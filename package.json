@@ -1,0 +1,27 @@
+{
+  "name": "gocery-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "tsc": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only app/index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.14",
+    "@types/luxon": "^3.0.3",
+    "@types/mysql": "^2.15.21",
+    "@types/node": "^18.7.18",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^4.8.3"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "firebase-admin": "^11.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "luxon": "^3.1.0",
+    "mysql": "^2.18.1"
+  }
+}
