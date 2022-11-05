@@ -2,7 +2,8 @@ import CategoryModel from "../model/category_model";
 import CategoryRepository from "../repository/category_repository";
 import Database from "../../../../core/service/mysql_database";
 import { QueryOptions } from "mysql";
-import { ResourceNotFound } from "../../../../core/config/errors";
+import HelperService from "../../../../core/service/helper_service";
+import PaginationOption from "../../../../core/model/pagination_option";
 
 class CategoryMysql implements CategoryRepository {
   async category(uid: string): Promise<CategoryModel | null> {
@@ -35,14 +36,19 @@ class CategoryMysql implements CategoryRepository {
     return result;
   }
 
-  async categories(): Promise<CategoryModel[] | []> {
+  async categories(
+    paginationOption?: PaginationOption
+  ): Promise<CategoryModel[] | []> {
     const result: Promise<CategoryModel[] | []> = new Promise<
       CategoryModel[] | []
     >((resolve, reject) => {
       Database.pool
         .then((connection) => {
           const query: QueryOptions = {
-            sql: "select * from categories where active = 1",
+            sql: HelperService.paginate(
+              "select * from categories where active = 1",
+              paginationOption
+            ),
           };
 
           connection.query(query, (error, results) => {
