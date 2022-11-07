@@ -12,31 +12,39 @@ const now: string = DateTime.utc().toFormat("yyyy-LL-dd hh:mm:ss");
 
 class CustomerMysql implements CustomerRepository {
   async getUser(uid: string): Promise<CustomerModel | null> {
-    const result: Promise<CustomerModel | null> =
-      new Promise<CustomerModel | null>((resolve, reject) => {
-        Database.pool
-          .then((connection) => {
-            const query: QueryOptions = {
-              sql: "select * from customers where uid = ? and active = 1",
-              values: [uid],
-            };
+    const result = new Promise<CustomerModel | null>((resolve, reject) => {
+      Database.pool
+        .then((connection) => {
+          const query: QueryOptions = {
+            sql: "select * from customers where uid = ? and active = 1",
+            values: [uid],
+          };
 
-            connection.query(query, (error, results) => {
-              if (error) {
-                return reject(error);
-              }
+          connection.query(query, (error, results) => {
+            let customer: CustomerModel | null = null;
 
-              if (results.length == 0) {
-                return resolve(null);
-              }
+            if (error) {
+              return reject(error);
+            }
 
-              resolve(results[0]);
-            });
-          })
-          .catch((error) => {
-            reject(error);
+            if (results.length > 0) {
+              const e: CustomerModel = results[0];
+
+              customer = {
+                uid: e.uid,
+                name: e.name,
+                email: e.email,
+                phone: e.phone,
+              };
+            }
+
+            resolve(customer);
           });
-      });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
 
     return result;
   }
@@ -59,10 +67,6 @@ class CustomerMysql implements CustomerRepository {
           connection.query(query, (error, results) => {
             if (error) {
               return reject(error);
-            }
-
-            if (results.affectedRows == 0) {
-              return reject(new ResourceNotFound("User not found"));
             }
 
             resolve();
@@ -95,10 +99,6 @@ class CustomerMysql implements CustomerRepository {
           connection.query(query, (error, results) => {
             if (error) {
               return reject(error);
-            }
-
-            if (results.affectedRows == 0) {
-              return reject(new InternalServerError("Insert new user failed"));
             }
 
             resolve();

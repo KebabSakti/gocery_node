@@ -6,67 +6,48 @@ import HelperService from "../../../../core/service/helper_service";
 import PaginationOption from "../../../../core/model/pagination_option";
 
 class CategoryMysql implements CategoryRepository {
-  async category(uid: string): Promise<CategoryModel | null> {
-    const result: Promise<CategoryModel | null> =
-      new Promise<CategoryModel | null>((resolve, reject) => {
+  async categories(
+    paginationOption?: PaginationOption
+  ): Promise<CategoryModel[]> {
+    const result: Promise<CategoryModel[]> = new Promise<CategoryModel[]>(
+      (resolve, reject) => {
         Database.pool
           .then((connection) => {
+            const queryBuilder: string =
+              "select * from categories where active = 1";
+
             const query: QueryOptions = {
-              sql: "select * from categories where uid = ? and active = 1",
-              values: [uid],
+              sql:
+                paginationOption == undefined
+                  ? queryBuilder
+                  : HelperService.paginate(queryBuilder, paginationOption),
             };
 
             connection.query(query, (error, results) => {
+              let categories: CategoryModel[] = [];
+
               if (error) {
                 return reject(error);
               }
 
-              if (results.length == 0) {
-                return resolve(null);
+              if (results.length > 0) {
+                categories = Array.from(results, (e: CategoryModel) => {
+                  return {
+                    uid: e.uid,
+                    name: e.name,
+                    image: e.image,
+                  };
+                });
               }
 
-              resolve(results[0]);
+              resolve(categories);
             });
           })
           .catch((error) => {
             reject(error);
           });
-      });
-
-    return result;
-  }
-
-  async categories(
-    paginationOption?: PaginationOption
-  ): Promise<CategoryModel[] | []> {
-    const result: Promise<CategoryModel[] | []> = new Promise<
-      CategoryModel[] | []
-    >((resolve, reject) => {
-      Database.pool
-        .then((connection) => {
-          const query: QueryOptions = {
-            sql: HelperService.paginate(
-              "select * from categories where active = 1",
-              paginationOption
-            ),
-          };
-
-          connection.query(query, (error, results) => {
-            if (error) {
-              return reject(error);
-            }
-
-            if (results.length == 0) {
-              return resolve([]);
-            }
-
-            resolve(results);
-          });
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
+      }
+    );
 
     return result;
   }

@@ -12,20 +12,17 @@ const customerRepository: CustomerRepository = new CustomerMysql();
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    // const uid: string = await customerAuth.verify(req.body.token);
-
-    const uid: string = req.body.uid;
+    const uid: string = await customerAuth.verify(req.body.token);
 
     let customer: CustomerModel | null = await customerRepository.getUser(uid);
 
     if (customer == null) {
-      customer = new CustomerModel(
-        undefined,
-        uid,
-        req.body.name,
-        req.body.email,
-        req.body.phone
-      );
+      customer = {
+        uid: uid,
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+      };
 
       await customerRepository.insertUser(customer);
     }

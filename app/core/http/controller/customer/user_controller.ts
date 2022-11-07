@@ -8,10 +8,10 @@ import { ResourceNotFound } from "../../../config/errors";
 const router = express.Router();
 const customerRepo: CustomerRepository = new CustomerMysql();
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/:uid", async (req: Request, res: Response) => {
   try {
     const customerUser: CustomerModel | null = await customerRepo.getUser(
-      req.body.uid
+      req.params.uid
     );
 
     if (customerUser == null) {
@@ -26,15 +26,13 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.put("/", async (req: Request, res: Response) => {
   try {
-    await customerRepo.updateUser(
-      new CustomerModel(
-        undefined,
-        req.body.uid,
-        req.body.name,
-        req.body.email,
-        req.body.password
-      )
-    );
+    const customerModel: CustomerModel = {
+      uid: req.body.uid,
+      name: req.body.name,
+      email: req.body.email,
+    };
+
+    await customerRepo.updateUser(customerModel);
 
     res.end();
   } catch (error) {

@@ -8,7 +8,7 @@ class HelperService {
     return now;
   }
 
-  static paginate(query: string, option?: PaginationOption): string {
+  static paginate(query: string, option: PaginationOption): string {
     let offset: number = 0;
 
     if (option != undefined) {

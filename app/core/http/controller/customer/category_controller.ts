@@ -15,7 +15,7 @@ router.get("*", async (req: Request, res: Response) => {
       req.query.page == undefined ? 1 : parseInt(req.query.page as string);
 
     const paginationOption: PaginationOption = {
-      perPage: 5,
+      perPage: 4,
       currentPage: page,
     };
 
