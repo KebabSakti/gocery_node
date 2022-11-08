@@ -98,17 +98,21 @@ async function insert(params?: any): Promise<void> {
       .then((connection) => {
         const query: QueryOptions = {
           sql: `
-                insert into order_statuses set
+                insert into product_statistics set
                 uid = ?,
-                order_uid = ?,
-                status = ?,
+                product_uid = ?,
+                sold = ?,
+                view = ?,
+                favourite = ?,
                 created_at = ?,
                 updated_at = ?
                 `,
           values: [
             faker.datatype.uuid(),
-            params.order_uid,
-            params.status,
+            params.product_uid,
+            faker.random.numeric(),
+            faker.random.numeric(),
+            faker.random.numeric(),
             HelperService.sqlDateNow(),
             HelperService.sqlDateNow(),
           ],
@@ -156,16 +160,40 @@ router.get("*", async (req: Request, res: Response) => {
 
     // const d = await debug();
 
+    // if (productOption.sold != undefined) {
+    //   fields = [...fields, "sum(o.qty) as sold"];
+
+    //   joins = [
+    //     ...joins,
+    //     "join order_products o on o.product_uid = p.uid",
+    //   ];
+
+    //   wheres = [
+    //     ...wheres,
+    //     `and p.uid in (select product_uid from order_products
+    //     join orders on order_products.order_uid = orders.uid
+    //     join order_statuses on order_statuses.order_uid = orders.uid
+    //     where order_statuses.status = "completed")`,
+    //   ];
+
+    //   group = "group by p.uid";
+
+    //   orders = [...orders, "sold desc"];
+    // }
+
+    let productOption: ProductOption | undefined = undefined;
+
+    let paginationOption: PaginationOption | undefined = undefined;
+
     const page: number | undefined =
-      req.query.page == undefined ? 1 : parseInt(req.query.page as string);
+      req.query.page == undefined
+        ? undefined
+        : parseInt(req.query.page as string);
 
     const bundle_uid: string | undefined =
       req.query.bundle_uid == undefined
         ? undefined
         : (req.query.bundle_uid as string);
-
-    const sold: string | undefined =
-      req.query.sold == undefined ? undefined : (req.query.sold as string);
 
     const search: string | undefined =
       req.query.search == undefined ? undefined : (req.query.search as string);
@@ -188,25 +216,42 @@ router.get("*", async (req: Request, res: Response) => {
     const point: string | undefined =
       req.query.point == undefined ? undefined : (req.query.point as string);
 
-    const productOption: ProductOption = {
+    const sold: string | undefined =
+      req.query.sold == undefined ? undefined : (req.query.sold as string);
+
+    const view: string | undefined =
+      req.query.view == undefined ? undefined : (req.query.view as string);
+
+    const favourite: string | undefined =
+      req.query.favourite == undefined
+        ? undefined
+        : (req.query.favourite as string);
+
+    productOption = {
       bundle_uid: bundle_uid,
-      sold: sold,
       search: search,
       category_uid: category_uid,
       cheapest: cheapest,
       discount: discount,
       point: point,
+      sold: sold,
+      view: view,
+      favourite: favourite,
     };
 
-    const paginationOption: PaginationOption = {
-      perPage: 5,
-      currentPage: page,
-    };
+    if (page != undefined) {
+      paginationOption = {
+        perPage: 5,
+        currentPage: page,
+      };
+    }
 
     const p: ProductModel[] = await productRepository.products(
       productOption,
       paginationOption
     );
+
+    const { sorting } = req.query;
 
     res.json(p);
   } catch (error) {
