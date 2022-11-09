@@ -7,6 +7,8 @@ abstract class ProductRepository {
     productOption?: ProductOption,
     paginationOption?: PaginationOption
   ): Promise<ProductModel[]>;
+
+  abstract product(uid: string): Promise<ProductModel | null>;
 }
 
 export default ProductRepository;

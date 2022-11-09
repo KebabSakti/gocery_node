@@ -97,22 +97,16 @@ async function insert(params?: any): Promise<void> {
     Database.pool
       .then((connection) => {
         const query: QueryOptions = {
-          sql: `
-                insert into product_statistics set
+          sql: `insert into bundle_products set
                 uid = ?,
+                bundle_uid = ?,
                 product_uid = ?,
-                sold = ?,
-                view = ?,
-                favourite = ?,
                 created_at = ?,
-                updated_at = ?
-                `,
+                updated_at = ?`,
           values: [
             faker.datatype.uuid(),
+            params.bundle_uid,
             params.product_uid,
-            faker.random.numeric(),
-            faker.random.numeric(),
-            faker.random.numeric(),
             HelperService.sqlDateNow(),
             HelperService.sqlDateNow(),
           ],
@@ -134,19 +128,16 @@ async function insert(params?: any): Promise<void> {
 
 router.get("*", async (req: Request, res: Response) => {
   try {
-    // const iterates: number[] = [...Array(2000).keys()];
+    // const iterates: number[] = [...Array(5).keys()];
 
     // for (const _ in iterates) {
-    //   const category = await row("categories");
-    //   const product = await row("products");
+    // const category = await row("categories");
+    // const product = await row("products");
 
-    //   await insert({
-    //     category_uid: category.uid,
-    //     product_uid: product.uid,
-    //   });
+    //   await insert();
     // }
 
-    // const items = await rows("orders");
+    // const items = await rows("products");
     // const statuses = ["pending", "progress", "completed", "canceled"];
 
     // for (const item of items as any[]) {
@@ -181,79 +172,22 @@ router.get("*", async (req: Request, res: Response) => {
     //   orders = [...orders, "sold desc"];
     // }
 
-    let productOption: ProductOption | undefined = undefined;
+    const datas = await rows("bundles");
 
-    let paginationOption: PaginationOption | undefined = undefined;
+    for (const data of datas) {
+      const i: number = parseInt(faker.random.numeric());
 
-    const page: number | undefined =
-      req.query.page == undefined
-        ? undefined
-        : parseInt(req.query.page as string);
+      for (let s = 0; s <= i; s++) {
+        const e = await row("products");
 
-    const bundle_uid: string | undefined =
-      req.query.bundle_uid == undefined
-        ? undefined
-        : (req.query.bundle_uid as string);
-
-    const search: string | undefined =
-      req.query.search == undefined ? undefined : (req.query.search as string);
-
-    const category_uid: string | undefined =
-      req.query.category_uid == undefined
-        ? undefined
-        : (req.query.category_uid as string);
-
-    const cheapest: string | undefined =
-      req.query.cheapest == undefined
-        ? undefined
-        : (req.query.cheapest as string);
-
-    const discount: string | undefined =
-      req.query.discount == undefined
-        ? undefined
-        : (req.query.discount as string);
-
-    const point: string | undefined =
-      req.query.point == undefined ? undefined : (req.query.point as string);
-
-    const sold: string | undefined =
-      req.query.sold == undefined ? undefined : (req.query.sold as string);
-
-    const view: string | undefined =
-      req.query.view == undefined ? undefined : (req.query.view as string);
-
-    const favourite: string | undefined =
-      req.query.favourite == undefined
-        ? undefined
-        : (req.query.favourite as string);
-
-    productOption = {
-      bundle_uid: bundle_uid,
-      search: search,
-      category_uid: category_uid,
-      cheapest: cheapest,
-      discount: discount,
-      point: point,
-      sold: sold,
-      view: view,
-      favourite: favourite,
-    };
-
-    if (page != undefined) {
-      paginationOption = {
-        perPage: 5,
-        currentPage: page,
-      };
+        await insert({
+          bundle_uid: data.uid,
+          product_uid: e.uid,
+        });
+      }
     }
 
-    const p: ProductModel[] = await productRepository.products(
-      productOption,
-      paginationOption
-    );
-
-    const { sorting } = req.query;
-
-    res.json(p);
+    res.json("SUCCESS");
   } catch (error) {
     new ErrorHandler(res, error);
   }

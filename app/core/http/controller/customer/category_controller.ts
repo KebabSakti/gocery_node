@@ -11,17 +11,11 @@ const categoryRepo: CategoryRepository = new CategoryMysql();
 
 router.get("*", async (req: Request, res: Response) => {
   try {
-    const page: number =
-      req.query.page == undefined ? 1 : parseInt(req.query.page as string);
+    const categories: CategoryModel[] | null = await categoryRepo.categories();
 
-    const paginationOption: PaginationOption = {
-      perPage: 4,
-      currentPage: page,
-    };
-
-    const categories: CategoryModel[] | null = await categoryRepo.categories(
-      paginationOption
-    );
+    if (categories.length == 0) {
+      throw new ResourceNotFound("Resource not found");
+    }
 
     res.json(categories);
   } catch (error) {

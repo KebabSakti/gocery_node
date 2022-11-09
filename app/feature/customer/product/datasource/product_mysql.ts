@@ -7,6 +7,74 @@ import HelperService from "../../../../core/service/helper_service";
 import { QueryOptions } from "mysql";
 
 class ProductMysql implements ProductRepository {
+  async product(uid: string): Promise<ProductModel | null> {
+    const result = new Promise<ProductModel | null>((resolve, reject) => {
+      Database.pool
+        .then((connection) => {
+          const query: QueryOptions = {
+            sql: `select
+                  p.*,
+                  c.category_uid,
+                  t.sold,
+                  t.view,
+                  t.favourite,
+                  m.name as unit_name,
+                  u.count as unit_count,
+                  s.fixed as discount_type,
+                  s.amount as discount_amount
+                  from products p
+                  join product_statistics t on t.product_uid = p.uid
+                  join product_categories c on c.product_uid = p.uid
+                  join product_units u on u.product_uid = p.uid
+                  join unit_measures m on u.unit_measure_uid = m.uid
+                  left join product_discounts d on d.product_uid = p.uid
+                  left join discounts s on d.discount_uid = s.uid
+                  where p.active = 1`,
+            values: [uid],
+          };
+
+          connection.query(query, (error, results) => {
+            let product: ProductModel | null = null;
+
+            if (error) {
+              return reject(error);
+            }
+
+            if (results.length > 0) {
+              const e: ProductModel = results[0];
+
+              product = {
+                uid: e.uid,
+                category_uid: e.category_uid,
+                name: e.name,
+                description: e.description,
+                image: e.image,
+                price: e.price,
+                point: e.point,
+                min: e.min,
+                max: e.max,
+                link: e.link,
+                unit_name: e.unit_name,
+                unit_count: e.unit_count,
+                discount_type: e.discount_type,
+                discount_amount: e.discount_amount,
+                sold: e.sold,
+                view: e.view,
+                favourite: e.favourite,
+              };
+            }
+
+            resolve(product);
+          });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+
+    return result;
+  }
+
   products(
     productOption?: ProductOption | undefined,
     paginationOption?: PaginationOption | undefined
@@ -16,6 +84,7 @@ class ProductMysql implements ProductRepository {
         .then((connection) => {
           let fields: string[] = [
             "p.*",
+            "c.category_uid",
             "t.sold",
             "t.view",
             "t.favourite",
@@ -25,17 +94,18 @@ class ProductMysql implements ProductRepository {
             "s.amount as discount_amount",
           ];
 
-          let joins = [
+          let joins: string[] = [
             "join product_statistics t on t.product_uid = p.uid",
+            "join product_categories c on c.product_uid = p.uid",
             "join product_units u on u.product_uid = p.uid",
             "join unit_measures m on u.unit_measure_uid = m.uid",
             "left join product_discounts d on d.product_uid = p.uid",
             "left join discounts s on d.discount_uid = s.uid",
           ];
 
-          let wheres = ["where p.active = 1"];
+          let wheres: string[] = ["where p.active = 1"];
 
-          let group = ``;
+          let group: string = ``;
 
           let orders: string[] = [];
 
@@ -60,13 +130,6 @@ class ProductMysql implements ProductRepository {
             }
 
             if (productOption.category_uid != undefined) {
-              fields = [...fields, "c.category_uid"];
-
-              joins = [
-                ...joins,
-                "join product_categories c on c.product_uid = p.uid",
-              ];
-
               wheres = [
                 ...wheres,
                 `and c.category_uid = ${connection.escape(
@@ -115,10 +178,7 @@ class ProductMysql implements ProductRepository {
             sql:
               paginationOption == undefined
                 ? queryBuilder
-                : HelperService.paginate(queryBuilder, {
-                    perPage: paginationOption.perPage,
-                    currentPage: paginationOption.currentPage,
-                  }),
+                : HelperService.paginate(queryBuilder, paginationOption),
           };
 
           console.group(query.sql);
