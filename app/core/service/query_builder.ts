@@ -18,7 +18,9 @@ class QueryBuilder {
   public get query(): string {
     let query = `select ${this.field.join(",")} from ${this.table}`;
 
-    query += ` ${this.join?.join(" ")}`;
+    if (this.join != undefined) {
+      query += ` ${this.join?.join(" ")}`;
+    }
 
     if (this.where != undefined) {
       if (this.where.length > 0) {
@@ -70,15 +72,15 @@ class QueryBuilder {
   }
 
   public set fields(field: string[]) {
-    this.field = field;
+    this.field = field.concat(this.field);
   }
 
   public set joins(join: string[]) {
-    this.join = join;
+    this.join = this.join == undefined ? join : join.concat(this.join);
   }
 
   public set wheres(where: string[]) {
-    this.where = where;
+    this.where = this.where == undefined ? where : where.concat(this.where);
   }
 
   public set groups(group: string) {
@@ -90,7 +92,7 @@ class QueryBuilder {
   }
 
   public set sorts(sort: string[]) {
-    this.sort = sort;
+    this.sort = this.sort == undefined ? sort : sort.concat(this.sort);
   }
 
   public set pagings(paging: PaginationOption) {

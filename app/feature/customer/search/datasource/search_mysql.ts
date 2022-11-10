@@ -5,6 +5,7 @@ import { QueryOptions } from "mysql";
 import HelperService from "../../../../core/service/helper_service";
 import SearchOption from "../model/search_option";
 import PaginationOption from "../../../../core/model/pagination_option";
+import QueryBuilder from "../../../../core/service/query_builder";
 
 class SearchMysql implements SearchRepository {
   async searches(
@@ -15,16 +16,13 @@ class SearchMysql implements SearchRepository {
       (resolve, reject) => {
         Database.pool
           .then((connection) => {
-            let queryBuilder: string = "select * from searches";
-
-            let wheres: string[] = [];
+            const queryBuilder: QueryBuilder = new QueryBuilder({
+              table: "searches",
+            });
 
             if (searchOption != undefined) {
               if (searchOption.customer_uid != undefined) {
-                wheres = [...wheres, wheres.length == 0 ? "where" : "and"];
-
-                wheres = [
-                  ...wheres,
+                queryBuilder.wheres = [
                   `customer_uid = ${connection.escape(
                     searchOption.customer_uid
                   )}`,
@@ -32,10 +30,7 @@ class SearchMysql implements SearchRepository {
               }
 
               if (searchOption.keyword != undefined) {
-                wheres = [...wheres, wheres.length == 0 ? "where" : "and"];
-
-                wheres = [
-                  ...wheres,
+                queryBuilder.wheres = [
                   `keyword like "%"${connection.escape(
                     searchOption.keyword
                   )}"%"`,
@@ -43,22 +38,17 @@ class SearchMysql implements SearchRepository {
               }
             }
 
-            queryBuilder += ` ${wheres.join(" ")}
-                            group by keyword
-                            order by keyword asc`;
+            queryBuilder.groups = "keyword";
+
+            queryBuilder.sorts = ["keyword asc"];
 
             if (paginationOption != undefined) {
-              queryBuilder = HelperService.paginate(
-                queryBuilder,
-                paginationOption
-              );
+              queryBuilder.pagings = paginationOption;
             }
 
             const query: QueryOptions = {
-              sql: queryBuilder,
+              sql: queryBuilder.query,
             };
-
-            console.log(query.sql);
 
             connection.query(query, (error, results) => {
               let searches: SearchModel[] = [];
