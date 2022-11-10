@@ -4,6 +4,7 @@ import Database from "../../service/mysql_database";
 import { faker } from "@faker-js/faker";
 import ErrorHandler from "../../service/error_handler";
 import HelperService from "../../service/helper_service";
+import QueryBuilder from "../../service/query_builder";
 import ProductRepository from "../../../feature/customer/product/repository/product_repository";
 import ProductMysql from "../../../feature/customer/product/datasource/product_mysql";
 import ProductModel from "../../../feature/customer/product/model/product_model";
@@ -128,13 +129,13 @@ async function insert(params?: any): Promise<void> {
 
 router.get("*", async (req: Request, res: Response) => {
   try {
-    const iterates: number[] = [...Array(200).keys()];
+    // const iterates: number[] = [...Array(200).keys()];
 
-    for (const _ in iterates) {
-      const c = await row("customers");
+    // for (const _ in iterates) {
+    //   const c = await row("customers");
 
-      await insert({ customer_uid: c.uid });
-    }
+    //   await insert({ customer_uid: c.uid });
+    // }
 
     // const items = await rows("products");
     // const statuses = ["pending", "progress", "completed", "canceled"];
@@ -185,6 +186,28 @@ router.get("*", async (req: Request, res: Response) => {
     //     });
     //   }
     // }
+
+    const queryBuilder: QueryBuilder = new QueryBuilder({ table: "products" });
+
+    queryBuilder.fields = ["p.*"];
+
+    queryBuilder.joins = [
+      "join product_statistics t on t.product_uid = p.uid",
+      "join product_categories c on c.product_uid = p.uid",
+    ];
+
+    queryBuilder.groups = "udin";
+
+    queryBuilder.sorts = ["udin asc", "tejo desc"];
+
+    queryBuilder.wheres = ["p.active = 1"];
+
+    queryBuilder.pagings = {
+      perPage: 2,
+      currentPage: 2,
+    };
+
+    console.log(queryBuilder.query);
 
     res.json("SUCCESS");
   } catch (error) {
