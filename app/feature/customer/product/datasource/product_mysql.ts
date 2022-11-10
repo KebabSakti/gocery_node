@@ -166,7 +166,7 @@ class ProductMysql implements ProductRepository {
 
           const sort = orders.length == 0 ? "" : `order by ${orders.join(",")}`;
 
-          const queryBuilder = `select 
+          let queryBuilder = `select 
                               ${fields.join(",")}
                               from products p
                               ${joins.join(" ")}
@@ -174,11 +174,15 @@ class ProductMysql implements ProductRepository {
                               ${group} 
                               ${sort}`;
 
+          if (paginationOption != undefined) {
+            queryBuilder = HelperService.paginate(
+              queryBuilder,
+              paginationOption
+            );
+          }
+
           const query: QueryOptions = {
-            sql:
-              paginationOption == undefined
-                ? queryBuilder
-                : HelperService.paginate(queryBuilder, paginationOption),
+            sql: queryBuilder,
           };
 
           console.group(query.sql);

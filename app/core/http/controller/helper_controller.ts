@@ -97,16 +97,16 @@ async function insert(params?: any): Promise<void> {
     Database.pool
       .then((connection) => {
         const query: QueryOptions = {
-          sql: `insert into bundle_products set
+          sql: `insert into searches set
                 uid = ?,
-                bundle_uid = ?,
-                product_uid = ?,
+                customer_uid = ?,
+                keyword = ?,
                 created_at = ?,
                 updated_at = ?`,
           values: [
             faker.datatype.uuid(),
-            params.bundle_uid,
-            params.product_uid,
+            params.customer_uid,
+            faker.random.word(),
             HelperService.sqlDateNow(),
             HelperService.sqlDateNow(),
           ],
@@ -128,14 +128,13 @@ async function insert(params?: any): Promise<void> {
 
 router.get("*", async (req: Request, res: Response) => {
   try {
-    // const iterates: number[] = [...Array(5).keys()];
+    const iterates: number[] = [...Array(200).keys()];
 
-    // for (const _ in iterates) {
-    // const category = await row("categories");
-    // const product = await row("products");
+    for (const _ in iterates) {
+      const c = await row("customers");
 
-    //   await insert();
-    // }
+      await insert({ customer_uid: c.uid });
+    }
 
     // const items = await rows("products");
     // const statuses = ["pending", "progress", "completed", "canceled"];
@@ -172,20 +171,20 @@ router.get("*", async (req: Request, res: Response) => {
     //   orders = [...orders, "sold desc"];
     // }
 
-    const datas = await rows("bundles");
+    // const datas = await rows("bundles");
 
-    for (const data of datas) {
-      const i: number = parseInt(faker.random.numeric());
+    // for (const data of datas) {
+    //   const i: number = parseInt(faker.random.numeric());
 
-      for (let s = 0; s <= i; s++) {
-        const e = await row("products");
+    //   for (let s = 0; s <= i; s++) {
+    //     const e = await row("products");
 
-        await insert({
-          bundle_uid: data.uid,
-          product_uid: e.uid,
-        });
-      }
-    }
+    //     await insert({
+    //       bundle_uid: data.uid,
+    //       product_uid: e.uid,
+    //     });
+    //   }
+    // }
 
     res.json("SUCCESS");
   } catch (error) {
