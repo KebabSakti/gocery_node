@@ -3,7 +3,7 @@ import QueryBuilderOption from "../model/query_builder_option";
 
 class QueryBuilder {
   private table: string;
-  private field: string[] = ["*"];
+  private field?: string[];
   private join?: string[];
   private where?: string[];
   private group?: string;
@@ -16,7 +16,9 @@ class QueryBuilder {
   }
 
   public get query(): string {
-    let query = `select ${this.field.join(",")} from ${this.table}`;
+    let query = `select ${
+      this.field == undefined ? "*" : this.field.join(",")
+    } from ${this.table}`;
 
     if (this.join != undefined) {
       query += ` ${this.join?.join(" ")}`;
@@ -72,7 +74,7 @@ class QueryBuilder {
   }
 
   public set fields(field: string[]) {
-    this.field = field.concat(this.field);
+    this.field = this.field == undefined ? field : field.concat(this.field);
   }
 
   public set joins(join: string[]) {

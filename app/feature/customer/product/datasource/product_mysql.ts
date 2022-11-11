@@ -3,8 +3,8 @@ import ProductModel from "../model/product_model";
 import ProductOption from "../model/product_option";
 import ProductRepository from "../repository/product_repository";
 import Database from "../../../../core/service/mysql_database";
-import HelperService from "../../../../core/service/helper_service";
 import { QueryOptions } from "mysql";
+import QueryBuilder from "../../../../core/service/query_builder";
 
 class ProductMysql implements ProductRepository {
   async product(uid: string): Promise<ProductModel | null> {
@@ -82,7 +82,11 @@ class ProductMysql implements ProductRepository {
     const result = new Promise<ProductModel[]>((resolve, reject) => {
       Database.pool
         .then((connection) => {
-          let fields: string[] = [
+          const queryBuilder: QueryBuilder = new QueryBuilder({
+            table: "products p",
+          });
+
+          queryBuilder.fields = [
             "p.*",
             "c.category_uid",
             "t.sold",
@@ -94,7 +98,7 @@ class ProductMysql implements ProductRepository {
             "s.amount as discount_amount",
           ];
 
-          let joins: string[] = [
+          queryBuilder.joins = [
             "join product_statistics t on t.product_uid = p.uid",
             "join product_categories c on c.product_uid = p.uid",
             "join product_units u on u.product_uid = p.uid",
@@ -103,36 +107,27 @@ class ProductMysql implements ProductRepository {
             "left join discounts s on d.discount_uid = s.uid",
           ];
 
-          let wheres: string[] = ["where p.active = 1"];
-
-          let group: string = ``;
-
-          let orders: string[] = [];
+          queryBuilder.wheres = ["p.active = 1"];
 
           if (productOption != undefined) {
             //FILTER
             if (productOption.bundle_uid != undefined) {
-              wheres = [
-                ...wheres,
-                `and p.uid in (select product_uid from bundle_products where bundle_uid = ${connection.escape(
+              queryBuilder.wheres = [
+                `p.uid in (select product_uid from bundle_products where bundle_uid = ${connection.escape(
                   productOption.bundle_uid
                 )})`,
               ];
             }
 
             if (productOption.search != undefined) {
-              wheres = [
-                ...wheres,
-                `and p.name like "%"${connection.escape(
-                  productOption.search
-                )}"%"`,
+              queryBuilder.wheres = [
+                `p.name like "%"${connection.escape(productOption.search)}"%"`,
               ];
             }
 
             if (productOption.category_uid != undefined) {
-              wheres = [
-                ...wheres,
-                `and c.category_uid = ${connection.escape(
+              queryBuilder.wheres = [
+                `c.category_uid = ${connection.escape(
                   productOption.category_uid
                 )}`,
               ];
@@ -140,52 +135,37 @@ class ProductMysql implements ProductRepository {
 
             //SORT
             if (productOption.cheapest != undefined) {
-              orders = [...orders, "p.price asc"];
+              queryBuilder.sorts = ["p.price asc"];
             }
 
             if (productOption.discount != undefined) {
-              orders = [...orders, "discount_amount desc"];
+              queryBuilder.sorts = ["discount_amount desc"];
             }
 
             if (productOption.point != undefined) {
-              orders = [...orders, "p.point desc"];
+              queryBuilder.sorts = ["p.point desc"];
             }
 
             if (productOption.sold != undefined) {
-              orders = [...orders, "t.sold desc"];
+              queryBuilder.sorts = ["t.sold desc"];
             }
 
             if (productOption.view != undefined) {
-              orders = [...orders, "t.view desc"];
+              queryBuilder.sorts = ["t.view desc"];
             }
 
             if (productOption.favourite != undefined) {
-              orders = [...orders, "t.favourite desc"];
+              queryBuilder.sorts = ["t.favourite desc"];
             }
           }
 
-          const sort = orders.length == 0 ? "" : `order by ${orders.join(",")}`;
-
-          let queryBuilder = `select 
-                              ${fields.join(",")}
-                              from products p
-                              ${joins.join(" ")}
-                              ${wheres.join(" ")}
-                              ${group} 
-                              ${sort}`;
-
           if (paginationOption != undefined) {
-            queryBuilder = HelperService.paginate(
-              queryBuilder,
-              paginationOption
-            );
+            queryBuilder.pagings = paginationOption;
           }
 
           const query: QueryOptions = {
-            sql: queryBuilder,
+            sql: queryBuilder.query,
           };
-
-          console.group(query.sql);
 
           connection.query(query, (error, results) => {
             let products: ProductModel[] = [];

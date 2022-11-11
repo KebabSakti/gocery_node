@@ -17,6 +17,11 @@ router.get("/", async (req: Request, res: Response) => {
         ? undefined
         : parseInt(req.query.page as string);
 
+    const perPage: number | undefined =
+      req.query.per_page == undefined
+        ? undefined
+        : parseInt(req.query.per_page as string);
+
     const bundle_uid: string | undefined =
       req.query.bundle_uid == undefined
         ? undefined
@@ -67,10 +72,10 @@ router.get("/", async (req: Request, res: Response) => {
     };
 
     const paginationOption: PaginationOption | undefined =
-      page == undefined
+      page == undefined || perPage == undefined
         ? undefined
         : {
-            perPage: 5,
+            perPage: perPage,
             currentPage: page,
           };
 

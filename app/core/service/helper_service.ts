@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import PaginationOption from "../model/pagination_option";
+import { v4 as uuidv4 } from "uuid";
 
 class HelperService {
   static sqlDateNow(): string {
@@ -8,18 +8,8 @@ class HelperService {
     return now;
   }
 
-  static paginate(query: string, option: PaginationOption): string {
-    let offset: number = 0;
-
-    if (option.currentPage != undefined) {
-      if (option.currentPage > 0) {
-        offset = (option.currentPage - 1) * option.perPage;
-
-        query += ` limit ${option.perPage} offset ${offset}`;
-      }
-    }
-
-    return query;
+  static uuid(): string {
+    return uuidv4();
   }
 }
 

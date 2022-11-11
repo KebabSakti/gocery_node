@@ -55,4 +55,29 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/", async (req: Request, res: Response) => {
+  try {
+    const searchModel: SearchModel = {
+      customer_uid: req.body.customer_uid,
+      keyword: req.body.keyword,
+    };
+
+    await searchRepository.store(searchModel);
+
+    res.status(200).end();
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+});
+
+router.delete("/", async (req: Request, res: Response) => {
+  try {
+    await searchRepository.remove(req.body.uid);
+
+    res.status(200).end();
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+});
+
 export default router;
