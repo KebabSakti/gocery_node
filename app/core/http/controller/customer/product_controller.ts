@@ -2,13 +2,17 @@ import express, { Request, Response } from "express";
 import ErrorHandler from "../../../service/error_handler";
 import { ResourceNotFound } from "../../../config/errors";
 import ProductModel from "../../../../feature/customer/product/model/product_model";
+import ProductViewModel from "../../../../feature/customer/product/model/product_view_model";
 import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
+import ProductViewRepository from "../../../../feature/customer/product/repository/product_view_repository";
 import ProductMysql from "../../../../feature/customer/product/datasource/product_mysql";
+import ProductViewMysql from "../../../../feature/customer/product/datasource/product_view_mysql";
 import ProductOption from "../../../../feature/customer/product/model/product_option";
 import PaginationOption from "../../../model/pagination_option";
 
 const router = express.Router();
 const productRepository: ProductRepository = new ProductMysql();
+const productViewRepository: ProductViewRepository = new ProductViewMysql();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -79,7 +83,7 @@ router.get("/", async (req: Request, res: Response) => {
             currentPage: page,
           };
 
-    const products: ProductModel[] = await productRepository.products(
+    const products: ProductModel[] = await productRepository.index(
       productOption,
       paginationOption
     );
@@ -94,9 +98,9 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:uid", async (req: Request, res: Response) => {
+router.get("/:uid/show", async (req: Request, res: Response) => {
   try {
-    const product: ProductModel | null = await productRepository.product(
+    const product: ProductModel | null = await productRepository.show(
       req.params.uid
     );
 
@@ -105,6 +109,52 @@ router.get("/:uid", async (req: Request, res: Response) => {
     }
 
     res.json(product);
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+});
+
+router.get("/:customer_uid/view", async (req: Request, res: Response) => {
+  try {
+    const page: number | undefined =
+      req.query.page == undefined
+        ? undefined
+        : parseInt(req.query.page as string);
+
+    const perPage: number | undefined =
+      req.query.per_page == undefined
+        ? undefined
+        : parseInt(req.query.per_page as string);
+
+    const paginationOption: PaginationOption | undefined =
+      page == undefined || perPage == undefined
+        ? undefined
+        : {
+            perPage: perPage,
+            currentPage: page,
+          };
+
+    const productViews: ProductViewModel[] = await productViewRepository.index(
+      req.params.customer_uid,
+      paginationOption
+    );
+
+    res.json(productViews);
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+});
+
+router.post("/:customer_uid/view", async (req: Request, res: Response) => {
+  try {
+    const productViewModel: ProductViewModel = {
+      customer_uid: req.params.customer_uid,
+      product_uid: req.body.product_uid,
+    };
+
+    await productViewRepository.store(productViewModel);
+
+    res.status(200).end();
   } catch (error) {
     new ErrorHandler(res, error);
   }

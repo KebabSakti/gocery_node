@@ -7,75 +7,7 @@ import { QueryOptions } from "mysql";
 import QueryBuilder from "../../../../core/service/query_builder";
 
 class ProductMysql implements ProductRepository {
-  async product(uid: string): Promise<ProductModel | null> {
-    const result = new Promise<ProductModel | null>((resolve, reject) => {
-      Database.pool
-        .then((connection) => {
-          const query: QueryOptions = {
-            sql: `select
-                  p.*,
-                  c.category_uid,
-                  t.sold,
-                  t.view,
-                  t.favourite,
-                  m.name as unit_name,
-                  u.count as unit_count,
-                  s.fixed as discount_type,
-                  s.amount as discount_amount
-                  from products p
-                  join product_statistics t on t.product_uid = p.uid
-                  join product_categories c on c.product_uid = p.uid
-                  join product_units u on u.product_uid = p.uid
-                  join unit_measures m on u.unit_measure_uid = m.uid
-                  left join product_discounts d on d.product_uid = p.uid
-                  left join discounts s on d.discount_uid = s.uid
-                  where p.active = 1`,
-            values: [uid],
-          };
-
-          connection.query(query, (error, results) => {
-            let product: ProductModel | null = null;
-
-            if (error) {
-              return reject(error);
-            }
-
-            if (results.length > 0) {
-              const e: ProductModel = results[0];
-
-              product = {
-                uid: e.uid,
-                category_uid: e.category_uid,
-                name: e.name,
-                description: e.description,
-                image: e.image,
-                price: e.price,
-                point: e.point,
-                min: e.min,
-                max: e.max,
-                link: e.link,
-                unit_name: e.unit_name,
-                unit_count: e.unit_count,
-                discount_type: e.discount_type,
-                discount_amount: e.discount_amount,
-                sold: e.sold,
-                view: e.view,
-                favourite: e.favourite,
-              };
-            }
-
-            resolve(product);
-          });
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
-
-    return result;
-  }
-
-  products(
+  async index(
     productOption?: ProductOption | undefined,
     paginationOption?: PaginationOption | undefined
   ): Promise<ProductModel[]> {
@@ -199,6 +131,74 @@ class ProductMysql implements ProductRepository {
             }
 
             resolve(products);
+          });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+
+    return result;
+  }
+
+  async show(uid: string): Promise<ProductModel | null> {
+    const result = new Promise<ProductModel | null>((resolve, reject) => {
+      Database.pool
+        .then((connection) => {
+          const query: QueryOptions = {
+            sql: `select
+                  p.*,
+                  c.category_uid,
+                  t.sold,
+                  t.view,
+                  t.favourite,
+                  m.name as unit_name,
+                  u.count as unit_count,
+                  s.fixed as discount_type,
+                  s.amount as discount_amount
+                  from products p
+                  join product_statistics t on t.product_uid = p.uid
+                  join product_categories c on c.product_uid = p.uid
+                  join product_units u on u.product_uid = p.uid
+                  join unit_measures m on u.unit_measure_uid = m.uid
+                  left join product_discounts d on d.product_uid = p.uid
+                  left join discounts s on d.discount_uid = s.uid
+                  where p.active = 1`,
+            values: [uid],
+          };
+
+          connection.query(query, (error, results) => {
+            let product: ProductModel | null = null;
+
+            if (error) {
+              return reject(error);
+            }
+
+            if (results.length > 0) {
+              const e: ProductModel = results[0];
+
+              product = {
+                uid: e.uid,
+                category_uid: e.category_uid,
+                name: e.name,
+                description: e.description,
+                image: e.image,
+                price: e.price,
+                point: e.point,
+                min: e.min,
+                max: e.max,
+                link: e.link,
+                unit_name: e.unit_name,
+                unit_count: e.unit_count,
+                discount_type: e.discount_type,
+                discount_amount: e.discount_amount,
+                sold: e.sold,
+                view: e.view,
+                favourite: e.favourite,
+              };
+            }
+
+            resolve(product);
           });
         })
         .catch((error) => {

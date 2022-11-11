@@ -4,14 +4,13 @@ import CategoryMysql from "../../../../feature/customer/category/datasource/cate
 import CategoryModel from "../../../../feature/customer/category/model/category_model";
 import ErrorHandler from "../../../service/error_handler";
 import { ResourceNotFound } from "../../../config/errors";
-import PaginationOption from "../../../model/pagination_option";
 
 const router = express.Router();
 const categoryRepo: CategoryRepository = new CategoryMysql();
 
-router.get("*", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const categories: CategoryModel[] | null = await categoryRepo.categories();
+    const categories: CategoryModel[] | null = await categoryRepo.index();
 
     if (categories.length == 0) {
       throw new ResourceNotFound("Resource not found");

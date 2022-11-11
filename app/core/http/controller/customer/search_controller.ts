@@ -44,7 +44,7 @@ router.get("/", async (req: Request, res: Response) => {
             currentPage: page,
           };
 
-    const searches: SearchModel[] = await searchRepository.searches(
+    const searches: SearchModel[] = await searchRepository.index(
       searchOption,
       paginationOption
     );

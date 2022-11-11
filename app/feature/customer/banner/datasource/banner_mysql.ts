@@ -4,7 +4,7 @@ import Database from "../../../../core/service/mysql_database";
 import { QueryOptions } from "mysql";
 
 class BannerMysql implements BannerRepository {
-  async banners(): Promise<BannerModel[]> {
+  async index(): Promise<BannerModel[]> {
     const result = new Promise<BannerModel[]>((resolve, reject) => {
       Database.pool
         .then((connection) => {

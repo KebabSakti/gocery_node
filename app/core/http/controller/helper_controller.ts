@@ -98,16 +98,16 @@ async function insert(params?: any): Promise<void> {
     Database.pool
       .then((connection) => {
         const query: QueryOptions = {
-          sql: `insert into searches set
+          sql: `insert into product_views set
                 uid = ?,
                 customer_uid = ?,
-                keyword = ?,
+                product_uid = ?,
                 created_at = ?,
                 updated_at = ?`,
           values: [
             faker.datatype.uuid(),
             params.customer_uid,
-            faker.random.word(),
+            params.product_uid,
             HelperService.sqlDateNow(),
             HelperService.sqlDateNow(),
           ],
@@ -129,13 +129,14 @@ async function insert(params?: any): Promise<void> {
 
 router.get("*", async (req: Request, res: Response) => {
   try {
-    // const iterates: number[] = [...Array(200).keys()];
+    const iterates: number[] = [...Array(200).keys()];
 
-    // for (const _ in iterates) {
-    //   const c = await row("customers");
+    for (const _ in iterates) {
+      const c = await row("customers");
+      const p = await row("products");
 
-    //   await insert({ customer_uid: c.uid });
-    // }
+      await insert({ customer_uid: c.uid, product_uid: p.uid });
+    }
 
     // const items = await rows("products");
     // const statuses = ["pending", "progress", "completed", "canceled"];
@@ -186,28 +187,6 @@ router.get("*", async (req: Request, res: Response) => {
     //     });
     //   }
     // }
-
-    const queryBuilder: QueryBuilder = new QueryBuilder({ table: "products" });
-
-    queryBuilder.fields = ["p.*"];
-
-    queryBuilder.joins = [
-      "join product_statistics t on t.product_uid = p.uid",
-      "join product_categories c on c.product_uid = p.uid",
-    ];
-
-    queryBuilder.groups = "udin";
-
-    queryBuilder.sorts = ["udin asc", "tejo desc"];
-
-    queryBuilder.wheres = ["p.active = 1"];
-
-    queryBuilder.pagings = {
-      perPage: 2,
-      currentPage: 2,
-    };
-
-    console.log(queryBuilder.query);
 
     res.json("SUCCESS");
   } catch (error) {

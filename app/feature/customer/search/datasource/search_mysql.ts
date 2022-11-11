@@ -8,7 +8,7 @@ import PaginationOption from "../../../../core/model/pagination_option";
 import QueryBuilder from "../../../../core/service/query_builder";
 
 class SearchMysql implements SearchRepository {
-  async searches(
+  async index(
     searchOption?: SearchOption,
     paginationOption?: PaginationOption
   ): Promise<SearchModel[]> {
@@ -93,7 +93,7 @@ class SearchMysql implements SearchRepository {
           const query: QueryOptions = {
             sql: queryBuilder,
             values: [
-              searchModel.uid,
+              HelperService.uuid(),
               searchModel.customer_uid,
               searchModel.keyword,
               HelperService.sqlDateNow(),

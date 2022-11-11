@@ -2,16 +2,12 @@ import { QueryOptions } from "mysql";
 import Database from "../../../../core/service/mysql_database";
 import CustomerModel from "../model/customer_model";
 import CustomerRepository from "../repository/customer_repository";
-import {
-  InternalServerError,
-  ResourceNotFound,
-} from "../../../../core/config/errors";
 import { DateTime } from "luxon";
 
 const now: string = DateTime.utc().toFormat("yyyy-LL-dd hh:mm:ss");
 
 class CustomerMysql implements CustomerRepository {
-  async getUser(uid: string): Promise<CustomerModel | null> {
+  async show(uid: string): Promise<CustomerModel | null> {
     const result = new Promise<CustomerModel | null>((resolve, reject) => {
       Database.pool
         .then((connection) => {
@@ -49,7 +45,7 @@ class CustomerMysql implements CustomerRepository {
     return result;
   }
 
-  async updateUser(customer: CustomerModel): Promise<void> {
+  async update(customer: CustomerModel): Promise<void> {
     const result: Promise<void> = new Promise<void>((resolve, reject) => {
       Database.pool
         .then((connection) => {
@@ -80,7 +76,7 @@ class CustomerMysql implements CustomerRepository {
     return result;
   }
 
-  async insertUser(customer: CustomerModel): Promise<void> {
+  async store(customer: CustomerModel): Promise<void> {
     const result: Promise<void> = new Promise<void>((resolve, reject) => {
       Database.pool
         .then((connection) => {

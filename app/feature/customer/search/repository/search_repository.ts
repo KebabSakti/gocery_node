@@ -3,7 +3,7 @@ import SearchModel from "../model/search_model";
 import SearchOption from "../model/search_option";
 
 abstract class SearchRepository {
-  abstract searches(
+  abstract index(
     searchOption?: SearchOption,
     paginationOption?: PaginationOption
   ): Promise<SearchModel[]>;

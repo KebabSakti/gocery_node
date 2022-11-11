@@ -1,9 +1,7 @@
 import BundleModel from "../model/bundle_model";
 
 abstract class BundleRepository {
-  abstract bundles(): Promise<BundleModel[]>;
-
-  abstract bundle(uid: string): Promise<BundleModel | null>;
+  abstract index(): Promise<BundleModel[]>;
 }
 
 export default BundleRepository;

@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(baseMiddleware);
 
 app.use("/api/customer/auth", customerAuthController);
-app.use("/api/customer/user", customerUserController);
+app.use("/api/customer/users", customerUserController);
 app.use("/api/customer/categories", categoryController);
 app.use("/api/customer/banners", bannerController);
 app.use("/api/customer/products", productController);

@@ -14,7 +14,7 @@ router.post("/", async (req: Request, res: Response) => {
   try {
     const uid: string = await customerAuth.verify(req.body.token);
 
-    let customer: CustomerModel | null = await customerRepository.getUser(uid);
+    let customer: CustomerModel | null = await customerRepository.show(uid);
 
     if (customer == null) {
       customer = {
@@ -24,7 +24,7 @@ router.post("/", async (req: Request, res: Response) => {
         phone: req.body.phone,
       };
 
-      await customerRepository.insertUser(customer);
+      await customerRepository.store(customer);
     }
 
     res.json(customer);

@@ -10,7 +10,7 @@ const bannerRepository: BannerRepository = new BannerMysql();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const banners: BannerModel[] = await bannerRepository.banners();
+    const banners: BannerModel[] = await bannerRepository.index();
 
     if (banners.length == 0) {
       throw new ResourceNotFound("Resource not found");

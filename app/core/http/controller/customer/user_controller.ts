@@ -10,7 +10,7 @@ const customerRepo: CustomerRepository = new CustomerMysql();
 
 router.get("/:uid", async (req: Request, res: Response) => {
   try {
-    const customerUser: CustomerModel | null = await customerRepo.getUser(
+    const customerUser: CustomerModel | null = await customerRepo.show(
       req.params.uid
     );
 
@@ -32,7 +32,7 @@ router.put("/", async (req: Request, res: Response) => {
       email: req.body.email,
     };
 
-    await customerRepo.updateUser(customerModel);
+    await customerRepo.update(customerModel);
 
     res.end();
   } catch (error) {
