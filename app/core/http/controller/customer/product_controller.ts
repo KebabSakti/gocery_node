@@ -1,18 +1,30 @@
 import express, { Request, Response } from "express";
 import ErrorHandler from "../../../service/error_handler";
 import { ResourceNotFound } from "../../../config/errors";
-import ProductModel from "../../../../feature/customer/product/model/product_model";
-import ProductViewModel from "../../../../feature/customer/product/model/product_view_model";
-import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
-import ProductViewRepository from "../../../../feature/customer/product/repository/product_view_repository";
-import ProductMysql from "../../../../feature/customer/product/datasource/product_mysql";
-import ProductViewMysql from "../../../../feature/customer/product/datasource/product_view_mysql";
-import ProductOption from "../../../../feature/customer/product/model/product_option";
+import {
+  ProductModel,
+  ProductViewModel,
+  ProductFavouriteModel,
+  ProductOption,
+} from "../../../../feature/customer/product/model/product_model";
+import {
+  ProductRepository,
+  ProductViewRepository,
+  ProductFavouriteRepository,
+} from "../../../../feature/customer/product/repository/product_repository";
+import {
+  ProductMysql,
+  ProductViewMysql,
+  ProductFavouriteMysql,
+} from "../../../../feature/customer/product/datasource/product_mysql";
 import PaginationOption from "../../../model/pagination_option";
+import HelperService from "../../../service/helper_service";
 
 const router = express.Router();
 const productRepository: ProductRepository = new ProductMysql();
 const productViewRepository: ProductViewRepository = new ProductViewMysql();
+const productFavouriteRepository: ProductFavouriteRepository =
+  new ProductFavouriteMysql();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -148,8 +160,11 @@ router.get("/:customer_uid/view", async (req: Request, res: Response) => {
 router.post("/:customer_uid/view", async (req: Request, res: Response) => {
   try {
     const productViewModel: ProductViewModel = {
+      uid: HelperService.uuid(),
       customer_uid: req.params.customer_uid,
       product_uid: req.body.product_uid,
+      created_at: HelperService.sqlDateNow(),
+      updated_at: HelperService.sqlDateNow(),
     };
 
     await productViewRepository.store(productViewModel);
@@ -159,5 +174,55 @@ router.post("/:customer_uid/view", async (req: Request, res: Response) => {
     new ErrorHandler(res, error);
   }
 });
+
+router.get("/:customer_uid/favourites", async (req: Request, res: Response) => {
+  try {
+    const page: number | undefined =
+      req.query.page == undefined
+        ? undefined
+        : parseInt(req.query.page as string);
+
+    const perPage: number | undefined =
+      req.query.per_page == undefined
+        ? undefined
+        : parseInt(req.query.per_page as string);
+
+    const paginationOption: PaginationOption | undefined =
+      page == undefined || perPage == undefined
+        ? undefined
+        : {
+            perPage: perPage,
+            currentPage: page,
+          };
+
+    const productFavourites: ProductModel[] =
+      await productFavouriteRepository.index(
+        req.params.customer_uid,
+        paginationOption
+      );
+
+    res.json(productFavourites);
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+});
+
+router.delete(
+  "/:customer_uid/favourites",
+  async (req: Request, res: Response) => {
+    try {
+      const productFavouriteModel: ProductFavouriteModel = {
+        customer_uid: req.params.customer_uid,
+        product_uid: req.body.product_uid,
+      };
+
+      await productFavouriteRepository.remove(productFavouriteModel);
+
+      res.status(200).end();
+    } catch (error) {
+      new ErrorHandler(res, error);
+    }
+  }
+);
 
 export default router;

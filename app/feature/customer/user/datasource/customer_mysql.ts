@@ -55,7 +55,7 @@ class CustomerMysql implements CustomerRepository {
               customer.name,
               customer.email,
               customer.phone,
-              now,
+              customer.updated_at,
               customer.uid,
             ],
           };
@@ -87,8 +87,8 @@ class CustomerMysql implements CustomerRepository {
               customer.name,
               customer.email,
               customer.phone,
-              now,
-              now,
+              customer.created_at,
+              customer.updated_at,
             ],
           };
 

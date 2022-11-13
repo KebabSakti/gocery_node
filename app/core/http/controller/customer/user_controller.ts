@@ -4,6 +4,7 @@ import CustomerMysql from "../../../../feature/customer/user/datasource/customer
 import CustomerModel from "../../../../feature/customer/user/model/customer_model";
 import ErrorHandler from "../../../service/error_handler";
 import { ResourceNotFound } from "../../../config/errors";
+import HelperService from "../../../service/helper_service";
 
 const router = express.Router();
 const customerRepo: CustomerRepository = new CustomerMysql();
@@ -30,11 +31,12 @@ router.put("/", async (req: Request, res: Response) => {
       uid: req.body.uid,
       name: req.body.name,
       email: req.body.email,
+      updated_at: HelperService.sqlDateNow(),
     };
 
     await customerRepo.update(customerModel);
 
-    res.end();
+    res.status(200).end();
   } catch (error) {
     new ErrorHandler(res, error);
   }

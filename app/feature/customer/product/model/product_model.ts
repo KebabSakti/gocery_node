@@ -1,4 +1,4 @@
-interface ProductModel {
+export interface ProductModel {
   uid?: string;
   category_uid?: string;
   name?: string;
@@ -16,6 +16,38 @@ interface ProductModel {
   sold?: number;
   view?: number;
   favourite?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export default ProductModel;
+export interface ProductViewModel {
+  uid?: string;
+  customer_uid?: string;
+  product_uid?: string;
+  image?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProductOption {
+  uid?: string;
+  bundle_uid?: string;
+  search?: string;
+  category_uid?: string;
+  cheapest?: string;
+  discount?: string;
+  point?: string;
+  sold?: string;
+  view?: string;
+  favourite?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ProductFavouriteModel {
+  uid?: string;
+  customer_uid?: string;
+  product_uid?: string;
+  created_at?: string;
+  updated_at?: string;
+}

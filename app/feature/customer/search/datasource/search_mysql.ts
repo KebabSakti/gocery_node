@@ -1,9 +1,8 @@
-import SearchModel from "../model/search_model";
+import { SearchModel, SearchOption } from "../model/search_model";
 import SearchRepository from "../repository/search_repository";
 import Database from "../../../../core/service/mysql_database";
 import { QueryOptions } from "mysql";
 import HelperService from "../../../../core/service/helper_service";
-import SearchOption from "../model/search_option";
 import PaginationOption from "../../../../core/model/pagination_option";
 import QueryBuilder from "../../../../core/service/query_builder";
 
@@ -61,7 +60,6 @@ class SearchMysql implements SearchRepository {
                 searches = Array.from(results, (e: SearchModel) => {
                   return {
                     uid: e.uid,
-                    customer_uid: e.customer_uid,
                     keyword: e.keyword,
                   };
                 });
@@ -93,11 +91,11 @@ class SearchMysql implements SearchRepository {
           const query: QueryOptions = {
             sql: queryBuilder,
             values: [
-              HelperService.uuid(),
+              searchModel.uid,
               searchModel.customer_uid,
               searchModel.keyword,
-              HelperService.sqlDateNow(),
-              HelperService.sqlDateNow(),
+              searchModel.created_at,
+              searchModel.updated_at,
             ],
           };
 

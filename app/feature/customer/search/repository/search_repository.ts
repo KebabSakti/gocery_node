@@ -1,6 +1,5 @@
 import PaginationOption from "../../../../core/model/pagination_option";
-import SearchModel from "../model/search_model";
-import SearchOption from "../model/search_option";
+import { SearchModel, SearchOption } from "../model/search_model";
 
 abstract class SearchRepository {
   abstract index(

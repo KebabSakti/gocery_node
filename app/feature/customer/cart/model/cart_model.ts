@@ -1,15 +1,14 @@
-export interface BundleModel {
+export interface CartModel {
   uid?: string;
-  name?: string;
-  description?: string;
-  image?: string;
+  customer_uid?: string;
+  total?: number;
   created_at?: string;
   updated_at?: string;
 }
 
-export interface BundleItemModel {
+export interface CartItemModel {
   uid?: string;
-  bundle_uid?: string;
+  cart_uid?: string;
   product_uid?: string;
   category_uid?: string;
   name?: string;
@@ -24,11 +23,13 @@ export interface BundleItemModel {
   unit_count?: number;
   discount_type?: string;
   discount_amount?: number;
+  qty?: number;
+  total?: number;
   created_at?: string;
   updated_at?: string;
 }
 
-export interface BundleWithItemModel {
-  bundle: BundleModel;
-  bundle_items: BundleItemModel[];
+export interface CartWithItemModel {
+  cart: CartModel;
+  cart_items: CartItemModel[];
 }

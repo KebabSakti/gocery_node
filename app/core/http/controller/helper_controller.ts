@@ -5,14 +5,8 @@ import { faker } from "@faker-js/faker";
 import ErrorHandler from "../../service/error_handler";
 import HelperService from "../../service/helper_service";
 import QueryBuilder from "../../service/query_builder";
-import ProductRepository from "../../../feature/customer/product/repository/product_repository";
-import ProductMysql from "../../../feature/customer/product/datasource/product_mysql";
-import ProductModel from "../../../feature/customer/product/model/product_model";
-import ProductOption from "../../../feature/customer/product/model/product_option";
-import PaginationOption from "../../model/pagination_option";
 
 const router = express.Router();
-const productRepository: ProductRepository = new ProductMysql();
 
 async function debug(): Promise<any> {
   const result = new Promise<any>((resolve, reject) => {
@@ -98,16 +92,16 @@ async function insert(params?: any): Promise<void> {
     Database.pool
       .then((connection) => {
         const query: QueryOptions = {
-          sql: `insert into product_views set
+          sql: `insert into carts set
                 uid = ?,
                 customer_uid = ?,
-                product_uid = ?,
+                total = ?,
                 created_at = ?,
                 updated_at = ?`,
           values: [
             faker.datatype.uuid(),
             params.customer_uid,
-            params.product_uid,
+            faker.commerce.price(10000),
             HelperService.sqlDateNow(),
             HelperService.sqlDateNow(),
           ],

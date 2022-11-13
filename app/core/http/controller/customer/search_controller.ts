@@ -1,10 +1,13 @@
 import express, { Request, Response } from "express";
 import ErrorHandler from "../../../service/error_handler";
-import SearchModel from "../../../../feature/customer/search/model/search_model";
+import {
+  SearchModel,
+  SearchOption,
+} from "../../../../feature/customer/search/model/search_model";
 import SearchRepository from "../../../../feature/customer/search/repository/search_repository";
 import SearchMysql from "../../../../feature/customer/search/datasource/search_mysql";
-import SearchOption from "../../../../feature/customer/search/model/search_option";
 import PaginationOption from "../../../model/pagination_option";
+import HelperService from "../../../../core/service/helper_service";
 
 const router = express.Router();
 const searchRepository: SearchRepository = new SearchMysql();
@@ -58,8 +61,11 @@ router.get("/", async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     const searchModel: SearchModel = {
+      uid: HelperService.uuid(),
       customer_uid: req.body.customer_uid,
       keyword: req.body.keyword,
+      created_at: HelperService.sqlDateNow(),
+      updated_at: HelperService.sqlDateNow(),
     };
 
     await searchRepository.store(searchModel);
