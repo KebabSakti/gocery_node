@@ -5,6 +5,7 @@ export interface ProductModel {
   description?: string;
   image?: string;
   price?: number;
+  final_price?: number;
   point?: number;
   min?: number;
   max?: number;

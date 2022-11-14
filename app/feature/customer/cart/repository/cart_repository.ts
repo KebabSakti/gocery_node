@@ -13,7 +13,7 @@ export abstract class CartRepository {
 export abstract class CartItemRepository {
   abstract index(cart_uid: string): Promise<CartItemModel[]>;
 
-  abstract show(uid: string): Promise<CartItemModel | null>;
+  abstract show(cartItemModel: CartItemModel): Promise<CartItemModel | null>;
 
   abstract store(cartItemModel: CartItemModel): Promise<void>;
 

@@ -119,7 +119,7 @@ export class CartMysql implements CartRepository {
       Database.pool
         .then((connection) => {
           const query: QueryOptions = {
-            sql: `delete carts where customer_uid = ?`,
+            sql: `delete from carts where customer_uid = ?`,
             values: [customer_uid],
           };
 
@@ -161,6 +161,7 @@ export class CartItemMysql implements CartItemRepository {
               "p.min",
               "p.max",
               "p.link",
+              "p.final_price",
               "m.name as unit_name",
               "u.count as unit_count",
               "s.fixed as discount_type",
@@ -202,6 +203,7 @@ export class CartItemMysql implements CartItemRepository {
                     description: e.description,
                     image: e.image,
                     price: e.price,
+                    final_price: e.final_price,
                     point: e.point,
                     min: e.min,
                     max: e.max,
@@ -228,7 +230,7 @@ export class CartItemMysql implements CartItemRepository {
     return result;
   }
 
-  async show(uid: string): Promise<CartItemModel | null> {
+  async show(cartItemModel: CartItemModel): Promise<CartItemModel | null> {
     const result = new Promise<CartItemModel | null>((resolve, reject) => {
       Database.pool
         .then((connection) => {
@@ -262,7 +264,10 @@ export class CartItemMysql implements CartItemRepository {
             "left join discounts s on d.discount_uid = s.uid",
           ];
 
-          queryBuilder.wheres = [`i.uid = ${connection.escape(uid)}`];
+          queryBuilder.wheres = [
+            `i.cart_uid = ${connection.escape(cartItemModel.cart_uid)}`,
+            `i.product_uid = ${connection.escape(cartItemModel.product_uid)}`,
+          ];
 
           const query: QueryOptions = {
             sql: queryBuilder.query,
@@ -390,7 +395,7 @@ export class CartItemMysql implements CartItemRepository {
       Database.pool
         .then((connection) => {
           const query: QueryOptions = {
-            sql: `delete cart_items where uid = ?`,
+            sql: `delete from cart_items where uid = ?`,
             values: [uid],
           };
 

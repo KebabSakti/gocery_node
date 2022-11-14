@@ -5,6 +5,7 @@ import { faker } from "@faker-js/faker";
 import ErrorHandler from "../../service/error_handler";
 import HelperService from "../../service/helper_service";
 import QueryBuilder from "../../service/query_builder";
+import { ProductModel } from "../../../feature/customer/product/model/product_model";
 
 const router = express.Router();
 
@@ -92,19 +93,10 @@ async function insert(params?: any): Promise<void> {
     Database.pool
       .then((connection) => {
         const query: QueryOptions = {
-          sql: `insert into carts set
-                uid = ?,
-                customer_uid = ?,
-                total = ?,
-                created_at = ?,
-                updated_at = ?`,
-          values: [
-            faker.datatype.uuid(),
-            params.customer_uid,
-            faker.commerce.price(10000),
-            HelperService.sqlDateNow(),
-            HelperService.sqlDateNow(),
-          ],
+          sql: `update products set
+                final_price = ?
+                where uid = ?`,
+          values: [params.final_price, params.uid],
         };
 
         connection.query(query, (error, results) => {
@@ -123,26 +115,24 @@ async function insert(params?: any): Promise<void> {
 
 router.get("*", async (req: Request, res: Response) => {
   try {
-    const iterates: number[] = [...Array(200).keys()];
+    // const iterates: number[] = [...Array(200).keys()];
 
-    for (const _ in iterates) {
-      const c = await row("customers");
-      const p = await row("products");
+    // for (const _ in iterates) {
+    //   const c = await row("customers");
+    //   const p = await row("products");
 
-      await insert({ customer_uid: c.uid, product_uid: p.uid });
-    }
+    //   await insert({ customer_uid: c.uid, product_uid: p.uid });
+    // }
 
-    // const items = await rows("products");
+    const items = await rows("products");
     // const statuses = ["pending", "progress", "completed", "canceled"];
 
-    // for (const item of items as any[]) {
-    //   const index = Math.floor(Math.random() * statuses.length);
-
-    //   await insert({
-    //     order_uid: item.uid,
-    //     status: statuses[index],
-    //   });
-    // }
+    for (const item of items as ProductModel[]) {
+      await insert({
+        uid: item.uid,
+        final_price: item.price,
+      });
+    }
 
     // const d = await debug();
 

@@ -13,7 +13,6 @@ import {
 import Database from "../../../../core/service/mysql_database";
 import { QueryOptions } from "mysql";
 import QueryBuilder from "../../../../core/service/query_builder";
-import HelperService from "../../../../core/service/helper_service";
 
 export class ProductMysql implements ProductRepository {
   async index(
@@ -76,7 +75,7 @@ export class ProductMysql implements ProductRepository {
 
             //SORT
             if (productOption.cheapest != undefined) {
-              queryBuilder.sorts = ["p.price asc"];
+              queryBuilder.sorts = ["p.final_price asc"];
             }
 
             if (productOption.discount != undefined) {
@@ -132,6 +131,7 @@ export class ProductMysql implements ProductRepository {
                   unit_count: e.unit_count,
                   discount_type: e.discount_type,
                   discount_amount: e.discount_amount,
+                  final_price: e.final_price,
                   sold: e.sold,
                   view: e.view,
                   favourite: e.favourite,
@@ -172,7 +172,8 @@ export class ProductMysql implements ProductRepository {
                   join unit_measures m on u.unit_measure_uid = m.uid
                   left join product_discounts d on d.product_uid = p.uid
                   left join discounts s on d.discount_uid = s.uid
-                  where p.active = 1`,
+                  where p.active = 1
+                  and p.uid = ?`,
             values: [uid],
           };
 
@@ -201,6 +202,7 @@ export class ProductMysql implements ProductRepository {
                 unit_count: e.unit_count,
                 discount_type: e.discount_type,
                 discount_amount: e.discount_amount,
+                final_price: e.final_price,
                 sold: e.sold,
                 view: e.view,
                 favourite: e.favourite,
