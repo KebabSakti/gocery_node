@@ -9,6 +9,7 @@ import productController from "./core/http/controller/customer/product_controlle
 import bundleController from "./core/http/controller/customer/bundle_controller";
 import searchController from "./core/http/controller/customer/search_controller";
 import cartController from "./core/http/controller/customer/cart_controller";
+import orderController from "./core/http/controller/customer/order_controller";
 import helperController from "./core/http/controller/helper_controller";
 
 const app: Express = express();
@@ -26,6 +27,7 @@ app.use("/api/customer/products", productController);
 app.use("/api/customer/bundles", bundleController);
 app.use("/api/customer/searches", searchController);
 app.use("/api/customer/carts", cartController);
+app.use("/api/customer/orders", orderController);
 
 app.use("/api/helper", helperController);
 

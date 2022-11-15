@@ -13,7 +13,6 @@ import {
   CartMysql,
   CartItemMysql,
 } from "../../../../feature/customer/cart/datasource/cart_mysql";
-import { InternalServerError, ResourceNotFound } from "../../../config/errors";
 import HelperService from "../../../service/helper_service";
 import { ProductModel } from "../../../../feature/customer/product/model/product_model";
 import { ProductRepository } from "../../../../feature/customer/product/repository/product_repository";
