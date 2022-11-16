@@ -2,13 +2,13 @@ export interface OrderModel {
   uid?: string;
   invoice?: string;
   pay?: number;
-  customer?: OrderCustomerModel;
-  partner?: OrderPartnerModel;
-  payment?: OrderPaymentModel;
-  shipping?: OrderShippingModel;
-  voucher?: OrderVoucherModel;
-  status?: OrderStatusModel;
-  products?: OrderPartnerModel[];
+  customer: OrderCustomerModel;
+  partner: OrderPartnerModel;
+  payment: OrderPaymentModel;
+  shipping: OrderShippingModel;
+  voucher: OrderVoucherModel;
+  status: OrderStatusModel;
+  products: OrderPartnerModel[];
   created_at?: string;
   updated_at?: string;
 }
@@ -54,7 +54,7 @@ export interface OrderPaymentModel {
   updated_at?: string;
 }
 
-export interface OrderProductsModel {
+export interface OrderProductModel {
   uid?: string;
   order_uid?: string;
   category?: string;
