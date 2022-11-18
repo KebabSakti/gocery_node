@@ -1,8 +1,8 @@
-import PaginationOption from "../../../../core/model/pagination_option";
-import CategoryModel from "../model/category_model";
+import PagingOption from "../../../../core/model/paging_option";
+import { CategoryModel } from "../../../../core/model/category_structure";
 
 abstract class CategoryRepository {
-  abstract index(paginationOption?: PaginationOption): Promise<CategoryModel[]>;
+  abstract index(pagingOption?: PagingOption): Promise<CategoryModel[]>;
 }
 
 export default CategoryRepository;

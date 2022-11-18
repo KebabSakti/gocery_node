@@ -1,17 +1,8 @@
-import PaginationOption from "../../../../core/model/pagination_option";
-import {
-  BundleModel,
-  BundleItemModel,
-  BundleWithItemModel,
-} from "../model/bundle_model";
+import PagingOption from "../../../../core/model/paging_option";
+import { BundleModel } from "../../../../core/model/bundle_structure";
 
-export abstract class BundleRepository {
-  abstract index(): Promise<BundleModel[]>;
+abstract class BundleRepository {
+  abstract index(pagingOption?: PagingOption): Promise<BundleModel[]>;
 }
 
-export abstract class BundleItemRepository {
-  abstract index(
-    bundle_uid: string,
-    paginationOption?: PaginationOption
-  ): Promise<BundleItemModel[]>;
-}
+export default BundleRepository;

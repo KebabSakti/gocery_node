@@ -1,36 +1,12 @@
-import {
-  ProductFavouriteModel,
-  ProductModel,
-  ProductOption,
-  ProductViewModel,
-} from "../model/product_model";
-import PaginationOption from "../../../../core/model/pagination_option";
+import PagingOption from "../../../../core/model/paging_option";
+import { ProductModel } from "../../../../core/model/product_structure";
+import ProductIndexOption from "../model/product_index_option";
 
-export abstract class ProductRepository {
+abstract class ProductRepository {
   abstract index(
-    productOption?: ProductOption,
-    paginationOption?: PaginationOption
+    productIndexOption?: ProductIndexOption,
+    pagingOption?: PagingOption
   ): Promise<ProductModel[]>;
-
-  abstract show(uid: string): Promise<ProductModel | null>;
 }
 
-export abstract class ProductViewRepository {
-  abstract index(
-    customer_uid: string,
-    paginationOption?: PaginationOption
-  ): Promise<ProductViewModel[]>;
-
-  abstract store(productViewModel: ProductViewModel): Promise<void>;
-}
-
-export abstract class ProductFavouriteRepository {
-  abstract index(
-    customer_uid: string,
-    paginationOption?: PaginationOption
-  ): Promise<ProductModel[]>;
-
-  abstract store(productFavouriteModel: ProductFavouriteModel): Promise<void>;
-
-  abstract remove(productFavouriteModel: ProductFavouriteModel): Promise<void>;
-}
+export default ProductRepository;

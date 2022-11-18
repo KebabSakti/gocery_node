@@ -1,178 +1,56 @@
-import express, { Request, Response } from "express";
-import { QueryOptions } from "mysql";
-import Database from "../../service/mysql_database";
+import { ProductModel } from "./../../model/product_structure";
+import {
+  CategoryScheme,
+  CategoryModel,
+} from "./../../model/category_structure";
 import { faker } from "@faker-js/faker";
+import express, { Request, Response } from "express";
+import { ProductScheme } from "../../model/product_structure";
 import ErrorHandler from "../../service/error_handler";
-import HelperService from "../../service/helper_service";
-import QueryBuilder from "../../service/query_builder";
-import { ProductModel } from "../../../feature/customer/product/model/product_model";
+import mongoose from "mongoose";
+import { BadRequest, ResourceNotFound } from "../../config/errors";
+import { BundleModel, BundleScheme } from "../../model/bundle_structure";
 
 const router = express.Router();
 
-async function debug(): Promise<any> {
-  const result = new Promise<any>((resolve, reject) => {
-    Database.pool
-      .then((connection) => {
-        const query: QueryOptions = {
-          sql: `select p.name, sum(o.qty) as sold from products p
-                join order_products o on o.product_uid = p.uid
-                where p.uid in (select product_uid from order_products
-                              join orders on order_products.order_uid = orders.uid
-                              join order_statuses on order_statuses.order_uid = orders.uid
-                              where order_statuses.status = "completed")
-                group by p.uid
-                order by sold desc`,
-        };
-
-        connection.query(query, (error, results) => {
-          if (error) {
-            return reject(error);
-          }
-
-          resolve(results);
-        });
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-
-  return result;
-}
-
-async function rows(table: string): Promise<any> {
-  const result = new Promise<any>((resolve, reject) => {
-    Database.pool
-      .then((connection) => {
-        const query: QueryOptions = {
-          sql: `select * from ${table}`,
-        };
-
-        connection.query(query, (error, results) => {
-          if (error) {
-            return reject(error);
-          }
-
-          resolve(results);
-        });
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-
-  return result;
-}
-
-async function row(table: string): Promise<any> {
-  const result = new Promise<any>((resolve, reject) => {
-    Database.pool
-      .then((connection) => {
-        const query: QueryOptions = {
-          sql: `select * from ${table} order by RAND() limit 1`,
-        };
-
-        connection.query(query, (error, results) => {
-          if (error) {
-            return reject(error);
-          }
-
-          resolve(results[0]);
-        });
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-
-  return result;
-}
-
-async function insert(params?: any): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    Database.pool
-      .then((connection) => {
-        const query: QueryOptions = {
-          sql: `update products set
-                final_price = ?
-                where uid = ?`,
-          values: [params.final_price, params.uid],
-        };
-
-        connection.query(query, (error, results) => {
-          if (error) {
-            return reject(error);
-          }
-
-          resolve();
-        });
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
-
 router.get("*", async (req: Request, res: Response) => {
   try {
-    // const iterates: number[] = [...Array(200).keys()];
+    // const iterates: number[] = [...Array(5).keys()];
+    // const datas = await ProductScheme.find().limit(100);
 
+    // const ids: string[] = Array.from(datas, (e) => {
+    //   return e._id;
+    // });
+
+    // let p: string[] = [];
     // for (const _ in iterates) {
-    //   const c = await row("customers");
-    //   const p = await row("products");
-
-    //   await insert({ customer_uid: c.uid, product_uid: p.uid });
-    // }
-
-    const items = await rows("products");
-    // const statuses = ["pending", "progress", "completed", "canceled"];
-
-    for (const item of items as ProductModel[]) {
-      await insert({
-        uid: item.uid,
-        final_price: item.price,
-      });
-    }
-
-    // const d = await debug();
-
-    // if (productOption.sold != undefined) {
-    //   fields = [...fields, "sum(o.qty) as sold"];
-
-    //   joins = [
-    //     ...joins,
-    //     "join order_products o on o.product_uid = p.uid",
-    //   ];
-
-    //   wheres = [
-    //     ...wheres,
-    //     `and p.uid in (select product_uid from order_products
-    //     join orders on order_products.order_uid = orders.uid
-    //     join order_statuses on order_statuses.order_uid = orders.uid
-    //     where order_statuses.status = "completed")`,
-    //   ];
-
-    //   group = "group by p.uid";
-
-    //   orders = [...orders, "sold desc"];
-    // }
-
-    // const datas = await rows("bundles");
-
-    // for (const data of datas) {
-    //   const i: number = parseInt(faker.random.numeric());
-
-    //   for (let s = 0; s <= i; s++) {
-    //     const e = await row("products");
-
-    //     await insert({
-    //       bundle_uid: data.uid,
-    //       product_uid: e.uid,
-    //     });
+    //   for (let i = 1; i <= 10; i++) {
+    //     p.push(ids[Math.floor(Math.random() * ids.length)]);
     //   }
+
+    //   const scheme = new BundleScheme({
+    //     name: faker.commerce.productAdjective(),
+    //     description: faker.commerce.productDescription(),
+    //     image: faker.image.food(),
+    //     products: p,
+    //   });
+
+    //   await scheme.save();
+
+    //   p = [];
     // }
 
-    res.json("SUCCESS");
+    // const ids = ["637780b76b9a7275758dfdee", "637780b76b9a7275758dfdfe"];
+
+    const query = BundleScheme.find()
+      .select("-active -created_at -updated_at -__v")
+      .populate("products", "-active -created_at -updated_at -__v");
+
+    // query.where("_id").in(ids);
+
+    const result = await query.exec();
+
+    res.json(result);
   } catch (error) {
     new ErrorHandler(res, error);
   }
