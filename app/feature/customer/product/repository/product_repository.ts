@@ -4,9 +4,11 @@ import ProductIndexOption from "../model/product_index_option";
 
 abstract class ProductRepository {
   abstract index(
-    productIndexOption?: ProductIndexOption,
-    pagingOption?: PagingOption
+    pagingOption: PagingOption,
+    productIndexOption?: ProductIndexOption
   ): Promise<ProductModel[]>;
+
+  abstract show(id: string): Promise<ProductModel | null>;
 }
 
 export default ProductRepository;
