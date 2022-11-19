@@ -1,5 +1,7 @@
-abstract class AuthRepository {
+export abstract class AuthRepository {
   abstract verify(token: string): Promise<string>;
 }
 
-export default AuthRepository;
+export abstract class AuthRepositoryJwt extends AuthRepository {
+  abstract sign(id: string): Promise<void>;
+}

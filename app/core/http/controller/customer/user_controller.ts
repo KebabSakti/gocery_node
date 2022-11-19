@@ -1,23 +1,15 @@
 import express, { Request, Response } from "express";
 import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
-import CustomerMysql from "../../../../feature/customer/user/datasource/customer_mysql";
-import CustomerModel from "../../../../feature/customer/user/model/customer_model";
+import { CustomerModel } from "../../../../feature/customer/user/model/customer_model";
 import ErrorHandler from "../../../service/error_handler";
-import { ResourceNotFound } from "../../../config/errors";
-import HelperService from "../../../service/helper_service";
+import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
 
 const router = express.Router();
-const customerRepo: CustomerRepository = new CustomerMysql();
+const customerRepo: CustomerRepository = new CustomerMongo();
 
-router.get("/:uid", async (req: Request, res: Response) => {
+router.get("/:external_id/show", async (req: Request, res: Response) => {
   try {
-    const customerUser: CustomerModel | null = await customerRepo.show(
-      req.params.uid
-    );
-
-    if (customerUser == null) {
-      throw new ResourceNotFound("Resource not found");
-    }
+    const customerUser = await customerRepo.show(req.params.external_id);
 
     res.json(customerUser);
   } catch (error) {
@@ -25,13 +17,14 @@ router.get("/:uid", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/", async (req: Request, res: Response) => {
+router.put("/:external_id", async (req: Request, res: Response) => {
   try {
     const customerModel: CustomerModel = {
-      uid: req.body.uid,
+      external_id: req.params.external_id,
       name: req.body.name,
       email: req.body.email,
-      updated_at: HelperService.sqlDateNow(),
+      phone: req.body.phone,
+      image: req.body.image,
     };
 
     await customerRepo.update(customerModel);

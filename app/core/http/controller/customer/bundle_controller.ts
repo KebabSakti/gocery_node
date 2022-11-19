@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import BundleMongo from "../../../../feature/customer/bundle/datasource/bundle_mongo";
 import BundleRepository from "../../../../feature/customer/bundle/repository/bundle_repository";
-import { BundleModel } from "../../../model/bundle_structure";
+import { BundleModel } from "../../../../feature/customer/bundle/model/bundle_model";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
 

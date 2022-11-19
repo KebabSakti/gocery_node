@@ -1,11 +1,10 @@
 import express, { Request, Response } from "express";
 import AuthFirebase from "../../../../feature/customer/auth/datasource/auth_firebase";
-import AuthRepository from "../../../../feature/customer/auth/repository/auth_repository";
-import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
+import { AuthRepository } from "../../../../feature/customer/auth/repository/auth_repository";
 import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
-import ErrorHandler from "../../../service/error_handler";
-import HelperService from "../../../service/helper_service";
 import { CustomerModel } from "../../../../feature/customer/user/model/customer_model";
+import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
+import ErrorHandler from "../../../service/error_handler";
 
 const router = express.Router();
 const customerAuth: AuthRepository = new AuthFirebase();
@@ -19,7 +18,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     if (customer == null) {
       customer = {
-        _id: id,
+        external_id: id,
         name: req.body.name,
         email: req.body.email,
         phone: req.body.phone,
@@ -28,6 +27,8 @@ router.post("/", async (req: Request, res: Response) => {
 
       await customerRepository.store(customer);
     }
+
+    req.app.locals.user = customer._id;
 
     res.json(customer);
   } catch (error) {

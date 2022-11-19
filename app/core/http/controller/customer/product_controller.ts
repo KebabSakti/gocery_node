@@ -2,12 +2,15 @@ import express, { Request, Response } from "express";
 import ProductMongo from "../../../../feature/customer/product/datasource/product_mongo";
 import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
 import PagingOption from "../../../model/paging_option";
-import { ProductModel } from "../../../model/product_structure";
+import { ProductModel } from "../../../../feature/customer/product/model/product_model";
 import ErrorHandler from "../../../service/error_handler";
 import { BadRequest } from "./../../../config/errors";
+import ViewRepository from "../../../../feature/customer/view/repository/view_repository";
+import ViewMongo from "../../../../feature/customer/view/datasource/view_mongo";
 
 const router = express.Router();
 const productRepository: ProductRepository = new ProductMongo();
+const viewRepository: ViewRepository = new ViewMongo();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -53,6 +56,12 @@ router.get("/:id/show", async (req: Request, res: Response) => {
     const result = await productRepository.show(req.params.id);
 
     await productRepository.incrementView(req.params.id);
+
+    await viewRepository.upsert({
+      customer: req.app.locals.user,
+      product: req.params.id,
+      updated_at: Date.now().toString(),
+    });
 
     res.json(result);
   } catch (error) {

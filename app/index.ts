@@ -7,14 +7,20 @@ import categoryController from "./core/http/controller/customer/category_control
 import orderController from "./core/http/controller/customer/order_controller";
 import productController from "./core/http/controller/customer/product_controller";
 import searchController from "./core/http/controller/customer/search_controller";
+import viewController from "./core/http/controller/customer/view_controller";
 import customerUserController from "./core/http/controller/customer/user_controller";
 import helperController from "./core/http/controller/helper_controller";
 import baseMiddleware from "./core/http/middleware/base_middleware";
+import customerMiddleware from "./core/http/middleware/customer/customer_middleware";
 import MongoDB from "./core/service/mongose_database";
+import FirebaseAdmin from "./core/service/firebase_admin";
 
 const app: Express = express();
 const port: Number = 1001;
 
+const authMiddleware = customerMiddleware;
+
+FirebaseAdmin.init();
 MongoDB.connect();
 
 app.use(baseMiddleware);
@@ -23,14 +29,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/customer/auth", customerAuthController);
-app.use("/api/customer/users", customerUserController);
-app.use("/api/customer/categories", categoryController);
-app.use("/api/customer/banners", bannerController);
-app.use("/api/customer/products", productController);
-app.use("/api/customer/bundles", bundleController);
-app.use("/api/customer/searches", searchController);
+app.use("/api/customer/users", authMiddleware, customerUserController);
+app.use("/api/customer/categories", authMiddleware, categoryController);
+app.use("/api/customer/banners", authMiddleware, bannerController);
+app.use("/api/customer/products", authMiddleware, productController);
+app.use("/api/customer/bundles", authMiddleware, bundleController);
+app.use("/api/customer/searches", authMiddleware, searchController);
+app.use("/api/customer/views", authMiddleware, viewController);
 // app.use("/api/customer/carts", cartController);
-app.use("/api/customer/orders", orderController);
+app.use("/api/customer/orders", authMiddleware, orderController);
 
 app.use("/api/helper", helperController);
 

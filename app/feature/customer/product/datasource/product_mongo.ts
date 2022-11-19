@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
-import { BundleScheme } from "./../../../../core/model/bundle_structure";
+import { BundleScheme } from "../../bundle/model/bundle_model";
 import PagingOption from "../../../../core/model/paging_option";
-import {
-  ProductModel,
-  ProductScheme,
-} from "../../../../core/model/product_structure";
+import { ProductModel, ProductScheme } from "../model/product_model";
 import ProductIndexOption from "../model/product_index_option";
 import ProductRepository from "../repository/product_repository";
 
@@ -80,7 +77,9 @@ class ProductMongo implements ProductRepository {
     let results: ProductModel | null = null;
 
     if (mongoose.isValidObjectId(id)) {
-      results = await ProductScheme.findById(id);
+      results = await ProductScheme.findById(id).select(
+        "-active -created_at -updated_at -__v"
+      );
     }
 
     return results;
@@ -88,7 +87,10 @@ class ProductMongo implements ProductRepository {
 
   async incrementView(id: string): Promise<void> {
     if (mongoose.isValidObjectId(id)) {
-      await ProductScheme.findByIdAndUpdate(id, { $inc: { "meta.view": 1 } });
+      await ProductScheme.updateOne(
+        { _id: id },
+        { updated_at: Date.now().toString(), $inc: { "meta.view": 1 } }
+      );
     }
   }
 }

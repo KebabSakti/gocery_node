@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-import { CategoryScheme } from "./category_structure";
 
 export interface ProductModel {
   _id?: string;
@@ -42,7 +41,7 @@ export const ProductScheme = model<ProductModel>(
     category: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: CategoryScheme,
+      ref: "categories",
     },
     name: { type: String, required: true, index: true },
     description: { type: String },

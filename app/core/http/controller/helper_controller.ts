@@ -1,15 +1,18 @@
-import { ProductModel } from "./../../model/product_structure";
+import { ProductModel } from "../../../feature/customer/product/model/product_model";
 import {
   CategoryScheme,
   CategoryModel,
-} from "./../../model/category_structure";
+} from "../../../feature/customer/category/model/category_model";
 import { faker } from "@faker-js/faker";
 import express, { Request, Response } from "express";
-import { ProductScheme } from "../../model/product_structure";
+import { ProductScheme } from "../../../feature/customer/product/model/product_model";
 import ErrorHandler from "../../service/error_handler";
 import mongoose from "mongoose";
 import { BadRequest, ResourceNotFound } from "../../config/errors";
-import { BundleModel, BundleScheme } from "../../model/bundle_structure";
+import {
+  BundleModel,
+  BundleScheme,
+} from "../../../feature/customer/bundle/model/bundle_model";
 
 const router = express.Router();
 
@@ -42,15 +45,15 @@ router.get("*", async (req: Request, res: Response) => {
 
     // const ids = ["637780b76b9a7275758dfdee", "637780b76b9a7275758dfdfe"];
 
-    const query = BundleScheme.find()
-      .select("-active -created_at -updated_at -__v")
-      .populate("products", "-active -created_at -updated_at -__v");
+    // const query = BundleScheme.find()
+    //   .select("-active -created_at -updated_at -__v")
+    //   .populate("products", "-active -created_at -updated_at -__v");
 
     // query.where("_id").in(ids);
 
-    const result = await query.exec();
+    // const result = await query.exec();
 
-    res.json(result);
+    res.json("");
   } catch (error) {
     new ErrorHandler(res, error);
   }

@@ -1,8 +1,5 @@
 import BannerRepository from "../repository/banner_repository";
-import {
-  BannerModel,
-  BannerScheme,
-} from "../../../../core/model/banner_structure";
+import { BannerModel, BannerScheme } from "../model/banner_model";
 
 export class BannerMongo implements BannerRepository {
   async index(): Promise<BannerModel[]> {

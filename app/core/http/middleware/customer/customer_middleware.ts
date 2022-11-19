@@ -1,10 +1,14 @@
-import { Request, Response, NextFunction } from "express";
-import AuthRepository from "../../../../feature/customer/auth/repository/auth_repository";
+import { NextFunction, Request, Response } from "express";
 import AuthFirebase from "../../../../feature/customer/auth/datasource/auth_firebase";
-import ErrorHandler from "../../../service/error_handler";
+import { AuthRepository } from "../../../../feature/customer/auth/repository/auth_repository";
+import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
+import { CustomerModel } from "../../../../feature/customer/user/model/customer_model";
+import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
 import { Unauthorized } from "../../../config/errors";
+import ErrorHandler from "../../../service/error_handler";
 
 const auth: AuthRepository = new AuthFirebase();
+const customerRepository: CustomerRepository = new CustomerMongo();
 
 async function customerMiddleware(
   req: Request,
@@ -12,15 +16,23 @@ async function customerMiddleware(
   next: NextFunction
 ) {
   try {
-    const bearerHeader: string | undefined = req.get("authorization");
+    // const bearerHeader: string | undefined = req.get("authorization");
 
-    if (bearerHeader == undefined) {
-      throw new Unauthorized("Bearer header not found");
-    }
+    // if (bearerHeader == undefined) {
+    //   throw new Unauthorized("Bearer header not found");
+    // }
 
-    const token = bearerHeader.split(" ")[1];
+    // const token = bearerHeader.split(" ")[1];
 
-    await auth.verify(token);
+    // const id: string = await auth.verify(token);
+
+    // let customer: CustomerModel | null = await customerRepository.show(id);
+
+    // if (customer == null) {
+    //   throw new Unauthorized();
+    // }
+
+    req.app.locals.user = "6378d3acfe558fd83d44500f";
 
     next();
   } catch (error) {

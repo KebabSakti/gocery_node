@@ -1,12 +1,12 @@
 import express, { Request, Response } from "express";
-import CategoryMongo from "../../../../feature/customer/category/datasource/category_mongo";
-import { CategoryModel } from "../../../../feature/customer/category/model/category_model";
-import CategoryRepository from "../../../../feature/customer/category/repository/category_repository";
+import ViewMongo from "../../../../feature/customer/view/datasource/view_mongo";
+import { ViewModel } from "../../../../feature/customer/view/model/view_model";
+import ViewRepository from "../../../../feature/customer/view/repository/view_repository";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
 
 const router = express.Router();
-const categoryRepo: CategoryRepository = new CategoryMongo();
+const viewRepository: ViewRepository = new ViewMongo();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -19,9 +19,12 @@ router.get("/", async (req: Request, res: Response) => {
       );
     }
 
-    const categories: CategoryModel[] = await categoryRepo.index(pagingOption);
+    const results: ViewModel[] = await viewRepository.index(
+      req.app.locals.user,
+      pagingOption
+    );
 
-    res.json(categories);
+    res.json(results);
   } catch (error) {
     new ErrorHandler(res, error);
   }

@@ -1,4 +1,4 @@
-import BannerModel from "../model/banner_model";
+import { BannerModel } from "../model/banner_model";
 
 abstract class BannerRepository {
   abstract index(): Promise<BannerModel[]>;

@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import BannerMongo from "../../../../feature/customer/banner/datasource/banner_mongo";
-import BannerModel from "../../../../feature/customer/banner/model/banner_model";
+import { BannerModel } from "../../../../feature/customer/banner/model/banner_model";
 import BannerRepository from "../../../../feature/customer/banner/repository/banner_repository";
 import ErrorHandler from "../../../service/error_handler";
 

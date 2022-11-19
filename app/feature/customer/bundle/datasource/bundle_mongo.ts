@@ -1,8 +1,5 @@
 import PagingOption from "../../../../core/model/paging_option";
-import {
-  BundleModel,
-  BundleScheme,
-} from "../../../../core/model/bundle_structure";
+import { BundleModel, BundleScheme } from "../model/bundle_model";
 import BundleRepository from "../repository/bundle_repository";
 
 class BundleMongo implements BundleRepository {

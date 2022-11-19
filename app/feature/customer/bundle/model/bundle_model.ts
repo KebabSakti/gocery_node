@@ -1,4 +1,3 @@
-import { ProductScheme } from "./product_structure";
 import { model, Schema } from "mongoose";
 
 export interface BundleModel {
@@ -23,6 +22,6 @@ export const BundleScheme = model<BundleModel>(
     active: { type: Number, default: 1, index: true },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
-    products: [{ type: Schema.Types.ObjectId, ref: ProductScheme }],
+    products: [{ type: Schema.Types.ObjectId, ref: "products" }],
   })
 );
