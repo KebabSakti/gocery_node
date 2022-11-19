@@ -85,6 +85,12 @@ class ProductMongo implements ProductRepository {
 
     return results;
   }
+
+  async incrementView(id: string): Promise<void> {
+    if (mongoose.isValidObjectId(id)) {
+      await ProductScheme.findByIdAndUpdate(id, { $inc: { "meta.view": 1 } });
+    }
+  }
 }
 
 export default ProductMongo;

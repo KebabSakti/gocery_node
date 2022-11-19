@@ -1,11 +1,26 @@
-interface CustomerModel {
-  uid?: string;
+import { model, Schema } from "mongoose";
+
+export interface CustomerModel {
+  _id?: string;
   name?: string;
   email?: string;
   phone?: string;
-  password?: string;
+  image?: string;
+  active?: number;
   created_at?: string;
   updated_at?: string;
 }
 
-export default CustomerModel;
+export const CustomerScheme = model<CustomerModel>(
+  "customers",
+  new Schema<CustomerModel>({
+    _id: { type: String, required: true },
+    name: { type: String, required: true },
+    email: { type: String },
+    phone: { type: String },
+    image: { type: String },
+    active: { type: Number, default: 1 },
+    created_at: { type: String, default: Date.now() },
+    updated_at: { type: String, default: Date.now() },
+  })
+);

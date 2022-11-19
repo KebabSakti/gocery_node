@@ -9,6 +9,8 @@ abstract class ProductRepository {
   ): Promise<ProductModel[]>;
 
   abstract show(id: string): Promise<ProductModel | null>;
+
+  abstract incrementView(id: string): Promise<void>;
 }
 
 export default ProductRepository;

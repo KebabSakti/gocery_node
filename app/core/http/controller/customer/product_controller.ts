@@ -50,7 +50,11 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.get("/:id/show", async (req: Request, res: Response) => {
   try {
-    res.json("");
+    const result = await productRepository.show(req.params.id);
+
+    await productRepository.incrementView(req.params.id);
+
+    res.json(result);
   } catch (error) {
     new ErrorHandler(res, error);
   }

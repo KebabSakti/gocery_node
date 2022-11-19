@@ -1,5 +1,5 @@
+import { model, Schema } from "mongoose";
 import { CategoryScheme } from "./category_structure";
-import mongoose, { model, Schema } from "mongoose";
 
 export interface ProductModel {
   _id?: string;
