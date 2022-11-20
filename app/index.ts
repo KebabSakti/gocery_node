@@ -2,7 +2,7 @@ import express, { Express, Response } from "express";
 import customerAuthController from "./core/http/controller/customer/auth_controller";
 import bannerController from "./core/http/controller/customer/banner_controller";
 import bundleController from "./core/http/controller/customer/bundle_controller";
-// import cartController from "./core/http/controller/customer/cart_controller";
+import cartController from "./core/http/controller/customer/cart_controller";
 import categoryController from "./core/http/controller/customer/category_controller";
 import orderController from "./core/http/controller/customer/order_controller";
 import productController from "./core/http/controller/customer/product_controller";
@@ -36,7 +36,7 @@ app.use("/api/customer/products", authMiddleware, productController);
 app.use("/api/customer/bundles", authMiddleware, bundleController);
 app.use("/api/customer/searches", authMiddleware, searchController);
 app.use("/api/customer/views", authMiddleware, viewController);
-// app.use("/api/customer/carts", cartController);
+app.use("/api/customer/carts", cartController);
 app.use("/api/customer/orders", authMiddleware, orderController);
 
 app.use("/api/helper", helperController);

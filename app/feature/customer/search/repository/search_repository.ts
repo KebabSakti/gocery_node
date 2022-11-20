@@ -1,15 +1,16 @@
-import PaginationOption from "../../../../core/model/pagination_option";
-import { SearchModel, SearchOption } from "../model/search_model";
+import SearchOption from "./../model/search_option";
+import PagingOption from "../../../../core/model/paging_option";
+import { SearchModel } from "../model/search_model";
 
 abstract class SearchRepository {
   abstract index(
-    searchOption?: SearchOption,
-    paginationOption?: PaginationOption
+    searchOption: SearchOption,
+    pagingOption: PagingOption
   ): Promise<SearchModel[]>;
 
   abstract store(searchModel: SearchModel): Promise<void>;
 
-  abstract remove(uid: string): Promise<void>;
+  abstract remove(id: string): Promise<void>;
 }
 
 export default SearchRepository;

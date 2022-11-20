@@ -1,58 +1,42 @@
 import express, { Request, Response } from "express";
 import ErrorHandler from "../../../service/error_handler";
-import {
-  SearchModel,
-  SearchOption,
-} from "../../../../feature/customer/search/model/search_model";
+import { SearchModel } from "../../../../feature/customer/search/model/search_model";
+import SearchOption from "../../../../feature/customer/search/model/search_option";
 import SearchRepository from "../../../../feature/customer/search/repository/search_repository";
-import SearchMysql from "../../../../feature/customer/search/datasource/search_mysql";
-import PaginationOption from "../../../model/pagination_option";
-import HelperService from "../../../../core/service/helper_service";
+import SearchMongo from "../../../../feature/customer/search/datasource/search_mongo";
+import PagingOption from "../../../model/paging_option";
+import { BadRequest } from "../../../config/errors";
 
 const router = express.Router();
-const searchRepository: SearchRepository = new SearchMysql();
+const searchRepository: SearchRepository = new SearchMongo();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const page: number | undefined =
-      req.query.page == undefined
-        ? undefined
-        : parseInt(req.query.page as string);
-
-    const perPage: number | undefined =
-      req.query.per_page == undefined
-        ? undefined
-        : parseInt(req.query.per_page as string);
-
-    const customer_uid: string | undefined =
-      req.query.customer_uid == undefined
-        ? undefined
-        : (req.query.customer_uid as string);
-
-    const keyword: string | undefined =
-      req.query.keyword == undefined
-        ? undefined
-        : (req.query.keyword as string);
-
     const searchOption: SearchOption = {
-      customer_uid: customer_uid,
-      keyword: keyword,
+      customerId: req.app.locals.user,
+      keyword: req.query.keyword as string,
     };
 
-    const paginationOption: PaginationOption | undefined =
-      page == undefined || perPage == undefined
-        ? undefined
-        : {
-            perPage: perPage,
-            currentPage: page,
-          };
+    const page = isNaN(parseInt(req.query.page as string))
+      ? 1
+      : parseInt(req.query.page as string);
 
-    const searches: SearchModel[] = await searchRepository.index(
+    const limit = isNaN(parseInt(req.query.limit as string))
+      ? 5
+      : parseInt(req.query.limit as string);
+
+    if (limit >= 20) {
+      throw new BadRequest();
+    }
+
+    const pagingOption = new PagingOption(page, limit);
+
+    const results: SearchModel[] = await searchRepository.index(
       searchOption,
-      paginationOption
+      pagingOption
     );
 
-    res.json(searches);
+    res.json(results);
   } catch (error) {
     new ErrorHandler(res, error);
   }
@@ -60,15 +44,10 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const searchModel: SearchModel = {
-      uid: HelperService.uuid(),
-      customer_uid: req.body.customer_uid,
+    await searchRepository.store({
+      customer: req.app.locals.user,
       keyword: req.body.keyword,
-      created_at: HelperService.sqlDateNow(),
-      updated_at: HelperService.sqlDateNow(),
-    };
-
-    await searchRepository.store(searchModel);
+    });
 
     res.status(200).end();
   } catch (error) {
@@ -76,9 +55,9 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/", async (req: Request, res: Response) => {
+router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    await searchRepository.remove(req.body.uid);
+    await searchRepository.remove(req.params.id);
 
     res.status(200).end();
   } catch (error) {

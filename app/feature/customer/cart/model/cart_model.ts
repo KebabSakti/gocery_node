@@ -1,36 +1,33 @@
+import { model, Schema } from "mongoose";
+
 export interface CartModel {
-  uid?: string;
-  customer_uid?: string;
+  _id?: string;
+  customer?: string;
   total?: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface CartItemModel {
-  uid?: string;
-  cart_uid?: string;
-  product_uid?: string;
-  category_uid?: string;
-  name?: string;
-  description?: string;
-  image?: string;
-  price?: number;
-  final_price?: number;
-  point?: number;
-  min?: number;
-  max?: number;
-  link?: string;
-  unit_name?: string;
-  unit_count?: number;
-  discount_type?: string;
-  discount_amount?: number;
   qty?: number;
-  total?: number;
+  items: {
+    product: string;
+    qty: number;
+    total: number;
+  }[];
   created_at?: string;
   updated_at?: string;
 }
 
-export interface CartWithItemModel {
-  cart: CartModel;
-  cart_items: CartItemModel[];
-}
+export const CartScheme = model<CartModel>(
+  "carts",
+  new Schema<CartModel>({
+    customer: { type: Schema.Types.ObjectId, ref: "customers" },
+    qty: { type: Number, required: true },
+    total: { type: Number, required: true },
+    items: [
+      {
+        product: { type: Schema.Types.ObjectId, ref: "products" },
+        qty: { type: Number, required: true },
+        total: { type: Number, required: true },
+      },
+    ],
+    created_at: { type: String, default: Date.now() },
+    updated_at: { type: String, default: Date.now() },
+  })
+);
