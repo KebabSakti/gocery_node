@@ -44,7 +44,7 @@ router.post("/:customer_id", async (req: Request, res: Response) => {
 
       if (cart != null) {
         items = [
-          ...cart.items.filter(
+          ...cart.items!.filter(
             (e) => (e.product as any)._id.toString() != product._id
           ),
           item,

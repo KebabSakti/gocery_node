@@ -2,10 +2,10 @@ import { model, Schema } from "mongoose";
 
 export interface CartModel {
   _id?: string;
-  customer?: string;
-  total?: number;
-  qty?: number;
-  items: {
+  customer: string;
+  total: number;
+  qty: number;
+  items?: {
     product: string;
     qty: number;
     total: number;
@@ -17,7 +17,7 @@ export interface CartModel {
 export const CartScheme = model<CartModel>(
   "carts",
   new Schema<CartModel>({
-    customer: { type: Schema.Types.ObjectId, ref: "customers" },
+    customer: { type: String, required: true },
     qty: { type: Number, required: true },
     total: { type: Number, required: true },
     items: [
