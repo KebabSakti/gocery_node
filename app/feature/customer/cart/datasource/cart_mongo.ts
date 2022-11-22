@@ -27,7 +27,7 @@ class CartMongo implements CartRepository {
 
   async remove(id: string): Promise<void> {
     if (mongoose.isValidObjectId(id)) {
-      await CartScheme.remove({ _id: id });
+      await CartScheme.remove({ customer: id });
     }
   }
 }

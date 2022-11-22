@@ -53,7 +53,7 @@ router.post("/:customer_id", async (req: Request, res: Response) => {
         items = [item];
       }
 
-      items.filter(() => {});
+      items = items.filter((e) => e.qty > 0);
 
       let grandTotalQty = 0;
       let grandTotalPrice = 0;
@@ -70,8 +70,22 @@ router.post("/:customer_id", async (req: Request, res: Response) => {
         items: items,
       };
 
-      await cartRepository.upsert(cartModel);
+      if (items.length == 0) {
+        await cartRepository.remove(req.params.customer_id);
+      } else {
+        await cartRepository.upsert(cartModel);
+      }
     }
+
+    res.status(200).end();
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+});
+
+router.delete("/:customer_id", async (req: Request, res: Response) => {
+  try {
+    await cartRepository.remove(req.params.customer_id);
 
     res.status(200).end();
   } catch (error) {
