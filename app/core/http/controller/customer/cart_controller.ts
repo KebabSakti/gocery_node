@@ -1,10 +1,11 @@
-import { CartModel } from "./../../../../feature/customer/cart/model/cart_model";
+import { BadRequest } from "./../../../config/errors";
 import express, { Request, Response } from "express";
-import ErrorHandler from "../../../service/error_handler";
-import CartRepository from "../../../../feature/customer/cart/repository/cart_repository";
 import CartMongo from "../../../../feature/customer/cart/datasource/cart_mongo";
-import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
+import CartRepository from "../../../../feature/customer/cart/repository/cart_repository";
 import ProductMongo from "../../../../feature/customer/product/datasource/product_mongo";
+import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
+import ErrorHandler from "../../../service/error_handler";
+import { CartModel } from "./../../../../feature/customer/cart/model/cart_model";
 
 const router = express.Router();
 const cartRepository: CartRepository = new CartMongo();
@@ -25,31 +26,49 @@ router.post("/:customer_id", async (req: Request, res: Response) => {
     const product = await productRepository.show(req.body.product_id);
     const cart = await cartRepository.show(req.params.customer_id);
 
+    if (isNaN(req.body.qty)) {
+      throw new BadRequest();
+    }
+
     if (product != null) {
       const totalQty: number = req.body.qty;
       const totalPrice: number = product.price?.final! * totalQty;
 
-      let items: any;
+      let items = [];
 
-      if (cart != undefined) {
+      const item = {
+        product: product._id as string,
+        qty: totalQty,
+        total: totalPrice,
+      };
+
+      if (cart != null) {
         items = [
-          ...cart.items.filter((e) => e.product != product._id),
-          { product: product._id as string, qty: totalQty, total: totalPrice },
+          ...cart.items.filter(
+            (e) => (e.product as any)._id.toString() != product._id
+          ),
+          item,
         ];
       } else {
-        items = [
-          { product: product._id as string, qty: totalQty, total: totalPrice },
-        ];
+        items = [item];
       }
+
+      items.filter(() => {});
+
+      let grandTotalQty = 0;
+      let grandTotalPrice = 0;
+
+      items.forEach((e) => {
+        grandTotalQty += e.qty;
+        grandTotalPrice += e.total;
+      });
 
       const cartModel: CartModel = {
         customer: req.params.customer_id,
-        qty: totalQty,
-        total: totalPrice,
+        qty: grandTotalQty,
+        total: grandTotalPrice,
         items: items,
       };
-
-      console.log(cartModel);
 
       await cartRepository.upsert(cartModel);
     }

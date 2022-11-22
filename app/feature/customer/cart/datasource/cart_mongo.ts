@@ -7,7 +7,7 @@ class CartMongo implements CartRepository {
     let results: CartModel | null = null;
 
     if (mongoose.isValidObjectId(customerId)) {
-      results = await CartScheme.findById(customerId)
+      results = await CartScheme.findOne({ customer: customerId })
         .select("-created_at -updated_at -__v")
         .populate("items.product", "-active -created_at -updated_at");
     }

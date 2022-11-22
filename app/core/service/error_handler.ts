@@ -8,7 +8,7 @@ class ErrorHandler {
 
     if (error instanceof e.BadRequest) {
       status = 400;
-      message = "Request parameter is invalid";
+      message = "Request parameter invalid";
     }
 
     if (error instanceof e.ResourceNotFound) {
