@@ -13,7 +13,7 @@ class CartMongo implements CartRepository {
   async upsert(cartModel: CartModel): Promise<void> {
     await CartScheme.findOneAndUpdate(
       { customer: cartModel.customer },
-      cartModel,
+      { ...cartModel, updated_at: Date.now() },
       { upsert: true }
     );
   }

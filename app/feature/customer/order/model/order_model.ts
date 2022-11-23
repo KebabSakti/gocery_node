@@ -3,9 +3,13 @@ import { OrderStatus, PaymentStatus } from "../../../../core/config/enums";
 
 export interface OrderModel {
   _id?: string;
-  invoice: string;
   total: number;
   qty: number;
+  invoice: {
+    prefix: string;
+    leading: number;
+    number?: number;
+  };
   courier?: {
     _id: string;
     name: string;
@@ -20,14 +24,14 @@ export interface OrderModel {
     phone?: string;
     image?: string;
   };
-  shipping: {
+  shipping?: {
     place_id?: string;
     address: string;
     name: string;
     phone: string;
     note?: string;
   };
-  delivery: {
+  delivery?: {
     distance: number;
     unit: string;
     time: string;
@@ -46,7 +50,7 @@ export interface OrderModel {
     expire: string;
     status: PaymentStatus;
   };
-  products: OrderItemModel[];
+  items: OrderItemModel[];
   status: OrderStatus;
   created_at?: string;
   updated_at?: string;
@@ -133,7 +137,11 @@ export const OrderItemScheme = model<OrderItemModel>(
 export const OrderScheme = model<OrderModel>(
   "orders",
   new Schema<OrderModel>({
-    invoice: { type: String, required: true },
+    invoice: {
+      prefix: { type: String, required: true },
+      leading: { type: Number, required: true },
+      number: { type: Number, required: true },
+    },
     qty: { type: Number, required: true },
     total: { type: Number, required: true },
     courier: {
@@ -154,23 +162,17 @@ export const OrderScheme = model<OrderModel>(
       },
     },
     shipping: {
-      required: true,
-      type: {
-        place_id: { type: String },
-        address: { type: String, required: true },
-        name: { type: String, required: true },
-        phone: { type: String, required: true },
-        note: { type: String },
-      },
+      place_id: { type: String },
+      address: { type: String, required: true },
+      name: { type: String, required: true },
+      phone: { type: String, required: true },
+      note: { type: String },
     },
     delivery: {
-      required: true,
-      type: {
-        distance: { type: Number, required: true },
-        unit: { type: String, required: true },
-        time: { type: String, required: true },
-        fee: { type: Number, required: true },
-      },
+      distance: { type: Number, required: true },
+      unit: { type: String, required: true },
+      time: { type: String, required: true },
+      fee: { type: Number, required: true },
     },
     payment: {
       required: true,
@@ -188,7 +190,7 @@ export const OrderScheme = model<OrderModel>(
         status: { type: String, required: true },
       },
     },
-    products: {
+    items: {
       required: true,
       type: [
         { type: Schema.Types.ObjectId, required: true, ref: "order_items" },

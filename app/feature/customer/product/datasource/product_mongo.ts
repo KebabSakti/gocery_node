@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { BundleScheme } from "../../bundle/model/bundle_model";
 import PagingOption from "../../../../core/model/paging_option";
-import { ProductModel, ProductScheme } from "../model/product_model";
+import { BundleScheme } from "../../bundle/model/bundle_model";
 import ProductIndexOption from "../model/product_index_option";
+import { ProductModel, ProductScheme } from "../model/product_model";
 import ProductRepository from "../repository/product_repository";
 
 class ProductMongo implements ProductRepository {
@@ -90,6 +90,24 @@ class ProductMongo implements ProductRepository {
       await ProductScheme.updateOne(
         { _id: id },
         { updated_at: Date.now().toString(), $inc: { "meta.view": 1 } }
+      );
+    }
+  }
+
+  async incrementSold(id: string): Promise<void> {
+    if (mongoose.isValidObjectId(id)) {
+      await ProductScheme.updateOne(
+        { _id: id },
+        { updated_at: Date.now().toString(), $inc: { "meta.sold": 1 } }
+      );
+    }
+  }
+
+  async incrementFavs(id: string): Promise<void> {
+    if (mongoose.isValidObjectId(id)) {
+      await ProductScheme.updateOne(
+        { _id: id },
+        { updated_at: Date.now().toString(), $inc: { "meta.favs": 1 } }
       );
     }
   }

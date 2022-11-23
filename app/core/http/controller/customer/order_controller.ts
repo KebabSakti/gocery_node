@@ -9,7 +9,7 @@ import { BadRequest } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
 import OrderOption from "./../../../../feature/customer/order/model/order_option";
-import { ResourceNotFound } from "./../../../config/errors";
+import { Unauthorized } from "./../../../config/errors";
 
 const router = express.Router();
 const orderRepository: OrderRepository = new OrderMongo();
@@ -59,14 +59,22 @@ router.post("/", async (req: Request, res: Response) => {
     const customer = await customerRepository.show(req.app.locals.user);
 
     if (customer == null) {
-      throw new ResourceNotFound();
+      throw new Unauthorized();
     }
 
+    const deliveryFee = 0;
+    const paymentFee = 0;
+    const qtyTotal = 0;
+    const payTotal = 0;
+
     const orderModel: OrderModel = {
-      invoice: "",
-      qty: 0,
-      total: 0,
+      qty: qtyTotal,
+      total: payTotal,
       status: OrderStatus.PENDING,
+      invoice: {
+        prefix: "GC",
+        leading: 6,
+      },
       customer: {
         _id: customer._id!,
         name: customer.name!,
@@ -85,7 +93,7 @@ router.post("/", async (req: Request, res: Response) => {
         distance: req.body.delivery.distance,
         unit: req.body.delivery.unit,
         time: req.body.delivery.time,
-        fee: req.body.delivery.fee,
+        fee: deliveryFee,
       },
       payment: {
         _id: "",
@@ -93,17 +101,17 @@ router.post("/", async (req: Request, res: Response) => {
         code: "",
         name: "",
         picture: "",
-        fee: 0,
+        fee: paymentFee,
         percentage: 0,
         min: 0,
         max: 0,
         expire: "",
         status: PaymentStatus.PENDING,
       },
-      products: [],
+      items: [],
     };
 
-    await orderRepository.store(orderModel);
+    await orderRepository.upsert(orderModel);
 
     res.end();
   } catch (error) {

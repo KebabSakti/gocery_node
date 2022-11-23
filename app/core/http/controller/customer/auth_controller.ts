@@ -12,8 +12,6 @@ const customerRepository: CustomerRepository = new CustomerMongo();
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    console.log(req.body);
-
     const id = await customerAuth.verify(req.body.token);
 
     let customer = await customerRepository.show(id);

@@ -32,7 +32,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     if (product != null) {
       const totalQty: number = req.body.qty;
-      const totalPrice: number = product.price?.final! * totalQty;
+      const totalPrice: number = product.price!.final * totalQty;
 
       let items = [];
 

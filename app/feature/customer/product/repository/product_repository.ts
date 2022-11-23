@@ -11,6 +11,10 @@ abstract class ProductRepository {
   abstract show(id: string): Promise<ProductModel | null>;
 
   abstract incrementView(id: string): Promise<void>;
+
+  abstract incrementSold(id: string): Promise<void>;
+
+  abstract incrementFavs(id: string): Promise<void>;
 }
 
 export default ProductRepository;

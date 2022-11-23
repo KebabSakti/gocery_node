@@ -36,14 +36,12 @@ class OrderMongo implements OrderRepository {
     return results;
   }
 
-  async store(orderModel: OrderModel): Promise<void> {
-    await OrderScheme.create(orderModel);
-  }
-
-  async update(orderModel: OrderModel): Promise<void> {
-    if (mongoose.isValidObjectId(orderModel._id)) {
-      await OrderScheme.findOneAndUpdate({ _id: orderModel._id }, orderModel);
-    }
+  async upsert(orderModel: OrderModel): Promise<void> {
+    await OrderScheme.findOneAndUpdate(
+      { customer: orderModel.customer },
+      orderModel,
+      { upsert: true }
+    );
   }
 }
 
