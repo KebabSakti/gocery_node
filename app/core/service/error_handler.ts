@@ -8,17 +8,17 @@ class ErrorHandler {
 
     if (error instanceof e.BadRequest) {
       status = 400;
-      message = "Request parameter invalid";
+      if (message.length == 0) message = "Request parameter invalid";
     }
 
     if (error instanceof e.ResourceNotFound) {
       status = 404;
-      message = "Resource not found";
+      if (message.length == 0) message = "Resource not found";
     }
 
     if (error instanceof e.Unauthorized) {
       status = 401;
-      message = "Unauthorized";
+      if (message.length == 0) message = "Unauthorized";
     }
 
     res.status(status).json(message);

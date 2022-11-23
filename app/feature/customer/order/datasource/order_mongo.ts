@@ -40,9 +40,9 @@ class OrderMongo implements OrderRepository {
     await OrderScheme.create(orderModel);
   }
 
-  async update(id: string, orderModel: OrderModel): Promise<void> {
-    if (mongoose.isValidObjectId(id)) {
-      await OrderScheme.findOneAndUpdate({ _id: id }, orderModel);
+  async update(orderModel: OrderModel): Promise<void> {
+    if (mongoose.isValidObjectId(orderModel._id)) {
+      await OrderScheme.findOneAndUpdate({ _id: orderModel._id }, orderModel);
     }
   }
 }

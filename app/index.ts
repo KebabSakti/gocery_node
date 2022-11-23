@@ -36,7 +36,7 @@ app.use("/api/customer/products", authMiddleware, productController);
 app.use("/api/customer/bundles", authMiddleware, bundleController);
 app.use("/api/customer/searches", authMiddleware, searchController);
 app.use("/api/customer/views", authMiddleware, viewController);
-app.use("/api/customer/carts", cartController);
+app.use("/api/customer/carts", authMiddleware, cartController);
 app.use("/api/customer/orders", authMiddleware, orderController);
 
 app.use("/api/helper", helperController);

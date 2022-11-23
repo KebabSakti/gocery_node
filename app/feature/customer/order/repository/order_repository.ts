@@ -12,7 +12,7 @@ abstract class OrderRepository {
 
   abstract store(orderModel: OrderModel): Promise<void>;
 
-  abstract update(id: string, orderModel: OrderModel): Promise<void>;
+  abstract update(orderModel: OrderModel): Promise<void>;
 }
 
 export default OrderRepository;

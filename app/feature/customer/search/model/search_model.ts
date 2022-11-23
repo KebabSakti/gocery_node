@@ -11,7 +11,7 @@ export interface SearchModel {
 export const SearchScheme = model<SearchModel>(
   "searches",
   new Schema<SearchModel>({
-    customer: { type: Schema.Types.ObjectId, required: true, ref: "customers" },
+    customer: { type: String, required: true },
     keyword: { type: String, required: true },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },

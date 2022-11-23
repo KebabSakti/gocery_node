@@ -12,7 +12,7 @@ export interface ViewModel {
 export const ViewScheme = model<ViewModel>(
   "views",
   new Schema<ViewModel>({
-    customer: { type: Schema.Types.ObjectId, required: true },
+    customer: { type: String, required: true },
     product: { type: Schema.Types.ObjectId, required: true, ref: "products" },
     hit: { type: Number, default: 1 },
     created_at: { type: String, default: Date.now() },

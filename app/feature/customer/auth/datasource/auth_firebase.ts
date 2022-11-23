@@ -5,15 +5,19 @@ import { Unauthorized } from "../../../../core/config/errors";
 
 class AuthFirebase implements AuthRepository {
   async verify(token: string): Promise<string> {
-    const decodedToken: DecodedIdToken = await admin
-      .auth()
-      .verifyIdToken(token);
+    try {
+      const decodedToken: DecodedIdToken = await admin
+        .auth()
+        .verifyIdToken(token);
 
-    if (decodedToken == undefined) {
-      throw new Unauthorized("Firebase token invalid");
+      if (decodedToken == undefined) {
+        throw new Unauthorized("Auth token invalid");
+      }
+
+      return decodedToken.uid;
+    } catch (e: any) {
+      throw new Unauthorized(e.message);
     }
-
-    return decodedToken.uid;
   }
 }
 

@@ -12,13 +12,15 @@ const customerRepository: CustomerRepository = new CustomerMongo();
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const id: string = await customerAuth.verify(req.body.token);
+    console.log(req.body);
 
-    let customer: CustomerModel | null = await customerRepository.show(id);
+    const id = await customerAuth.verify(req.body.token);
+
+    let customer = await customerRepository.show(id);
 
     if (customer == null) {
       customer = {
-        external_id: id,
+        _id: id,
         name: req.body.name,
         email: req.body.email,
         phone: req.body.phone,
@@ -28,7 +30,7 @@ router.post("/", async (req: Request, res: Response) => {
       await customerRepository.store(customer);
     }
 
-    req.app.locals.user = customer._id;
+    req.app.locals.user = id;
 
     res.json(customer);
   } catch (error) {

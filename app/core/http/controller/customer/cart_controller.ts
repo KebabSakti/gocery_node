@@ -11,9 +11,9 @@ const router = express.Router();
 const cartRepository: CartRepository = new CartMongo();
 const productRepository: ProductRepository = new ProductMongo();
 
-router.get("/:customer_id/show", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const results = await cartRepository.show(req.params.customer_id);
+    const results = await cartRepository.show(req.app.locals.user);
 
     res.json(results);
   } catch (error) {
@@ -21,14 +21,14 @@ router.get("/:customer_id/show", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/:customer_id", async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const product = await productRepository.show(req.body.product_id);
-    const cart = await cartRepository.show(req.params.customer_id);
-
     if (isNaN(req.body.qty)) {
       throw new BadRequest();
     }
+
+    const product = await productRepository.show(req.body.product_id);
+    const cart = await cartRepository.show(req.app.locals.user);
 
     if (product != null) {
       const totalQty: number = req.body.qty;
@@ -64,14 +64,14 @@ router.post("/:customer_id", async (req: Request, res: Response) => {
       });
 
       const cartModel: CartModel = {
-        customer: req.params.customer_id,
+        customer: req.app.locals.user,
         qty: grandTotalQty,
         total: grandTotalPrice,
         items: items,
       };
 
       if (items.length == 0) {
-        await cartRepository.remove(req.params.customer_id);
+        await cartRepository.remove(req.app.locals.user);
       } else {
         await cartRepository.upsert(cartModel);
       }
@@ -83,9 +83,9 @@ router.post("/:customer_id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:customer_id", async (req: Request, res: Response) => {
+router.delete("/", async (req: Request, res: Response) => {
   try {
-    await cartRepository.remove(req.params.customer_id);
+    await cartRepository.remove(req.app.locals.user);
 
     res.status(200).end();
   } catch (error) {

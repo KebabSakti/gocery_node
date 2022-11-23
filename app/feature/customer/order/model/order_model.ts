@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import { OrderStatus, PaymentStatus } from "../../../../core/config/enums";
 
 export interface OrderModel {
   _id?: string;
@@ -14,7 +15,6 @@ export interface OrderModel {
   };
   customer: {
     _id: string;
-    external_id: string;
     name: string;
     email?: string;
     phone?: string;
@@ -44,10 +44,10 @@ export interface OrderModel {
     min: number;
     max: number;
     expire: string;
-    status: string;
+    status: PaymentStatus;
   };
   products: OrderItemModel[];
-  status: string;
+  status: OrderStatus;
   created_at?: string;
   updated_at?: string;
 }
@@ -147,7 +147,6 @@ export const OrderScheme = model<OrderModel>(
       required: true,
       type: {
         _id: { type: String, required: true },
-        external_id: { type: String, required: true },
         name: { type: String, required: true },
         email: { type: String },
         phone: { type: String },

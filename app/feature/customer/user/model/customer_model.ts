@@ -2,7 +2,6 @@ import { model, Schema } from "mongoose";
 
 export interface CustomerModel {
   _id?: string;
-  external_id?: string;
   name?: string;
   email?: string;
   phone?: string;
@@ -15,7 +14,7 @@ export interface CustomerModel {
 export const CustomerScheme = model<CustomerModel>(
   "customers",
   new Schema<CustomerModel>({
-    external_id: { type: String, required: true },
+    _id: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, default: null },
     phone: { type: String, default: null },

@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import BundleMongo from "../../../../feature/customer/bundle/datasource/bundle_mongo";
 import BundleRepository from "../../../../feature/customer/bundle/repository/bundle_repository";
-import { BundleModel } from "../../../../feature/customer/bundle/model/bundle_model";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
 
@@ -19,7 +18,7 @@ router.get("/", async (req: Request, res: Response) => {
       );
     }
 
-    const results: BundleModel[] = await bundleRepository.index(pagingOption);
+    const results = await bundleRepository.index(pagingOption);
 
     res.json(results);
   } catch (error) {

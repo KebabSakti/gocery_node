@@ -24,10 +24,7 @@ class ViewMongo implements ViewRepository {
   }
 
   async upsert(viewModel: ViewModel): Promise<void> {
-    if (
-      mongoose.isValidObjectId(viewModel.customer) &&
-      mongoose.isValidObjectId(viewModel.product)
-    ) {
+    if (mongoose.isValidObjectId(viewModel.product)) {
       await ViewScheme.updateOne(
         { customer: viewModel.customer, product: viewModel.product },
         { ...viewModel, $inc: { hit: 1 } },

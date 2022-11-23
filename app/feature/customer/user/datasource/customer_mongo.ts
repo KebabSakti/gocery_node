@@ -3,7 +3,7 @@ import CustomerRepository from "../repository/customer_repository";
 
 class CustomerMongo implements CustomerRepository {
   async show(id: string): Promise<CustomerModel | null> {
-    const results = await CustomerScheme.findOne({ external_id: id }).select(
+    const results = await CustomerScheme.findOne({ _id: id }).select(
       "-active -created_at -updated_at -__v"
     );
 
@@ -12,8 +12,9 @@ class CustomerMongo implements CustomerRepository {
 
   async update(customerModel: CustomerModel): Promise<void> {
     await CustomerScheme.findOneAndUpdate(
-      { external_id: customerModel._id },
+      { _id: customerModel._id },
       {
+        _id: customerModel._id,
         name: customerModel.name,
         email: customerModel.email,
         phone: customerModel.phone,

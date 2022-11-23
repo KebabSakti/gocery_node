@@ -53,7 +53,7 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.get("/:id/show", async (req: Request, res: Response) => {
   try {
-    const result = await productRepository.show(req.params.id);
+    const results = await productRepository.show(req.params.id);
 
     await productRepository.incrementView(req.params.id);
 
@@ -63,7 +63,7 @@ router.get("/:id/show", async (req: Request, res: Response) => {
       updated_at: Date.now().toString(),
     });
 
-    res.json(result);
+    res.json(results);
   } catch (error) {
     new ErrorHandler(res, error);
   }

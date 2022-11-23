@@ -5,7 +5,7 @@ abstract class CartRepository {
 
   abstract upsert(cartModel: CartModel): Promise<void>;
 
-  abstract remove(id: string): Promise<void>;
+  abstract remove(customerId: string): Promise<void>;
 }
 
 export default CartRepository;
