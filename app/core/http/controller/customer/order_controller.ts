@@ -2,18 +2,20 @@ import express, { Request, Response } from "express";
 import OrderMongo from "../../../../feature/customer/order/datasource/order_mongo";
 import { OrderModel } from "../../../../feature/customer/order/model/order_model";
 import OrderRepository from "../../../../feature/customer/order/repository/order_repository";
+import PaymentMongo from "../../../../feature/customer/payment/datasource/payment_mongo";
+import PaymentRepository from "../../../../feature/customer/payment/repository/payment_repository";
 import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
 import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
 import { OrderStatus, PaymentStatus } from "../../../config/enums";
-import { BadRequest } from "../../../config/errors";
+import { BadRequest, InternalServerError } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
 import OrderOption from "./../../../../feature/customer/order/model/order_option";
-import { Unauthorized } from "./../../../config/errors";
 
 const router = express.Router();
 const orderRepository: OrderRepository = new OrderMongo();
 const customerRepository: CustomerRepository = new CustomerMongo();
+const paymentRepository: PaymentRepository = new PaymentMongo();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -57,15 +59,44 @@ router.get("/:id/show", async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     const customer = await customerRepository.show(req.app.locals.user);
+    const payment = await paymentRepository.show(req.body.payment.id);
 
-    if (customer == null) {
-      throw new Unauthorized();
+    if (customer == null || payment == null) {
+      throw new InternalServerError();
     }
 
-    const deliveryFee = 0;
-    const paymentFee = 0;
-    const qtyTotal = 0;
-    const payTotal = 0;
+    let deliveryFee = 0;
+    let paymentFee = 0;
+    let qtyTotal = 0;
+    let payTotal = 0;
+
+    const bills: { name: string; value: number }[] = [];
+    const discounts: { name: string; value: number }[] = [];
+
+    const items = req.body.items;
+
+    items.forEach((e: any) => {
+      qtyTotal += e.qty;
+      paymentFee += e.total;
+    });
+
+    //shop total
+    bills.push({
+      name: "Total belanja",
+      value: payTotal,
+    });
+
+    //delivery fee
+    bills.push({
+      name: "Ongkir",
+      value: req.body.delivery.fee,
+    });
+
+    //payment fee
+    bills.push({
+      name: "Biaya admin",
+      value: payment.fee!,
+    });
 
     const orderModel: OrderModel = {
       qty: qtyTotal,
