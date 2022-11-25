@@ -1,3 +1,5 @@
+import { PaymentScheme } from "./../model/payment_model";
+import mongoose from "mongoose";
 import PagingOption from "../../../../core/model/paging_option";
 import { PaymentModel } from "../model/payment_model";
 import PaymentOption from "../model/payment_option";
@@ -8,11 +10,29 @@ class PaymentMongo implements PaymentRepository {
     option?: PaymentOption | undefined,
     paging?: PagingOption | undefined
   ): Promise<PaymentModel[]> {
-    throw new Error("Method not implemented.");
+    const query = PaymentScheme.find({ active: 1 }).select(
+      "-active -created_at -updated_at -__v"
+    );
+
+    if (paging != undefined) {
+      query.skip(paging.offset).limit(paging.limit);
+    }
+
+    const results = await query.exec();
+
+    return results;
   }
 
   async show(id: string): Promise<PaymentModel | null> {
-    throw new Error("Method not implemented.");
+    let results = null;
+
+    if (mongoose.isValidObjectId(id)) {
+      results = await PaymentScheme.findById(id, { active: 1 }).select(
+        "-active -created_at -updated_at -__v"
+      );
+    }
+
+    return results;
   }
 }
 

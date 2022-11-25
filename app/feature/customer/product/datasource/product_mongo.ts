@@ -77,7 +77,7 @@ class ProductMongo implements ProductRepository {
     let results: ProductModel | null = null;
 
     if (mongoose.isValidObjectId(id)) {
-      results = await ProductScheme.findById(id).select(
+      results = await ProductScheme.findById(id, { active: 1 }).select(
         "-active -created_at -updated_at -__v"
       );
     }

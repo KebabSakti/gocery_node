@@ -4,18 +4,23 @@ import { OrderModel } from "../../../../feature/customer/order/model/order_model
 import OrderRepository from "../../../../feature/customer/order/repository/order_repository";
 import PaymentMongo from "../../../../feature/customer/payment/datasource/payment_mongo";
 import PaymentRepository from "../../../../feature/customer/payment/repository/payment_repository";
+import ProductMongo from "../../../../feature/customer/product/datasource/product_mongo";
+import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
 import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
 import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
-import { OrderStatus, PaymentStatus } from "../../../config/enums";
+import Config from "../../../config/config";
 import { BadRequest, InternalServerError } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
+import { OrderItemModel } from "./../../../../feature/customer/order/model/order_model";
 import OrderOption from "./../../../../feature/customer/order/model/order_option";
 
 const router = express.Router();
+
 const orderRepository: OrderRepository = new OrderMongo();
 const customerRepository: CustomerRepository = new CustomerMongo();
 const paymentRepository: PaymentRepository = new PaymentMongo();
+const productRepository: ProductRepository = new ProductMongo();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -59,53 +64,92 @@ router.get("/:id/show", async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     const customer = await customerRepository.show(req.app.locals.user);
-    const payment = await paymentRepository.show(req.body.payment.id);
+    const payment = await paymentRepository.show(req.body.payment._id);
 
     if (customer == null || payment == null) {
       throw new InternalServerError();
     }
 
-    let deliveryFee = 0;
-    let paymentFee = 0;
-    let qtyTotal = 0;
-    let payTotal = 0;
+    let itemsQty = 0;
+    let itemsTotal = 0;
 
+    const deliveryFee = Config.app.fee.delivery;
     const bills: { name: string; value: number }[] = [];
-    const discounts: { name: string; value: number }[] = [];
+    const deductors: { name: string; value: number }[] = [];
 
     const items = req.body.items;
+    const orderItems: OrderItemModel[] = [];
 
-    items.forEach((e: any) => {
-      qtyTotal += e.qty;
-      paymentFee += e.total;
-    });
+    for (const item of items) {
+      const product = await productRepository.show(item._id);
 
-    //shop total
+      if (product != null) {
+        const qty = item.qty;
+        const total = product.price!.final * item.qty;
+
+        itemsQty += qty;
+        itemsTotal += total;
+
+        orderItems.push({
+          product: product._id!,
+          qty: qty,
+          total: total,
+          category: product.category!,
+          currency: product.currency!,
+          image: product.image!,
+          meta: product.meta!,
+          name: product.name!,
+          point: product.point!,
+          price: product.price!,
+          unit: product.unit!,
+          description: product.description,
+          link: product.link,
+          max: product.max,
+          min: product.min,
+          note: item.note,
+        });
+      }
+    }
+
     bills.push({
       name: "Total belanja",
-      value: payTotal,
+      value: itemsTotal,
     });
 
-    //delivery fee
     bills.push({
       name: "Ongkir",
-      value: req.body.delivery.fee,
+      value: deliveryFee,
     });
 
-    //payment fee
     bills.push({
       name: "Biaya admin",
       value: payment.fee!,
     });
 
+    if (req.body.point == true) {
+      deductors.push({
+        name: "Point",
+        value: customer.point,
+      });
+    }
+
+    const billTotal =
+      bills.length == 0
+        ? 0
+        : bills.reduce((partialSum, e) => partialSum + e.value, 0);
+
+    const deductorTotal =
+      deductors.length == 0
+        ? 0
+        : deductors.reduce((partialSum, e) => partialSum + e.value, 0);
+
+    const payTotal =
+      billTotal - deductorTotal < 0 ? 0 : billTotal - deductorTotal;
+
     const orderModel: OrderModel = {
-      qty: qtyTotal,
+      qty: itemsQty,
       total: payTotal,
-      status: OrderStatus.PENDING,
-      invoice: {
-        prefix: "GC",
-        leading: 6,
-      },
+      invoice: "GC/INV/1",
       customer: {
         _id: customer._id!,
         name: customer.name!,
@@ -127,24 +171,25 @@ router.post("/", async (req: Request, res: Response) => {
         fee: deliveryFee,
       },
       payment: {
-        _id: "",
-        category: "",
-        code: "",
-        name: "",
-        picture: "",
-        fee: paymentFee,
-        percentage: 0,
-        min: 0,
-        max: 0,
-        expire: "",
-        status: PaymentStatus.PENDING,
+        _id: payment._id!,
+        category: payment.category!,
+        code: payment.code!,
+        name: payment.name!,
+        picture: payment.picture!,
+        fee: payment.fee!,
+        percentage: payment.percentage!,
+        min: payment.min!,
+        max: payment.max!,
+        expire: payment.expire!,
       },
-      items: [],
+      items: orderItems,
+      bills: bills,
+      deductors: deductors,
     };
 
     await orderRepository.upsert(orderModel);
 
-    res.end();
+    res.status(200).end();
   } catch (error) {
     new ErrorHandler(res, error);
   }

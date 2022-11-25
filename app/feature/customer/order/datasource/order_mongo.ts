@@ -3,6 +3,7 @@ import PagingOption from "../../../../core/model/paging_option";
 import { OrderModel, OrderScheme } from "../model/order_model";
 import OrderOption from "../model/order_option";
 import OrderRepository from "../repository/order_repository";
+import { OrderItemScheme } from "./../model/order_model";
 
 class OrderMongo implements OrderRepository {
   async index(
@@ -37,11 +38,26 @@ class OrderMongo implements OrderRepository {
   }
 
   async upsert(orderModel: OrderModel): Promise<void> {
-    await OrderScheme.findOneAndUpdate(
-      { customer: orderModel.customer },
-      orderModel,
-      { upsert: true }
+    const items = orderModel.items.map((e, _) => {
+      return { ...e, _id: new mongoose.Types.ObjectId() };
+    });
+
+    const order: OrderModel | null = await OrderScheme.findOneAndUpdate(
+      { customer: orderModel.customer, status: null },
+      { ...orderModel, items: items },
+      { upsert: true, returnDocument: "after" }
     );
+
+    if (order != null) {
+      await OrderItemScheme.deleteMany({ order: order._id });
+
+      for (const item of items) {
+        await OrderItemScheme.create({
+          ...item,
+          order: order._id,
+        });
+      }
+    }
   }
 }
 

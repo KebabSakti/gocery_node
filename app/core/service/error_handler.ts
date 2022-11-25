@@ -21,6 +21,13 @@ class ErrorHandler {
       if (message.length == 0) message = "Unauthorized";
     }
 
+    if (error instanceof e.InternalServerError) {
+      status = 500;
+      if (message.length == 0) message = "Internal server error";
+    }
+
+    console.log(message);
+
     res.status(status).json(message);
   }
 }

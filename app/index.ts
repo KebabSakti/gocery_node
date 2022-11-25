@@ -1,4 +1,5 @@
-import express, { Express, Response } from "express";
+import express, { Response } from "express";
+import http from "http";
 import customerAuthController from "./core/http/controller/customer/auth_controller";
 import bannerController from "./core/http/controller/customer/banner_controller";
 import bundleController from "./core/http/controller/customer/bundle_controller";
@@ -9,14 +10,26 @@ import productController from "./core/http/controller/customer/product_controlle
 import searchController from "./core/http/controller/customer/search_controller";
 import viewController from "./core/http/controller/customer/view_controller";
 import customerUserController from "./core/http/controller/customer/user_controller";
+import callbackController from "./core/http/controller/callback_controller";
 import helperController from "./core/http/controller/helper_controller";
 import baseMiddleware from "./core/http/middleware/base_middleware";
 import customerMiddleware from "./core/http/middleware/customer/customer_middleware";
+import SocketIO from "./core/service/socketio";
 import MongoDB from "./core/service/mongose_database";
 import FirebaseAdmin from "./core/service/firebase_admin";
 
-const app: Express = express();
-const port: Number = 1001;
+const app = express();
+const server = http.createServer(app);
+const port = 1001;
+const io = new SocketIO(server);
+
+io.I.on("connection", (socket) => {
+  console.log("User connected");
+
+  socket.on("greet", (payload) => {
+    console.log(payload);
+  });
+});
 
 const authMiddleware = customerMiddleware;
 
@@ -24,9 +37,14 @@ FirebaseAdmin.init();
 MongoDB.connect();
 
 app.use(baseMiddleware);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use((req, res, next) => {
+  io.I.emit("greet", "Hello from server");
+
+  next();
+});
 
 app.use("/api/customer/auth", customerAuthController);
 app.use("/api/customer/users", authMiddleware, customerUserController);
@@ -39,9 +57,10 @@ app.use("/api/customer/views", authMiddleware, viewController);
 app.use("/api/customer/carts", authMiddleware, cartController);
 app.use("/api/customer/orders", authMiddleware, orderController);
 
+app.use("/api/callback", callbackController);
 app.use("/api/helper", helperController);
 
 //route not found 404
 app.use("*", (_, res: Response) => res.status(404).json("Resource Not Found"));
 
-app.listen(port);
+server.listen(port);

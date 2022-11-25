@@ -1,15 +1,12 @@
 import { model, Schema } from "mongoose";
-import { OrderStatus, PaymentStatus } from "../../../../core/config/enums";
+import { OrderStatus, PaymentStatus } from "../config/order_enum";
 
 export interface OrderModel {
   _id?: string;
+  invoice: string;
   total: number;
   qty: number;
-  invoice: {
-    prefix: string;
-    leading: number;
-    number?: number;
-  };
+  status?: OrderStatus;
   courier?: {
     _id: string;
     name: string;
@@ -48,10 +45,11 @@ export interface OrderModel {
     min: number;
     max: number;
     expire: string;
-    status: PaymentStatus;
+    status?: PaymentStatus;
   };
   items: OrderItemModel[];
-  status: OrderStatus;
+  bills: { name: string; value: number }[];
+  deductors: { name: string; value: number }[];
   created_at?: string;
   updated_at?: string;
 }
@@ -59,6 +57,7 @@ export interface OrderModel {
 export interface OrderItemModel {
   _id?: string;
   order?: string;
+  product?: string;
   category: string;
   name: string;
   description?: string;
@@ -95,19 +94,20 @@ export interface OrderItemModel {
 export const OrderItemScheme = model<OrderItemModel>(
   "order_items",
   new Schema<OrderItemModel>({
-    _id: { type: String, required: true },
-    order: { type: Schema.Types.ObjectId, required: true, ref: "orders" },
-    category: {
-      type: String,
-      required: true,
-    },
+    _id: { type: Schema.Types.ObjectId, required: true },
+    order: { type: String, required: true },
+    product: { type: String, required: true },
     name: { type: String, required: true, index: true },
     description: { type: String },
     image: { type: String, required: true },
     point: { type: Number, default: 0 },
-    min: { type: Number },
-    max: { type: Number },
-    link: { type: String },
+    min: { type: Number, default: null },
+    max: { type: Number, default: null },
+    link: { type: String, default: null },
+    category: {
+      type: String,
+      required: true,
+    },
     currency: {
       code: { type: String, required: true },
       name: { type: String, required: true },
@@ -128,7 +128,7 @@ export const OrderItemScheme = model<OrderItemModel>(
       view: { type: Number, default: 0 },
       favs: { type: Number, default: 0 },
     },
-    note: { type: String },
+    note: { type: String, default: null },
     qty: { type: Number, required: true },
     total: { type: Number, required: true },
   })
@@ -137,36 +137,33 @@ export const OrderItemScheme = model<OrderItemModel>(
 export const OrderScheme = model<OrderModel>(
   "orders",
   new Schema<OrderModel>({
-    invoice: {
-      prefix: { type: String, required: true },
-      leading: { type: Number, required: true },
-      number: { type: Number, required: true },
-    },
+    status: { type: String, default: null },
     qty: { type: Number, required: true },
     total: { type: Number, required: true },
+    invoice: { type: String, required: true },
     courier: {
       _id: { type: String, required: true },
       name: { type: String, required: true },
-      email: { type: String },
-      phone: { type: String },
-      image: { type: String },
+      email: { type: String, default: null },
+      phone: { type: String, default: null },
+      image: { type: String, default: null },
     },
     customer: {
       required: true,
       type: {
         _id: { type: String, required: true },
         name: { type: String, required: true },
-        email: { type: String },
-        phone: { type: String },
-        image: { type: String },
+        email: { type: String, default: null },
+        phone: { type: String, default: null },
+        image: { type: String, default: null },
       },
     },
     shipping: {
-      place_id: { type: String },
+      place_id: { type: String, default: null },
       address: { type: String, required: true },
       name: { type: String, required: true },
       phone: { type: String, required: true },
-      note: { type: String },
+      note: { type: String, default: null },
     },
     delivery: {
       distance: { type: Number, required: true },
@@ -187,7 +184,7 @@ export const OrderScheme = model<OrderModel>(
         min: { type: Number, required: true },
         max: { type: Number, required: true },
         expire: { type: String, required: true },
-        status: { type: String, required: true },
+        status: { type: String, default: null },
       },
     },
     items: {
@@ -196,7 +193,24 @@ export const OrderScheme = model<OrderModel>(
         { type: Schema.Types.ObjectId, required: true, ref: "order_items" },
       ],
     },
-    status: { type: String, required: true },
+    bills: {
+      default: [],
+      type: [
+        {
+          name: { type: String, required: true },
+          value: { type: String, required: true },
+        },
+      ],
+    },
+    deductors: {
+      default: [],
+      type: [
+        {
+          name: { type: String, required: true },
+          value: { type: String, required: true },
+        },
+      ],
+    },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
   })

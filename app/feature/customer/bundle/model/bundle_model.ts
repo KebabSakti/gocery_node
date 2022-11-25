@@ -23,5 +23,5 @@ export const BundleScheme = model<BundleModel>(
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
     products: [{ type: Schema.Types.ObjectId, ref: "products" }],
-  })
+  }) 
 );
