@@ -1,5 +1,6 @@
 import express, { Response } from "express";
 import http from "http";
+import callbackController from "./core/http/controller/callback_controller";
 import customerAuthController from "./core/http/controller/customer/auth_controller";
 import bannerController from "./core/http/controller/customer/banner_controller";
 import bundleController from "./core/http/controller/customer/bundle_controller";
@@ -8,28 +9,20 @@ import categoryController from "./core/http/controller/customer/category_control
 import orderController from "./core/http/controller/customer/order_controller";
 import productController from "./core/http/controller/customer/product_controller";
 import searchController from "./core/http/controller/customer/search_controller";
-import viewController from "./core/http/controller/customer/view_controller";
 import customerUserController from "./core/http/controller/customer/user_controller";
-import callbackController from "./core/http/controller/callback_controller";
+import viewController from "./core/http/controller/customer/view_controller";
 import helperController from "./core/http/controller/helper_controller";
+import socketController from "./core/http/controller/socket_controller";
 import baseMiddleware from "./core/http/middleware/base_middleware";
 import customerMiddleware from "./core/http/middleware/customer/customer_middleware";
-import SocketIO from "./core/service/socketio";
-import MongoDB from "./core/service/mongose_database";
 import FirebaseAdmin from "./core/service/firebase_admin";
+import MongoDB from "./core/service/mongose_database";
+import SocketIO from "./core/service/socketio";
 
 const app = express();
 const server = http.createServer(app);
 const port = 1001;
 const io = new SocketIO(server);
-
-io.I.on("connection", (socket) => {
-  console.log("User connected");
-
-  socket.on("greet", (payload) => {
-    console.log(payload);
-  });
-});
 
 const authMiddleware = customerMiddleware;
 
@@ -40,12 +33,10 @@ app.use(baseMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  io.I.emit("greet", "Hello from server");
+//socket events
+io.I.on("connection", socketController);
 
-  next();
-});
-
+//route
 app.use("/api/customer/auth", customerAuthController);
 app.use("/api/customer/users", authMiddleware, customerUserController);
 app.use("/api/customer/categories", authMiddleware, categoryController);
@@ -64,3 +55,5 @@ app.use("/api/helper", helperController);
 app.use("*", (_, res: Response) => res.status(404).json("Resource Not Found"));
 
 server.listen(port);
+
+export { io };

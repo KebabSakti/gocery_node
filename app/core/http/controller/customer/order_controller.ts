@@ -12,8 +12,11 @@ import Config from "../../../config/config";
 import { BadRequest, InternalServerError } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
+import FcmNotification from "./../../../../feature/customer/notification/datasource/fcm_notification";
+import NotificationRepository from "./../../../../feature/customer/notification/repository/notification_repository";
 import { OrderItemModel } from "./../../../../feature/customer/order/model/order_model";
 import OrderOption from "./../../../../feature/customer/order/model/order_option";
+import { io } from "../../../../index";
 
 const router = express.Router();
 
@@ -21,6 +24,10 @@ const orderRepository: OrderRepository = new OrderMongo();
 const customerRepository: CustomerRepository = new CustomerMongo();
 const paymentRepository: PaymentRepository = new PaymentMongo();
 const productRepository: ProductRepository = new ProductMongo();
+const notificationRepository: NotificationRepository<
+  any,
+  Promise<void>
+> = new FcmNotification();
 
 router.get("/", async (req: Request, res: Response) => {
   try {
@@ -129,7 +136,7 @@ router.post("/", async (req: Request, res: Response) => {
     if (req.body.point == true) {
       deductors.push({
         name: "Point",
-        value: customer.point,
+        value: customer.point!,
       });
     }
 
@@ -188,6 +195,10 @@ router.post("/", async (req: Request, res: Response) => {
     };
 
     await orderRepository.upsert(orderModel);
+
+    io.I.on("connection", (socket) => {
+      socket.emit("user:joined", { username: "KEBAB" });
+    });
 
     res.status(200).end();
   } catch (error) {

@@ -23,6 +23,7 @@ router.post("/", async (req: Request, res: Response) => {
         email: req.body.email,
         phone: req.body.phone,
         image: req.body.image,
+        fcm: req.body.fcm,
       };
 
       await customerRepository.store(customer);
