@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import AuthFirebase from "../../../../feature/customer/auth/datasource/auth_firebase";
 import { AuthRepository } from "../../../../feature/customer/auth/repository/auth_repository";
 import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
-import { CustomerModel } from "../../../../feature/customer/user/model/customer_model";
 import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
 import ErrorHandler from "../../../service/error_handler";
 

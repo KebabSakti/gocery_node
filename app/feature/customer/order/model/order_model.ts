@@ -142,11 +142,14 @@ export const OrderScheme = model<OrderModel>(
     total: { type: Number, required: true },
     invoice: { type: String, required: true },
     courier: {
-      _id: { type: String, required: true },
-      name: { type: String, required: true },
-      email: { type: String, default: null },
-      phone: { type: String, default: null },
-      image: { type: String, default: null },
+      default: null,
+      type: {
+        _id: { type: String, required: true },
+        name: { type: String, required: true },
+        email: { type: String, default: null },
+        phone: { type: String, default: null },
+        image: { type: String, default: null },
+      },
     },
     customer: {
       required: true,

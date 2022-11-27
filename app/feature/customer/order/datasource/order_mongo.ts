@@ -10,9 +10,9 @@ class OrderMongo implements OrderRepository {
     orderOption: OrderOption,
     pagingOption: PagingOption
   ): Promise<OrderModel[]> {
-    const query = OrderScheme.find({ customer: orderOption.customer })
+    const query = OrderScheme.find({ "customer._id": orderOption.customer })
       .select("-created_at -updated_at -__v")
-      .populate("products");
+      .populate("items");
 
     if (orderOption.status != undefined) {
       query.where({ status: orderOption.status });

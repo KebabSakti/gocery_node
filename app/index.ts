@@ -15,6 +15,7 @@ import helperController from "./core/http/controller/helper_controller";
 import socketController from "./core/http/controller/socket_controller";
 import baseMiddleware from "./core/http/middleware/base_middleware";
 import customerMiddleware from "./core/http/middleware/customer/customer_middleware";
+import socketAuth from "./core/http/middleware/socket_auth";
 import FirebaseAdmin from "./core/service/firebase_admin";
 import MongoDB from "./core/service/mongose_database";
 import SocketIO from "./core/service/socketio";
@@ -29,12 +30,15 @@ const authMiddleware = customerMiddleware;
 FirebaseAdmin.init();
 MongoDB.connect();
 
+//socket middleware
+io.I.use(socketAuth);
+//socket events
+io.I.on("connection", socketController);
+
+//express middleware
 app.use(baseMiddleware);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-//socket events
-io.I.on("connection", socketController);
 
 //route
 app.use("/api/customer/auth", customerAuthController);

@@ -32,7 +32,7 @@ const notificationRepository: NotificationRepository<
 router.get("/", async (req: Request, res: Response) => {
   try {
     const orderOption: OrderOption = {
-      customer: req.params.customer_id,
+      customer: req.app.locals.user,
       status: req.body.status,
     };
 
@@ -196,9 +196,9 @@ router.post("/", async (req: Request, res: Response) => {
 
     await orderRepository.upsert(orderModel);
 
-    io.I.on("connection", (socket) => {
-      socket.emit("user:joined", { username: "KEBAB" });
-    });
+    const socket = await io.I.fetchSockets();
+
+    // socket[0].emit("user:joined", `Hello ${socket[0].data.username}`);
 
     res.status(200).end();
   } catch (error) {

@@ -1,13 +1,13 @@
 customer event
 =========================
 listen:
-- order status changed
-- payment status changed
-- receive chat message
+- order:updated
+- payment:updated
+- chat:updated
 emit:
-- user join
-- send chat message
-- cancel order
+- user:joined
+- chat:updated
+- order:updated
 
 courier event
 =========================
