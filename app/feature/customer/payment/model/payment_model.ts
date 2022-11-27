@@ -11,7 +11,7 @@ export interface PaymentModel {
   min?: number;
   max?: number;
   expire?: string;
-  active?: number;
+  active?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -28,7 +28,7 @@ export const PaymentScheme = model<PaymentModel>(
     min: { type: Number },
     max: { type: Number },
     expire: { type: String },
-    active: { type: Number, default: 1, index: true },
+    active: { type: Boolean, default: true, index: true },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
   })

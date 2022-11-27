@@ -4,7 +4,7 @@ import BundleRepository from "../repository/bundle_repository";
 
 class BundleMongo implements BundleRepository {
   async index(pagingOption?: PagingOption | undefined): Promise<BundleModel[]> {
-    const query = BundleScheme.find({ active: 1 })
+    const query = BundleScheme.find({ active: true })
       .populate("products", "-active -created_at -updated_at")
       .select("-active -created_at -updated_at -__v");
 

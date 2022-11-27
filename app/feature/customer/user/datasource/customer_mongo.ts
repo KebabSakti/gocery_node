@@ -3,9 +3,10 @@ import CustomerRepository from "../repository/customer_repository";
 
 class CustomerMongo implements CustomerRepository {
   async show(id: string): Promise<CustomerModel | null> {
-    const results = await CustomerScheme.findOne({ _id: id }).select(
-      "-active -created_at -updated_at -__v"
-    );
+    const results = await CustomerScheme.findOne({
+      _id: id,
+      active: true,
+    }).select("-active -created_at -updated_at -__v");
 
     return results;
   }

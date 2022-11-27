@@ -10,7 +10,7 @@ class PaymentMongo implements PaymentRepository {
     option?: PaymentOption | undefined,
     paging?: PagingOption | undefined
   ): Promise<PaymentModel[]> {
-    const query = PaymentScheme.find({ active: 1 }).select(
+    const query = PaymentScheme.find({ active: true }).select(
       "-active -created_at -updated_at -__v"
     );
 
@@ -27,7 +27,7 @@ class PaymentMongo implements PaymentRepository {
     let results = null;
 
     if (mongoose.isValidObjectId(id)) {
-      results = await PaymentScheme.findById(id, { active: 1 }).select(
+      results = await PaymentScheme.findById(id, { active: true }).select(
         "-active -created_at -updated_at -__v"
       );
     }

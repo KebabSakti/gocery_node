@@ -8,8 +8,8 @@ export interface CustomerModel {
   image?: string;
   point?: number;
   fcm?: string;
-  online?: number;
-  active?: number;
+  online?: boolean;
+  active?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -24,8 +24,8 @@ export const CustomerScheme = model<CustomerModel>(
     image: { type: String, default: null },
     fcm: { type: String, default: null },
     point: { type: Number, default: 0 },
-    online: { type: Number, default: 0 },
-    active: { type: Number, default: 1 },
+    online: { type: Boolean, default: false },
+    active: { type: Boolean, default: true },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
   })

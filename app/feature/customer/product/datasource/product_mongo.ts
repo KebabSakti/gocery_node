@@ -10,7 +10,7 @@ class ProductMongo implements ProductRepository {
     pagingOption: PagingOption,
     productIndexOption?: ProductIndexOption | undefined
   ): Promise<ProductModel[]> {
-    const query = ProductScheme.find({ active: 1 }).select(
+    const query = ProductScheme.find({ active: true }).select(
       "-active -created_at -updated_at -__v"
     );
 
@@ -19,7 +19,7 @@ class ProductMongo implements ProductRepository {
         if (mongoose.isValidObjectId(productIndexOption.bundle)) {
           const bundle = await BundleScheme.findById(
             productIndexOption.bundle
-          ).where({ active: 1 });
+          ).where({ active: true });
 
           if (bundle != null) {
             query.where("_id").in(bundle.products!);
@@ -77,7 +77,7 @@ class ProductMongo implements ProductRepository {
     let results: ProductModel | null = null;
 
     if (mongoose.isValidObjectId(id)) {
-      results = await ProductScheme.findById(id, { active: 1 }).select(
+      results = await ProductScheme.findById(id, { active: true }).select(
         "-active -created_at -updated_at -__v"
       );
     }

@@ -9,16 +9,16 @@ type SocketType = Socket<
 >;
 
 const socketController = (socket: SocketType) => {
+  socket.on("disconnect", () => {
+    console.log(`${socket.data.username} disconnected`);
+  });
+
   socket.on("user:joined", (payload) => {
     socket.data.username = payload.username;
 
     console.log(`${socket.data.username} joined`);
 
     socket.emit("user:joined", "Hello");
-  });
-
-  socket.on("disconnect", () => {
-    console.log(`${socket.data.username} disconnected`);
   });
 };
 

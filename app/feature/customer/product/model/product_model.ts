@@ -10,7 +10,7 @@ export interface ProductModel {
   min?: number;
   max?: number;
   link?: string;
-  active?: number;
+  active?: boolean;
   created_at?: string;
   updated_at?: string;
   currency?: {
@@ -50,7 +50,7 @@ export const ProductScheme = model<ProductModel>(
     min: { type: Number },
     max: { type: Number },
     link: { type: String },
-    active: { type: Number, default: 1, index: true },
+    active: { type: Boolean, default: true, index: true },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
     currency: {

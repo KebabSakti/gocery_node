@@ -4,7 +4,7 @@ import { CategoryModel, CategoryScheme } from "../model/category_model";
 
 class CategoryMongo implements CategoryRepository {
   async index(pagingOption?: PagingOption): Promise<CategoryModel[]> {
-    const query = CategoryScheme.find({ active: 1 }).select(
+    const query = CategoryScheme.find({ active: true }).select(
       "-active -created_at -updated_at -__v"
     );
 
