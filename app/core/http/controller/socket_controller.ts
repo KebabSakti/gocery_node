@@ -3,8 +3,10 @@ import { Socket } from "socket.io";
 import { OrderStatus } from "../../../feature/customer/order/config/order_enum";
 import OrderMongo from "../../../feature/customer/order/datasource/order_mongo";
 import OrderRepository from "../../../feature/customer/order/repository/order_repository";
-import CustomerRepository from "../../../feature/customer/user/repository/customer_repository";
 import CustomerMongo from "../../../feature/customer/user/datasource/customer_mongo";
+import CustomerRepository from "../../../feature/customer/user/repository/customer_repository";
+import CourierMongo from "../../../feature/courier/user/datasource/courier_mongo";
+import CourierRepository from "../../../feature/courier/user/repository/courier_repository";
 
 type SocketType = Socket<
   DefaultEventsMap,
@@ -15,6 +17,7 @@ type SocketType = Socket<
 
 const orderRepository: OrderRepository = new OrderMongo();
 const customerRepository: CustomerRepository = new CustomerMongo();
+const courierRepository: CourierRepository = new CourierMongo();
 
 const socketController = (socket: SocketType) => {
   if (socket.data.user != undefined) {
@@ -54,8 +57,6 @@ const orderUpdated = async (socket: SocketType, id: string) => {
         break;
     }
   }
-
-  console.log(results);
 };
 
 const chatUpdated = async (socket: SocketType, payload: any) => {
@@ -63,6 +64,7 @@ const chatUpdated = async (socket: SocketType, payload: any) => {
 
   if (results != null) {
     const customer = await customerRepository.show(results.customer._id);
+    const courier = await courierRepository.show(results.courier?._id);
 
     if (
       (results.status == OrderStatus.ACTIVE ||
@@ -74,7 +76,7 @@ const chatUpdated = async (socket: SocketType, payload: any) => {
         socket
           .to([`room:${results.customer._id}`, `room:${results.courier._id}`])
           .emit("chat:updated", {
-            from: results.courier.name,
+            sender: socket.data.user,
             message: payload.message,
           });
       } else {
