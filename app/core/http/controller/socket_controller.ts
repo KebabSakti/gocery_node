@@ -9,6 +9,7 @@ import CustomerMongo from "../../../feature/customer/user/datasource/customer_mo
 import CustomerRepository from "../../../feature/customer/user/repository/customer_repository";
 import ChatRepository from "../../../feature/customer/chat/repository/chat_repository";
 import ChatMongo from "../../../feature/customer/chat/datasource/chat_mongo";
+import { ChatModel } from "../../../feature/customer/chat/model/chat_model";
 
 type SocketType = Socket<
   DefaultEventsMap,
@@ -20,6 +21,7 @@ type SocketType = Socket<
 const orderRepository: OrderRepository = new OrderMongo();
 const customerRepository: CustomerRepository = new CustomerMongo();
 const courierRepository: CourierRepository = new CourierMongo();
+const chatRepository: ChatRepository = new ChatMongo();
 
 const socketController = (socket: SocketType) => {
   if (socket.data.user != undefined) {
@@ -35,8 +37,22 @@ const socketController = (socket: SocketType) => {
       orderUpdated(socket, id);
     });
 
-    socket.on("chat:updated", (payload) => {
-      chatUpdated(socket, payload);
+    socket.on("chat:updated", async (payload, callback) => {
+      const chatModel: ChatModel = { ...payload, sent: Date.now() };
+
+      await chatRepository.update(chatModel);
+
+      socket.broadcast.emit("chat:updated", chatModel);
+
+      callback(chatModel);
+    });
+
+    socket.on("chat:read", async (payload) => {
+      const chatModel: ChatModel = { ...payload, read: Date.now() };
+
+      await chatRepository.update(chatModel);
+
+      socket.broadcast.emit("chat:read", chatModel);
     });
   }
 };
@@ -75,7 +91,6 @@ const chatUpdated = async (socket: SocketType, payload: any) => {
       const courier = await courierRepository.show(results.courier._id);
 
       if (customer?.online) {
-        //SOCKET IO
         socket
           .to([`room:${results.customer._id}`, `room:${results.courier._id}`])
           .emit("chat:updated", {
@@ -87,8 +102,6 @@ const chatUpdated = async (socket: SocketType, payload: any) => {
       }
     }
   }
-
-  console.log(results);
 };
 
 export default socketController;

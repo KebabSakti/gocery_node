@@ -2,8 +2,10 @@ import { ChatModel, ChatScheme } from "../model/chat_model";
 import ChatRepository from "../repository/chat_repository";
 
 class ChatMongo implements ChatRepository {
-  async store(chatModel: ChatModel): Promise<void> {
-    await ChatScheme.create(chatModel);
+  async update(chatModel: ChatModel): Promise<void> {
+    await ChatScheme.findOneAndUpdate({ _id: chatModel._id }, chatModel, {
+      upsert: true,
+    });
   }
 }
 

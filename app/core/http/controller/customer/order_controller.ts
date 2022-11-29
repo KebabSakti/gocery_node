@@ -16,7 +16,6 @@ import FcmNotification from "./../../../../feature/customer/notification/datasou
 import NotificationRepository from "./../../../../feature/customer/notification/repository/notification_repository";
 import { OrderItemModel } from "./../../../../feature/customer/order/model/order_model";
 import OrderOption from "./../../../../feature/customer/order/model/order_option";
-import { io } from "../../../../index";
 
 const router = express.Router();
 
@@ -195,10 +194,6 @@ router.post("/", async (req: Request, res: Response) => {
     };
 
     await orderRepository.upsert(orderModel);
-
-    const socket = await io.I.fetchSockets();
-
-    // socket[0].emit("user:joined", `Hello ${socket[0].data.username}`);
 
     res.status(200).end();
   } catch (error) {
