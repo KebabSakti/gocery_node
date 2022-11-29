@@ -1,12 +1,14 @@
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { Socket } from "socket.io";
+import CourierMongo from "../../../feature/courier/user/datasource/courier_mongo";
+import CourierRepository from "../../../feature/courier/user/repository/courier_repository";
 import { OrderStatus } from "../../../feature/customer/order/config/order_enum";
 import OrderMongo from "../../../feature/customer/order/datasource/order_mongo";
 import OrderRepository from "../../../feature/customer/order/repository/order_repository";
 import CustomerMongo from "../../../feature/customer/user/datasource/customer_mongo";
 import CustomerRepository from "../../../feature/customer/user/repository/customer_repository";
-import CourierMongo from "../../../feature/courier/user/datasource/courier_mongo";
-import CourierRepository from "../../../feature/courier/user/repository/courier_repository";
+import ChatRepository from "../../../feature/customer/chat/repository/chat_repository";
+import ChatMongo from "../../../feature/customer/chat/datasource/chat_mongo";
 
 type SocketType = Socket<
   DefaultEventsMap,
@@ -64,13 +66,14 @@ const chatUpdated = async (socket: SocketType, payload: any) => {
 
   if (results != null) {
     const customer = await customerRepository.show(results.customer._id);
-    const courier = await courierRepository.show(results.courier?._id);
 
     if (
       (results.status == OrderStatus.ACTIVE ||
         results.status == OrderStatus.PROGRESS) &&
       results.courier != null
     ) {
+      const courier = await courierRepository.show(results.courier._id);
+
       if (customer?.online) {
         //SOCKET IO
         socket

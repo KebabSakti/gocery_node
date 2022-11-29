@@ -8,6 +8,7 @@ export interface CourierModel {
   fcm?: string;
   email?: string;
   password?: string;
+  online?: boolean;
   active?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -22,7 +23,8 @@ export const CourierScheme = model<CourierModel>(
     fcm: { type: String, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },
-    active: { type: Boolean, default: true },
+    online: { type: Boolean, default: false },
+    active: { type: Boolean, default: false },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
   })
