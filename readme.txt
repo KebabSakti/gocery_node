@@ -1,7 +1,7 @@
 ORDER FLOW
 ============================================================
-order submit -> cash    -> update status bayar (PENDING) 
-                        -> update status order (AKTIF) 
+order submit -> cash    -> update status order (AKTIF) 
+                        -> update status bayar (PENDING) 
                         -> notif ke kurir/kantor  
                         -> kurir pilih orderan  
                         -> update status order (PROGRESS)

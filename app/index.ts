@@ -33,7 +33,9 @@ MongoDB.connect();
 //socket middleware
 io.I.use(socketAuth);
 //socket events
-io.I.on("connection", socketController);
+io.I.on("connection", (socket) => {
+  socketController(socket, io);
+});
 
 //express middleware
 app.use(baseMiddleware);
@@ -52,6 +54,7 @@ app.use("/api/customer/views", authMiddleware, viewController);
 app.use("/api/customer/carts", authMiddleware, cartController);
 app.use("/api/customer/orders", authMiddleware, orderController);
 
+//global
 app.use("/api/callback", callbackController);
 app.use("/api/helper", helperController);
 

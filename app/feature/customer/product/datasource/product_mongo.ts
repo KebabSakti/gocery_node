@@ -74,15 +74,16 @@ class ProductMongo implements ProductRepository {
   }
 
   async show(id: string): Promise<ProductModel | null> {
-    let results: ProductModel | null = null;
+    const results = await ProductScheme.findOne({
+      _id: id,
+      active: true,
+    }).select("-active -created_at -updated_at -__v");
 
-    if (mongoose.isValidObjectId(id)) {
-      results = await ProductScheme.findById(id, { active: true }).select(
-        "-active -created_at -updated_at -__v"
-      );
+    if (results == null) {
+      return null;
     }
 
-    return results;
+    return results.toObject();
   }
 
   async incrementView(id: string): Promise<void> {

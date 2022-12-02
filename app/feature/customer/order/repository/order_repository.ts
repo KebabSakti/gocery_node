@@ -11,6 +11,8 @@ abstract class OrderRepository {
   abstract show(id: string): Promise<OrderModel | null>;
 
   abstract upsert(orderModel: OrderModel): Promise<void>;
+
+  abstract update(orderModel: OrderModel): Promise<void>;
 }
 
 export default OrderRepository;

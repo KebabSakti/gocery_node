@@ -1,3 +1,4 @@
+import { InternalServerError } from "./../../../../core/config/errors";
 import mongoose from "mongoose";
 import PagingOption from "../../../../core/model/paging_option";
 import { OrderModel, OrderScheme } from "../model/order_model";
@@ -26,19 +27,19 @@ class OrderMongo implements OrderRepository {
   }
 
   async show(id: string): Promise<OrderModel | null> {
-    let results: OrderModel | null = null;
+    const results = await OrderScheme.findById(id)
+      .select("-created_at -updated_at -__v")
+      .populate("items");
 
-    if (mongoose.isValidObjectId(id)) {
-      results = await OrderScheme.findById(id)
-        .select("-created_at -updated_at -__v")
-        .populate("products");
+    if (results != null) {
+      return results.toObject();
     }
 
-    return results;
+    return null;
   }
 
   async upsert(orderModel: OrderModel): Promise<void> {
-    const items = orderModel.items.map((e, _) => {
+    const items = orderModel.items!.map((e, _) => {
       return { ...e, _id: new mongoose.Types.ObjectId() };
     });
 
@@ -58,6 +59,13 @@ class OrderMongo implements OrderRepository {
         });
       }
     }
+  }
+
+  async update(orderModel: OrderModel): Promise<void> {
+    await OrderScheme.findOneAndUpdate(
+      { _id: orderModel._id, status: null },
+      orderModel
+    );
   }
 }
 

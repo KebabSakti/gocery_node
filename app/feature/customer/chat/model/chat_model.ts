@@ -4,6 +4,7 @@ export interface ChatModel {
   _id?: string;
   session?: string;
   chats?: ChatItemModel[];
+  ended?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -26,7 +27,8 @@ export interface ChatItemModel {
 export const ChatItemScheme = model<ChatItemModel>(
   "chat_items",
   new Schema<ChatItemModel>({
-    session: { type: String, required: true, ref: "chats" },
+    _id: { type: Schema.Types.ObjectId, required: true },
+    session: { type: String, required: true },
     sender: {
       _id: { type: String, required: true },
       name: { type: String, required: true },
@@ -44,7 +46,8 @@ export const ChatScheme = model<ChatModel>(
   "chats",
   new Schema<ChatModel>({
     session: { type: String, required: true },
-    chats: [{ type: Schema.Types.ObjectId, required: true, ref: "chat_items" }],
+    chats: [{ type: Schema.Types.ObjectId, default: <ChatItemModel>[], ref: "chat_items" }],
+    ended: { type: String, default: null },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },
   })

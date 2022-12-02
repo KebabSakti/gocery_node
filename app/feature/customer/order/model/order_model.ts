@@ -3,9 +3,10 @@ import { OrderStatus, PaymentStatus } from "../config/order_enum";
 
 export interface OrderModel {
   _id?: string;
-  invoice: string;
-  total: number;
-  qty: number;
+  invoice?: string;
+  total?: number;
+  qty?: number;
+  point?: number;
   status?: OrderStatus;
   courier?: {
     _id: string;
@@ -14,12 +15,13 @@ export interface OrderModel {
     phone?: string;
     image?: string;
   };
-  customer: {
+  customer?: {
     _id: string;
     name: string;
     email?: string;
     phone?: string;
     image?: string;
+    point?: number;
   };
   shipping?: {
     place_id?: string;
@@ -34,7 +36,7 @@ export interface OrderModel {
     time: string;
     fee: number;
   };
-  payment: {
+  payment?: {
     _id: string;
     category: string;
     code: string;
@@ -44,12 +46,13 @@ export interface OrderModel {
     percentage: number;
     min: number;
     max: number;
+    cash?: boolean;
     expire: string;
     status?: PaymentStatus;
   };
-  items: OrderItemModel[];
-  bills: { name: string; value: number }[];
-  deductors: { name: string; value: number }[];
+  items?: OrderItemModel[];
+  bills?: { name: string; value: number }[];
+  deductors?: { name: string; value: number }[];
   created_at?: string;
   updated_at?: string;
 }
@@ -58,37 +61,37 @@ export interface OrderItemModel {
   _id?: string;
   order?: string;
   product?: string;
-  category: string;
-  name: string;
+  category?: string;
+  name?: string;
   description?: string;
-  image: string;
-  point: number;
+  image?: string;
+  point?: number;
   min?: number;
   max?: number;
   link?: string;
-  currency: {
+  currency?: {
     code: string;
     name: string;
     symbol: string;
   };
-  price: {
+  price?: {
     base: number;
     discount: number;
     final: number;
   };
-  unit: {
+  unit?: {
     name: string;
     symbol: string;
     count: number;
   };
-  meta: {
+  meta?: {
     sold: number;
     view: number;
     favs: number;
   };
   note?: string;
-  qty: number;
-  total: number;
+  qty?: number;
+  total?: number;
 }
 
 export const OrderItemScheme = model<OrderItemModel>(
@@ -140,7 +143,8 @@ export const OrderScheme = model<OrderModel>(
     status: { type: String, default: null },
     qty: { type: Number, required: true },
     total: { type: Number, required: true },
-    invoice: { type: String, required: true },
+    invoice: { type: String, default: null },
+    point: { type: Number, default: 0 },
     courier: {
       default: null,
       type: {
@@ -159,20 +163,27 @@ export const OrderScheme = model<OrderModel>(
         email: { type: String, default: null },
         phone: { type: String, default: null },
         image: { type: String, default: null },
+        point: { type: Number, default: 0 },
       },
     },
     shipping: {
-      place_id: { type: String, default: null },
-      address: { type: String, required: true },
-      name: { type: String, required: true },
-      phone: { type: String, required: true },
-      note: { type: String, default: null },
+      default: null,
+      type: {
+        place_id: { type: String, default: null },
+        address: { type: String, required: true },
+        name: { type: String, required: true },
+        phone: { type: String, required: true },
+        note: { type: String, default: null },
+      },
     },
     delivery: {
-      distance: { type: Number, required: true },
-      unit: { type: String, required: true },
-      time: { type: String, required: true },
-      fee: { type: Number, required: true },
+      default: null,
+      type: {
+        distance: { type: Number, required: true },
+        unit: { type: String, required: true },
+        time: { type: String, required: true },
+        fee: { type: Number, required: true },
+      },
     },
     payment: {
       required: true,
@@ -186,6 +197,7 @@ export const OrderScheme = model<OrderModel>(
         percentage: { type: Number, required: true },
         min: { type: Number, required: true },
         max: { type: Number, required: true },
+        cash: { type: Boolean, default: true },
         expire: { type: String, required: true },
         status: { type: String, default: null },
       },
