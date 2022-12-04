@@ -42,26 +42,20 @@ const socketController = (socket: SocketType, io: SocketIO) => {
 
         const sessionRoom = `room:${id}`;
 
-        switch (results.status) {
-          case OrderStatus.ACTIVE:
-            //customer join
-            socket.join(sessionRoom);
-            break;
-
-          case OrderStatus.PROGRESS:
-            //courier join
-            socket.join(sessionRoom);
-            break;
-
-          case OrderStatus.COMPLETED:
-            io.I.socketsLeave(sessionRoom);
-            break;
-
-          case OrderStatus.CANCELED:
-            io.I.socketsLeave(sessionRoom);
-            break;
+        if (
+          results.status == OrderStatus.ACTIVE ||
+          results.status == OrderStatus.PROGRESS
+        ) {
+          socket.join(sessionRoom);
         }
-    }
+
+        if (
+          results.status == OrderStatus.COMPLETED ||
+          results.status == OrderStatus.CANCELED
+        ) {
+          io.I.socketsLeave(sessionRoom);
+        }
+      }
     });
 
     socket.on("chat:updated", async (payload, callback) => {
