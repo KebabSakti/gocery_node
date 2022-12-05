@@ -1,36 +1,48 @@
+import { Unauthorized, BadRequest } from "./../../../config/errors";
 import express, { Request, Response } from "express";
-import AuthFirebase from "../../../../feature/customer/auth/datasource/auth_firebase";
-import { AuthRepository } from "../../../../feature/customer/auth/repository/auth_repository";
-import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
-import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
 import ErrorHandler from "../../../service/error_handler";
+import CustomerRepository from "../../../../feature/customer/auth/usecase/repository/customer_repository";
+import CustomerMongodb from "../../../../feature/customer/auth/framework/mongodb/customer_mongodb";
+import AuthFirebase from "../../../../feature/customer/auth/framework/firebase/auth_firebase";
+import AuthRepository from "../../../../feature/customer/auth/usecase/repository/auth_repository";
+import AuthUsecase from "../../../../feature/customer/auth/usecase/auth_usecase";
+import CustomerModel from "../../../../feature/customer/auth/entity/customer_model";
+import Validator from "../../../../feature/customer/auth/framework/joi/register_valid_user_validation";
 
 const router = express.Router();
-const customerAuth: AuthRepository = new AuthFirebase();
-const customerRepository: CustomerRepository = new CustomerMongo();
+
+const customerRepository: CustomerRepository = new CustomerMongodb();
+const authRepository: AuthRepository = new AuthFirebase();
+
+const authUsecase: AuthUsecase = new AuthUsecase(
+  customerRepository,
+  authRepository
+);
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const id = await customerAuth.verify(req.body.token);
+    const { error } = Validator.validate(req.body);
 
-    let customer = await customerRepository.show(id);
-
-    if (customer == null) {
-      customer = {
-        _id: id,
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
-        image: req.body.image,
-        fcm: req.body.fcm,
-      };
-
-      await customerRepository.store(customer);
+    if (error != undefined) {
+      throw new BadRequest(error.message);
     }
 
-    req.app.locals.user = id;
+    const model: CustomerModel = {
+      _id: req.body._id,
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      image: req.body.image,
+      fcm: req.body.fcm,
+    };
 
-    res.json(customer);
+    const results = await authUsecase.registerValidUser(model);
+
+    if (results == null) {
+      throw new Unauthorized();
+    }
+
+    res.json(results);
   } catch (error) {
     new ErrorHandler(res, error);
   }
