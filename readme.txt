@@ -26,3 +26,29 @@ order submit -> cash    -> update status order (AKTIF)
                         -> kurir terima pembayaran
                         -> update status order (COMPLETED)
 ============================================================
+
+ecommerce
+    entity
+        product_entity.ts
+        bundle_entity.ts
+    usecase
+        contract
+            product_contract.ts
+            bundle_contract.ts
+        product_usecase.ts
+        bundle_usecase.ts
+    framework
+        mongodb
+            scheme
+                product_scheme.ts
+                bundle_scheme.ts
+            repository
+                product_repository.ts
+                bundle_repository.ts
+        socketio
+    controller
+        product_controller.ts
+        bundle_controller.ts
+        
+
+    

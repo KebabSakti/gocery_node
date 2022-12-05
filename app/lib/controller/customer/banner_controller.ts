@@ -1,7 +1,7 @@
-import { BannerMongo } from "./../../../feature/customer/banner/datasource/banner_mongo";
 import express, { Request, Response } from "express";
 import BannerUsecase from "../../usecase/customer/banner_usecase";
 import BannerContract from "../../entity/contract/customer/banner_contract";
+import BannerMongo from "../../framework/customer/mongo/banner_mongo";
 
 const router = express.Router();
 
