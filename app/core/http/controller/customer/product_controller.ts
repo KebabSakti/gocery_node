@@ -1,49 +1,59 @@
 import express, { Request, Response } from "express";
-import ProductMongo from "../../../../feature/customer/product/datasource/product_mongo";
-import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
+import ProductOption from "../../../../feature/customer/ecommerce/entity/product/product_option";
+import ProductMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product/product_mongodb";
+import ProductUsecase from "../../../../feature/customer/ecommerce/usecase/product_usecase";
+import { BadRequest } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
-import { ProductModel } from "../../../../feature/customer/product/model/product_model";
 import ErrorHandler from "../../../service/error_handler";
-import { BadRequest } from "./../../../config/errors";
-import ViewRepository from "../../../../feature/customer/view/repository/view_repository";
-import ViewMongo from "../../../../feature/customer/view/datasource/view_mongo";
+import PagingValidator from "../../../validator/paging_validator";
+import { ResourceNotFound } from "./../../../config/errors";
 
 const router = express.Router();
-const productRepository: ProductRepository = new ProductMongo();
-const viewRepository: ViewRepository = new ViewMongo();
+const usecase = new ProductUsecase(new ProductMongodb());
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const productIndexOption = {
-      bundle: req.query.bundle as string,
-      search: req.query.search as string,
-      category: req.query.category as string,
-      cheapest: req.query.cheapest as string,
-      discount: req.query.discount as string,
-      point: req.query.point as string,
-      sold: req.query.sold as string,
-      view: req.query.view as string,
-      favs: req.query.favs as string,
+    const {
+      search,
+      category,
+      cheapest,
+      discount,
+      point,
+      sold,
+      view,
+      favs,
+      page,
+      limit,
+    } = req.query;
+
+    let option: ProductOption = {
+      search: search,
+      category: category,
+      cheapest: cheapest,
+      discount: discount,
+      point: point,
+      sold: sold,
+      view: view,
+      favs: favs,
     };
 
-    const page = isNaN(parseInt(req.query.page as string))
-      ? 1
-      : parseInt(req.query.page as string);
+    if (page != undefined && limit != undefined) {
+      const { error } = PagingValidator.validate(req.query);
 
-    const limit = isNaN(parseInt(req.query.limit as string))
-      ? 10
-      : parseInt(req.query.limit as string);
+      if (error != undefined) {
+        throw new BadRequest(error.message);
+      }
 
-    if (limit >= 20) {
-      throw new BadRequest();
+      option = {
+        ...option,
+        pagination: new PagingOption(
+          parseInt(page as string),
+          parseInt(limit as string)
+        ),
+      };
     }
 
-    const pagingOption = new PagingOption(page, limit);
-
-    const results: ProductModel[] = await productRepository.index(
-      pagingOption,
-      productIndexOption
-    );
+    const results = await usecase.index(option);
 
     res.json(results);
   } catch (error) {
@@ -53,15 +63,13 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.get("/:id/show", async (req: Request, res: Response) => {
   try {
-    const results = await productRepository.show(req.params.id);
+    const { id } = req.params;
 
-    await productRepository.incrementView(req.params.id);
+    const results = await usecase.showIncrementView(id);
 
-    await viewRepository.upsert({
-      customer: req.app.locals.user,
-      product: req.params.id,
-      updated_at: Date.now().toString(),
-    });
+    if (results == null) {
+      throw new ResourceNotFound();
+    }
 
     res.json(results);
   } catch (error) {

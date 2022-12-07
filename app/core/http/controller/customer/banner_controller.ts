@@ -1,17 +1,40 @@
 import express, { Request, Response } from "express";
-import BannerMongo from "../../../../feature/customer/banner/datasource/banner_mongo";
-import { BannerModel } from "../../../../feature/customer/banner/model/banner_model";
-import BannerRepository from "../../../../feature/customer/banner/repository/banner_repository";
+import BannerOption from "../../../../feature/customer/banner/entity/banner_option";
+import BannerMongodb from "../../../../feature/customer/banner/framework/mongodb/banner_mongodb";
+import BannerUsecase from "../../../../feature/customer/banner/usecase/banner_usecase";
+import { BadRequest } from "../../../config/errors";
+import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
+import PagingValidator from "../../../validator/paging_validator";
 
 const router = express.Router();
-const bannerRepository: BannerRepository = new BannerMongo();
+const usecase = new BannerUsecase(new BannerMongodb());
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const banners: BannerModel[] = await bannerRepository.index();
+    const { page, limit } = req.query;
 
-    res.json(banners);
+    let option: BannerOption = {};
+
+    if (page != undefined && limit != undefined) {
+      const { error } = PagingValidator.validate(req.query);
+
+      if (error != undefined) {
+        throw new BadRequest(error.message);
+      }
+
+      option = {
+        ...option,
+        pagination: new PagingOption(
+          parseInt(page as string),
+          parseInt(limit as string)
+        ),
+      };
+    }
+
+    const results = await usecase.index(option);
+
+    res.json(results);
   } catch (error) {
     new ErrorHandler(res, error);
   }

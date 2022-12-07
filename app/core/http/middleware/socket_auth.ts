@@ -1,32 +1,31 @@
-// import AuthFirebase from "../../../feature/customer/auth/datasource/auth_firebase";
-// import { AuthRepository } from "../../../feature/customer/auth/repository/auth_repository";
-// import CustomerMongo from "../../../feature/customer/user/datasource/customer_mongo";
-// import CustomerRepository from "../../../feature/customer/user/repository/customer_repository";
-// import { Unauthorized } from "./../../config/errors";
+import AuthJwt from "../../../feature/customer/auth/framework/jwt/auth_jwt";
+import CustomerMongodb from "../../../feature/customer/auth/framework/mongodb/customer_mongodb";
+import AuthUsecase from "../../../feature/customer/auth/usecase/auth_usecase";
+import { Unauthorized } from "./../../config/errors";
 
-// const auth: AuthRepository = new AuthFirebase();
-// const customerRepository: CustomerRepository = new CustomerMongo();
+const usecase: AuthUsecase = new AuthUsecase(
+  new CustomerMongodb(),
+  new AuthJwt()
+);
 
-// const socketAuth = async (socket: any, next: any) => {
-//   try {
-//     const token = socket.handshake.auth.token;
+const socketAuth = async (socket: any, next: any) => {
+  try {
+    const token = socket.handshake.auth.token;
 
-//     // const id = await auth.verify(token);
+    const userId = await usecase.verify(token);
 
-//     const id = "sMQ6HEvkfZadQfbbae2Qlgj11IJ2";
+    if (userId != null) {
+      socket.data.user = userId;
 
-//     const customer = await customerRepository.show(id);
+      next();
 
-//     if (customer == null) {
-//       next(new Unauthorized());
-//     }
+      return;
+    }
 
-//     socket.data.user = id;
+    throw new Unauthorized();
+  } catch (_) {
+    next(new Unauthorized());
+  }
+};
 
-//     next();
-//   } catch (_) {
-//     next(new Unauthorized());
-//   }
-// };
-
-// export default socketAuth;
+export default socketAuth;

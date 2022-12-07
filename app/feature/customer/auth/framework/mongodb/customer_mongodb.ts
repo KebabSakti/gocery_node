@@ -1,8 +1,8 @@
 import CustomerModel from "../../entity/customer_model";
-import CustomerRepository from "../../usecase/repository/customer_repository";
+import CustomerContract from "../../usecase/contract/customer_contract";
 import CustomerScheme from "./customer_scheme";
 
-class CustomerMongodb implements CustomerRepository {
+class CustomerMongodb implements CustomerContract {
   async show(_id: string): Promise<CustomerModel | null> {
     const results = await CustomerScheme.findOne({
       _id: _id,

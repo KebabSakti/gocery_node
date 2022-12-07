@@ -8,7 +8,7 @@ class MongoDB {
       const password = "buyung";
 
       mongoose.connect(`mongodb://${user}:${password}@${host}`, {
-        autoIndex: false,
+        autoIndex: true,
       });
     } catch (e) {
       console.log(e);

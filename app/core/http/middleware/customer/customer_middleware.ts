@@ -1,42 +1,40 @@
-// import { NextFunction, Request, Response } from "express";
-// import AuthFirebase from "../../../../feature/customer/auth/datasource/auth_firebase";
-// import { AuthRepository } from "../../../../feature/customer/auth/repository/auth_repository";
-// import CustomerMongo from "../../../../feature/customer/user/datasource/customer_mongo";
-// import CustomerRepository from "../../../../feature/customer/user/repository/customer_repository";
-// import { Unauthorized } from "../../../config/errors";
-// import ErrorHandler from "../../../service/error_handler";
+import { NextFunction, Request, Response } from "express";
+import AuthJwt from "../../../../feature/customer/auth/framework/jwt/auth_jwt";
+import CustomerMongodb from "../../../../feature/customer/auth/framework/mongodb/customer_mongodb";
+import AuthUsecase from "../../../../feature/customer/auth/usecase/auth_usecase";
+import { Unauthorized } from "../../../config/errors";
+import ErrorHandler from "../../../service/error_handler";
 
-// const auth: AuthRepository = new AuthFirebase();
-// const customerRepository: CustomerRepository = new CustomerMongo();
+const usecase = new AuthUsecase(new CustomerMongodb(), new AuthJwt());
 
-// async function customerMiddleware(
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) {
-//   try {
-//     // const bearerHeader: string | undefined = req.get("authorization");
+async function customerMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const bearerHeader: string | undefined = req.get("authorization");
 
-//     // if (bearerHeader == undefined) {
-//     //   throw new Unauthorized("Bearer header not found");
-//     // }
+    if (bearerHeader == undefined) {
+      throw new Unauthorized();
+    }
 
-//     // const token = bearerHeader.split(" ")[1];
+    const token = bearerHeader.split(" ")[1];
 
-//     // const id = await auth.verify(token);
+    const userId = await usecase.verify(token);
 
-//     // const customer = await customerRepository.show(id);
+    if (userId != null) {
+      req.app.locals.user = userId;
 
-//     // if (customer == null) {
-//     //   throw new Unauthorized();
-//     // }
+      next();
 
-//     req.app.locals.user = "sMQ6HEvkfZadQfbbae2Qlgj11IJ2";
+      return;
+    }
 
-//     next();
-//   } catch (error) {
-//     new ErrorHandler(res, error);
-//   }
-// }
+    throw new Unauthorized();
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+}
 
-// export default customerMiddleware;
+export default customerMiddleware;

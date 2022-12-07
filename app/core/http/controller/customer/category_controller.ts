@@ -1,27 +1,42 @@
 import express, { Request, Response } from "express";
-import CategoryMongo from "../../../../feature/customer/category/datasource/category_mongo";
-import { CategoryModel } from "../../../../feature/customer/category/model/category_model";
-import CategoryRepository from "../../../../feature/customer/category/repository/category_repository";
+import CategoryOption from "../../../../feature/customer/category/entity/category_option";
+import CategoryMongodb from "../../../../feature/customer/category/framework/mongodb/category_mongodb";
+import CategoryUsecase from "../../../../feature/customer/category/usecase/category_usecase";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
+import PagingValidator from "../../../validator/paging_validator";
+import { BadRequest } from "./../../../config/errors";
 
 const router = express.Router();
-const categoryRepo: CategoryRepository = new CategoryMongo();
+const usecase = new CategoryUsecase(new CategoryMongodb());
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    let pagingOption: PagingOption | undefined = undefined;
+    const { name, page, limit } = req.query;
 
-    if (req.query.page != undefined && req.query.limit != undefined) {
-      pagingOption = new PagingOption(
-        parseInt(req.query.page as string),
-        parseInt(req.query.limit as string)
-      );
+    let option: CategoryOption = {
+      name: name,
+    };
+
+    if (page != undefined && limit != undefined) {
+      const { error } = PagingValidator.validate(req.query);
+
+      if (error != undefined) {
+        throw new BadRequest(error.message);
+      }
+
+      option = {
+        ...option,
+        pagination: new PagingOption(
+          parseInt(page as string),
+          parseInt(limit as string)
+        ),
+      };
     }
 
-    const categories: CategoryModel[] = await categoryRepo.index(pagingOption);
+    const results = await usecase.index(option);
 
-    res.json(categories);
+    res.json(results);
   } catch (error) {
     new ErrorHandler(res, error);
   }

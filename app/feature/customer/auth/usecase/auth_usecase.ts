@@ -1,29 +1,21 @@
 import CustomerModel from "../entity/customer_model";
-import AuthRepository from "./repository/auth_repository";
-import CustomerRepository from "./repository/customer_repository";
+import AuthContract from "./contract/auth_contract";
+import CustomerContract from "./contract/customer_contract";
 
 class AuthUsecase {
-  private repository: CustomerRepository;
-  private auth: AuthRepository;
+  private repository: CustomerContract;
+  private auth: AuthContract;
 
-  constructor(repository: CustomerRepository, auth: AuthRepository) {
+  constructor(repository: CustomerContract, auth: AuthContract) {
     this.repository = repository;
     this.auth = auth;
   }
 
-  async checkIfTokenIsValid(token: string): Promise<boolean> {
-    const id = await this.auth.show(token);
-
-    if (id != null) {
-      return true;
-    }
-
-    return false;
+  async verify(token: string): Promise<string | null> {
+    return await this.auth.verify(token);
   }
 
-  async registerValidUser(
-    customerModel: CustomerModel
-  ): Promise<CustomerModel | null> {
+  async access(customerModel: CustomerModel): Promise<string | null> {
     let customer = await this.repository.show(customerModel._id!);
 
     if (customer == null) {
@@ -32,7 +24,9 @@ class AuthUsecase {
       customer = await this.repository.show(customerModel._id!);
     }
 
-    return customer;
+    const token = this.auth.access(customer!._id!);
+
+    return token;
   }
 }
 

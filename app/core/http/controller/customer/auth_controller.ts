@@ -1,27 +1,19 @@
-import { Unauthorized, BadRequest } from "./../../../config/errors";
 import express, { Request, Response } from "express";
-import ErrorHandler from "../../../service/error_handler";
-import CustomerRepository from "../../../../feature/customer/auth/usecase/repository/customer_repository";
-import CustomerMongodb from "../../../../feature/customer/auth/framework/mongodb/customer_mongodb";
-import AuthFirebase from "../../../../feature/customer/auth/framework/firebase/auth_firebase";
-import AuthRepository from "../../../../feature/customer/auth/usecase/repository/auth_repository";
-import AuthUsecase from "../../../../feature/customer/auth/usecase/auth_usecase";
 import CustomerModel from "../../../../feature/customer/auth/entity/customer_model";
-import Validator from "../../../../feature/customer/auth/framework/joi/register_valid_user_validation";
+import RegisterValidUserValidator from "../../../../feature/customer/auth/framework/joi/register_valid_user_validator";
+import AuthJwt from "../../../../feature/customer/auth/framework/jwt/auth_jwt";
+import CustomerMongodb from "../../../../feature/customer/auth/framework/mongodb/customer_mongodb";
+import AuthUsecase from "../../../../feature/customer/auth/usecase/auth_usecase";
+import ErrorHandler from "../../../service/error_handler";
+import { BadRequest, Unauthorized } from "./../../../config/errors";
 
 const router = express.Router();
 
-const customerRepository: CustomerRepository = new CustomerMongodb();
-const authRepository: AuthRepository = new AuthFirebase();
-
-const authUsecase: AuthUsecase = new AuthUsecase(
-  customerRepository,
-  authRepository
-);
+const usecase = new AuthUsecase(new CustomerMongodb(), new AuthJwt());
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { error } = Validator.validate(req.body);
+    const { error } = RegisterValidUserValidator.validate(req.body);
 
     if (error != undefined) {
       throw new BadRequest(error.message);
@@ -36,7 +28,7 @@ router.post("/", async (req: Request, res: Response) => {
       fcm: req.body.fcm,
     };
 
-    const results = await authUsecase.registerValidUser(model);
+    const results = await usecase.access(model);
 
     if (results == null) {
       throw new Unauthorized();
