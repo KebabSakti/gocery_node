@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import CategoryModel from "../../entity/category_model";
+import CategoryModel from "../../entity/model/category_model";
 
 const CategoryScheme = model<CategoryModel>(
   "categories",

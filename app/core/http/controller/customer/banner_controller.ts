@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import BannerOption from "../../../../feature/customer/banner/entity/banner_option";
+import BannerOption from "../../../../feature/customer/banner/entity/model/banner_option";
 import BannerMongodb from "../../../../feature/customer/banner/framework/mongodb/banner_mongodb";
 import BannerUsecase from "../../../../feature/customer/banner/usecase/banner_usecase";
 import { BadRequest } from "../../../config/errors";

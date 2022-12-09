@@ -10,7 +10,6 @@ import categoryController from "./core/http/controller/customer/category_control
 import orderController from "./core/http/controller/customer/order_controller";
 import productController from "./core/http/controller/customer/product_controller";
 import searchController from "./core/http/controller/customer/search_controller";
-import viewController from "./core/http/controller/customer/view_controller";
 import helperController from "./core/http/controller/helper_controller";
 import socketController from "./core/http/controller/socket_controller";
 import customerMiddleware from "./core/http/middleware/customer/customer_middleware";

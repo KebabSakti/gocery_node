@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
-import ProductOption from "../../../../feature/customer/ecommerce/entity/product/product_option";
-import ProductViewOption from "../../../../feature/customer/ecommerce/entity/product_view/product_view_option";
-import ProductMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product/product_mongodb";
-import ProductMetaMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_meta/product_meta_mongodb";
-import ProductViewMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_view/product_view_mongodb";
+import ProductOption from "../../../../feature/customer/ecommerce/entity/model/product_option";
+import ProductViewOption from "../../../../feature/customer/ecommerce/entity/model/product_view_option";
+import ProductViewValidatorJoi from "../../../../feature/customer/ecommerce/framework/joi/product_view_validator_joi";
+import ProductMetaMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_meta_mongodb";
+import ProductMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_mongodb";
+import ProductViewMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_view_mongodb";
 import ProductUsecase from "../../../../feature/customer/ecommerce/usecase/product_usecase";
 import { BadRequest } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
@@ -15,7 +16,8 @@ const router = express.Router();
 const usecase = new ProductUsecase(
   new ProductMongodb(),
   new ProductViewMongodb(),
-  new ProductMetaMongodb()
+  new ProductMetaMongodb(),
+  new ProductViewValidatorJoi()
 );
 
 router.get("/", async (req: Request, res: Response) => {

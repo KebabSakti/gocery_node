@@ -1,19 +1,37 @@
 import express, { Request, Response } from "express";
-import SearchOption from "../../../../feature/customer/search-new/entity/search_option";
-import SearchUsecase from "../../../../feature/customer/search-new/usecase/search_usecase";
-import SearchMongodb from "../../../../feature/customer/search-new/framework/mongodb/search_mongodb";
+import SearchModel from "../../../../feature/customer/search/entity/model/search_model";
+import SearchOption from "../../../../feature/customer/search/entity/model/search_option";
+import SearchValidatorJoi from "../../../../feature/customer/search/framework/joi/search_validator_joi";
+import SearchMongodb from "../../../../feature/customer/search/framework/mongodb/search_mongodb";
+import SearchUsecase from "../../../../feature/customer/search/usecase/search_usecase";
+import { BadRequest } from "../../../config/errors";
+import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
+import PagingValidator from "../../../validator/paging_validator";
 
 const router = express.Router();
-const usecase = new SearchUsecase(new SearchMongodb());
+const usecase = new SearchUsecase(
+  new SearchMongodb(),
+  new SearchValidatorJoi()
+);
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const { keyword } = req.query;
+    const { error } = PagingValidator.validate(req.query);
+
+    if (error != undefined) {
+      throw new BadRequest(error.message);
+    }
+
+    const { keyword, page, limit } = req.query;
 
     const option: SearchOption = {
       customer: req.app.locals.user,
       keyword: keyword,
+      pagination: new PagingOption(
+        parseInt(page as string),
+        parseInt(limit as string)
+      ),
     };
 
     const results = await usecase.index(option);
@@ -26,6 +44,15 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
+    const { keyword } = req.body;
+
+    const searchModel: SearchModel = {
+      customer: req.app.locals.user,
+      keyword: keyword,
+    };
+
+    await usecase.store(searchModel);
+
     res.status(200).end();
   } catch (error) {
     new ErrorHandler(res, error);
@@ -34,6 +61,10 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
+    const { id } = req.params;
+
+    await usecase.remove(id);
+
     res.status(200).end();
   } catch (error) {
     new ErrorHandler(res, error);

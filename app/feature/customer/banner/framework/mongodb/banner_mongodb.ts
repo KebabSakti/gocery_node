@@ -1,6 +1,6 @@
-import BannerModel from "../../entity/banner_model";
-import BannerOption from "../../entity/banner_option";
-import BannerContract from "../../usecase/contract/banner_contract";
+import BannerModel from "../../entity/model/banner_model";
+import BannerOption from "../../entity/model/banner_option";
+import BannerContract from "../../entity/contract/banner_contract";
 import BannerScheme from "./banner_scheme";
 
 class BannerMongodb implements BannerContract {

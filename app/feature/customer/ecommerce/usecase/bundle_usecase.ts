@@ -1,6 +1,6 @@
-import BundleModel from "../entity/bundle/bundle_model";
-import BundleOption from "../entity/bundle/bundle_option";
-import BundleContract from "./contract/bundle_contract";
+import BundleModel from "../entity/model/bundle_model";
+import BundleOption from "../entity/model/bundle_option";
+import BundleContract from "../entity/contract/bundle_contract";
 
 class BundleUsecase {
   private repository: BundleContract;

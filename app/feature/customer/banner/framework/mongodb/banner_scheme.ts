@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import BannerModel from "../../entity/banner_model";
+import BannerModel from "../../entity/model/banner_model";
 
 const BannerScheme = model<BannerModel>(
   "banners",

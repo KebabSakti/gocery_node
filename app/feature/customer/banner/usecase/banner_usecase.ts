@@ -1,6 +1,6 @@
-import BannerModel from "../entity/banner_model";
-import BannerOption from "../entity/banner_option";
-import BannerContract from "./contract/banner_contract";
+import BannerModel from "../entity/model/banner_model";
+import BannerOption from "../entity/model/banner_option";
+import BannerContract from "../entity/contract/banner_contract";
 
 class BannerUsecase {
   private repository: BannerContract;

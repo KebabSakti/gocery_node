@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import CategoryOption from "../../../../feature/customer/category/entity/category_option";
+import CategoryOption from "../../../../feature/customer/category/entity/model/category_option";
 import CategoryMongodb from "../../../../feature/customer/category/framework/mongodb/category_mongodb";
 import CategoryUsecase from "../../../../feature/customer/category/usecase/category_usecase";
 import PagingOption from "../../../model/paging_option";

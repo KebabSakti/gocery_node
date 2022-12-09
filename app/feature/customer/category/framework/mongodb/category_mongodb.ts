@@ -1,6 +1,6 @@
-import CategoryModel from "../../entity/category_model";
-import CategoryOption from "../../entity/category_option";
-import CategoryContract from "../../usecase/contract/category_contract";
+import CategoryModel from "../../entity/model/category_model";
+import CategoryOption from "../../entity/model/category_option";
+import CategoryContract from "../../entity/contract/category_contract";
 import CategoryScheme from "./category_scheme";
 
 class CategoryMongodb implements CategoryContract {
