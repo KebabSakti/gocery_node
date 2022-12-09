@@ -1,5 +1,5 @@
 interface BundleOption {
-  name?: string;
+  name?: any;
   pagination?: any;
 }
 

@@ -1,18 +1,7 @@
+import BundleModel from "../../../entity/bundle/bundle_model";
 import { model, Schema } from "mongoose";
 
-export interface BundleModel {
-  _id?: string;
-  name?: string;
-  description?: string;
-  image?: string;
-  hidden?: boolean;
-  active?: boolean;
-  created_at?: string;
-  updated_at?: string;
-  products?: string[];
-}
-
-export const BundleScheme = model<BundleModel>(
+const BundleScheme = model<BundleModel>(
   "bundles",
   new Schema<BundleModel>({
     name: { type: String, required: true },
@@ -25,3 +14,5 @@ export const BundleScheme = model<BundleModel>(
     products: [{ type: Schema.Types.ObjectId, ref: "products" }],
   })
 );
+
+export default BundleScheme;

@@ -1,24 +1,40 @@
 import express, { Request, Response } from "express";
-import BundleMongo from "../../../../feature/customer/bundle/datasource/bundle_mongo";
-import BundleRepository from "../../../../feature/customer/bundle/repository/bundle_repository";
+import BundleOption from "../../../../feature/customer/ecommerce/entity/bundle/bundle_option";
+import BundleMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/bundle/bundle_mongodb";
+import BundleUsecase from "../../../../feature/customer/ecommerce/usecase/bundle_usecase";
+import { BadRequest } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
+import PagingValidator from "../../../validator/paging_validator";
 
 const router = express.Router();
-const bundleRepository: BundleRepository = new BundleMongo();
+const usecase = new BundleUsecase(new BundleMongodb());
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    let pagingOption: PagingOption | undefined = undefined;
+    const { name, page, limit } = req.query;
 
-    if (req.query.page != undefined && req.query.limit != undefined) {
-      pagingOption = new PagingOption(
-        parseInt(req.query.page as string),
-        parseInt(req.query.limit as string)
-      );
+    let option: BundleOption = {
+      name: name,
+    };
+
+    if (page != undefined && limit != undefined) {
+      const { error } = PagingValidator.validate(req.query);
+
+      if (error != undefined) {
+        throw new BadRequest(error.message);
+      }
+
+      option = {
+        ...option,
+        pagination: new PagingOption(
+          parseInt(page as string),
+          parseInt(limit as string)
+        ),
+      };
     }
 
-    const results = await bundleRepository.index(pagingOption);
+    const results = await usecase.index(option);
 
     res.json(results);
   } catch (error) {

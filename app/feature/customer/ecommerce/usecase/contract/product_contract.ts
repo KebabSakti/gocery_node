@@ -5,8 +5,6 @@ abstract class ProductContract {
   abstract index(option?: ProductOption): Promise<ProductModel[]>;
 
   abstract show(_id: string): Promise<ProductModel | null>;
-
-  abstract incView(_id: string): Promise<void>;
 }
 
 export default ProductContract;

@@ -1,40 +1,22 @@
 import express, { Request, Response } from "express";
+import SearchOption from "../../../../feature/customer/search-new/entity/search_option";
+import SearchUsecase from "../../../../feature/customer/search-new/usecase/search_usecase";
+import SearchMongodb from "../../../../feature/customer/search-new/framework/mongodb/search_mongodb";
 import ErrorHandler from "../../../service/error_handler";
-import { SearchModel } from "../../../../feature/customer/search/model/search_model";
-import SearchOption from "../../../../feature/customer/search/model/search_option";
-import SearchRepository from "../../../../feature/customer/search/repository/search_repository";
-import SearchMongo from "../../../../feature/customer/search/datasource/search_mongo";
-import PagingOption from "../../../model/paging_option";
-import { BadRequest } from "../../../config/errors";
 
 const router = express.Router();
-const searchRepository: SearchRepository = new SearchMongo();
+const usecase = new SearchUsecase(new SearchMongodb());
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const searchOption: SearchOption = {
-      customerId: req.app.locals.user,
-      keyword: req.query.keyword as string,
+    const { keyword } = req.query;
+
+    const option: SearchOption = {
+      customer: req.app.locals.user,
+      keyword: keyword,
     };
 
-    const page = isNaN(parseInt(req.query.page as string))
-      ? 1
-      : parseInt(req.query.page as string);
-
-    const limit = isNaN(parseInt(req.query.limit as string))
-      ? 5
-      : parseInt(req.query.limit as string);
-
-    if (limit >= 20) {
-      throw new BadRequest();
-    }
-
-    const pagingOption = new PagingOption(page, limit);
-
-    const results: SearchModel[] = await searchRepository.index(
-      searchOption,
-      pagingOption
-    );
+    const results = await usecase.index(option);
 
     res.json(results);
   } catch (error) {
@@ -44,11 +26,6 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    await searchRepository.store({
-      customer: req.app.locals.user,
-      keyword: req.body.keyword,
-    });
-
     res.status(200).end();
   } catch (error) {
     new ErrorHandler(res, error);
@@ -57,8 +34,6 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.delete("/:id", async (req: Request, res: Response) => {
   try {
-    await searchRepository.remove(req.params.id);
-
     res.status(200).end();
   } catch (error) {
     new ErrorHandler(res, error);

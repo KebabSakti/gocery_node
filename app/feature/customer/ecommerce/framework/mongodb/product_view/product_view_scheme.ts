@@ -1,17 +1,9 @@
+import ProductViewModel from "../../../entity/product_view/product_view_model";
 import { model, Schema } from "mongoose";
 
-export interface ViewModel {
-  _id?: string;
-  customer?: string;
-  product?: string;
-  hit?: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export const ViewScheme = model<ViewModel>(
-  "views",
-  new Schema<ViewModel>({
+const ProductViewScheme = model<ProductViewModel>(
+  "product_views",
+  new Schema<ProductViewModel>({
     customer: { type: String, required: true },
     product: { type: Schema.Types.ObjectId, required: true, ref: "products" },
     hit: { type: Number, default: 1 },
@@ -19,3 +11,5 @@ export const ViewScheme = model<ViewModel>(
     updated_at: { type: String, default: Date.now() },
   })
 );
+
+export default ProductViewScheme;

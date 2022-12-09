@@ -10,14 +10,12 @@ class CategoryMongodb implements CategoryContract {
       .sort({ name: "asc" });
 
     if (option != undefined) {
-      //filter by name
       if (option.name != undefined) {
         query.where({
           name: { $regex: option.name, $options: "i" },
         });
       }
 
-      //paginate result
       if (option.pagination != undefined) {
         query.skip(option.pagination.offset).limit(option.pagination.limit);
       }

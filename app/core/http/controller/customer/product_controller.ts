@@ -1,6 +1,9 @@
 import express, { Request, Response } from "express";
 import ProductOption from "../../../../feature/customer/ecommerce/entity/product/product_option";
+import ProductViewOption from "../../../../feature/customer/ecommerce/entity/product_view/product_view_option";
 import ProductMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product/product_mongodb";
+import ProductMetaMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_meta/product_meta_mongodb";
+import ProductViewMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_view/product_view_mongodb";
 import ProductUsecase from "../../../../feature/customer/ecommerce/usecase/product_usecase";
 import { BadRequest } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
@@ -9,11 +12,16 @@ import PagingValidator from "../../../validator/paging_validator";
 import { ResourceNotFound } from "./../../../config/errors";
 
 const router = express.Router();
-const usecase = new ProductUsecase(new ProductMongodb());
+const usecase = new ProductUsecase(
+  new ProductMongodb(),
+  new ProductViewMongodb(),
+  new ProductMetaMongodb()
+);
 
 router.get("/", async (req: Request, res: Response) => {
   try {
     const {
+      bundle,
       search,
       category,
       cheapest,
@@ -27,6 +35,7 @@ router.get("/", async (req: Request, res: Response) => {
     } = req.query;
 
     let option: ProductOption = {
+      bundle: bundle,
       search: search,
       category: category,
       cheapest: cheapest,
@@ -63,9 +72,46 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.get("/:id/show", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const results = await usecase.showIncrementView({
+      customer: req.app.locals.user,
+      product: req.params.id,
+    });
 
-    const results = await usecase.showIncrementView(id);
+    if (results == null) {
+      throw new ResourceNotFound();
+    }
+
+    res.json(results);
+  } catch (error) {
+    new ErrorHandler(res, error);
+  }
+});
+
+router.get("/views", async (req: Request, res: Response) => {
+  try {
+    const { page, limit } = req.params;
+
+    const userId = req.app.locals.user;
+
+    let option: ProductViewOption = {};
+
+    if (page != undefined && limit != undefined) {
+      const { error } = PagingValidator.validate(req.query);
+
+      if (error != undefined) {
+        throw new BadRequest(error.message);
+      }
+
+      option = {
+        ...option,
+        pagination: new PagingOption(
+          parseInt(page as string),
+          parseInt(limit as string)
+        ),
+      };
+    }
+
+    const results = await usecase.productViewIndex(userId, option);
 
     if (results == null) {
       throw new ResourceNotFound();

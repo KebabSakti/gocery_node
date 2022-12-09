@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import ProductModel from "../../../entity/product/product_model";
 import ProductOption from "../../../entity/product/product_option";
 import ProductContract from "../../../usecase/contract/product_contract";
+import BundleScheme from "../bundle/bundle_scheme";
 import ProductScheme from "./product_scheme";
 
 class ProductMongodb implements ProductContract {
@@ -11,17 +12,18 @@ class ProductMongodb implements ProductContract {
     );
 
     if (option != undefined) {
-      //   if (option.bundle != undefined) {
-      //     if (mongoose.isValidObjectId(option.bundle)) {
-      //       const bundle = await BundleScheme.findById(option.bundle).where({
-      //         active: true,
-      //       });
+      if (option.bundle != undefined) {
+        if (mongoose.isValidObjectId(option.bundle)) {
+          const bundle = await BundleScheme.findOne({
+            _id: option.bundle,
+            active: true,
+          }).select("products");
 
-      //       if (bundle != null) {
-      //         query.where("_id").in(bundle.products!);
-      //       }
-      //     }
-      //   }
+          if (bundle != null) {
+            query.where("_id").in(bundle.products!);
+          }
+        }
+      }
 
       if (option.search != undefined) {
         query.where({
@@ -80,15 +82,6 @@ class ProductMongodb implements ProductContract {
     }
 
     return results;
-  }
-
-  async incView(_id: string): Promise<void> {
-    if (mongoose.isValidObjectId(_id)) {
-      await ProductScheme.updateOne(
-        { _id: _id },
-        { updated_at: Date.now().toString(), $inc: { "meta.view": 1 } }
-      );
-    }
   }
 }
 

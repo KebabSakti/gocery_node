@@ -10,7 +10,6 @@ class BannerMongodb implements BannerContract {
     }).select("-active -created_at -updated_at -__v");
 
     if (option != undefined) {
-      //paginate result
       if (option.pagination != undefined) {
         query.skip(option.pagination.offset).limit(option.pagination.limit);
       }

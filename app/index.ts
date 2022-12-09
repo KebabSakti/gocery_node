@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import express, { Response } from "express";
+import express from "express";
 import http from "http";
 import callbackController from "./core/http/controller/callback_controller";
 import customerAuthController from "./core/http/controller/customer/auth_controller";
@@ -45,9 +45,8 @@ app.use("/api/customer/auth", customerAuthController);
 app.use("/api/customer/categories", customerMiddleware, categoryController);
 app.use("/api/customer/banners", customerMiddleware, bannerController);
 app.use("/api/customer/products", customerMiddleware, productController);
-// app.use("/api/customer/bundles", authMiddleware, bundleController);
-// app.use("/api/customer/searches", authMiddleware, searchController);
-// app.use("/api/customer/views", authMiddleware, viewController);
+app.use("/api/customer/bundles", customerMiddleware, bundleController);
+app.use("/api/customer/searches", customerMiddleware, searchController);
 // app.use("/api/customer/carts", authMiddleware, cartController);
 // app.use("/api/customer/orders", authMiddleware, orderController);
 
@@ -56,7 +55,7 @@ app.use("/api/callback", callbackController);
 app.use("/api/helper", helperController);
 
 //route not found 404
-app.use("*", (_, res: Response) => res.status(404).json("Resource Not Found"));
+app.use("*", (_, res) => res.status(404).json("Resource Not Found"));
 
 server.listen(port);
 
