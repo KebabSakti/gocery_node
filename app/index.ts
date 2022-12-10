@@ -5,6 +5,7 @@ import callbackController from "./core/http/controller/callback_controller";
 import customerAuthController from "./core/http/controller/customer/auth_controller";
 import bannerController from "./core/http/controller/customer/banner_controller";
 import bundleController from "./core/http/controller/customer/bundle_controller";
+import cartController from "./core/http/controller/customer/cart_controller";
 import categoryController from "./core/http/controller/customer/category_controller";
 import productController from "./core/http/controller/customer/product_controller";
 import searchController from "./core/http/controller/customer/search_controller";
@@ -17,14 +18,13 @@ import MongoDB from "./core/service/mongose_database";
 import SocketIO from "./core/service/socketio";
 
 dotenv.config();
+FirebaseAdmin.init();
+MongoDB.connect();
 
 const app = express();
 const server = http.createServer(app);
 const port = 1001;
 const io = new SocketIO(server);
-
-FirebaseAdmin.init();
-MongoDB.connect();
 
 // socket middleware
 io.I.use(socketAuth);
@@ -44,7 +44,7 @@ app.use("/api/customer/banners", customerMiddleware, bannerController);
 app.use("/api/customer/products", customerMiddleware, productController);
 app.use("/api/customer/bundles", customerMiddleware, bundleController);
 app.use("/api/customer/searches", customerMiddleware, searchController);
-// app.use("/api/customer/carts", authMiddleware, cartController);
+app.use("/api/customer/carts", customerMiddleware, cartController);
 // app.use("/api/customer/orders", authMiddleware, orderController);
 
 //global

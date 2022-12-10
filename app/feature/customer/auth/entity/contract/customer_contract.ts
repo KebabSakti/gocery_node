@@ -1,4 +1,4 @@
-import CustomerModel from "../../entity/customer_model";
+import CustomerModel from "../model/customer_model";
 
 abstract class CustomerContract {
   abstract show(_id: string): Promise<CustomerModel | null>;

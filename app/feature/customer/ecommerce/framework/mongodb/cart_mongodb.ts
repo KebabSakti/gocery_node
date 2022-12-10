@@ -1,22 +1,27 @@
 import CartContract from "../../entity/contract/cart_contract";
-import CartItem from "../../entity/model/cart_item";
 import CartModel from "../../entity/model/cart_model";
-import CartTotal from "../../entity/model/cart_total";
+import CartScheme from "./cart_scheme";
 
 class CartMongodb implements CartContract {
-  show(customer: string): Promise<CartModel | null> {
-    throw new Error("Method not implemented.");
+  async show(customer: string): Promise<CartModel | null> {
+    const results = await CartScheme.findOne({ customer: customer })
+      .select("-customer -created_at -updated_at -__v")
+      .populate("items.product", "-active -created_at -updated_at");
+
+    return results;
   }
 
-  store(cartModel: CartModel): Promise<void> {
-    throw new Error("Method not implemented.");
+  async store(cartModel: CartModel): Promise<void> {
+    await CartScheme.findOneAndUpdate(
+      { customer: cartModel.customer },
+      { ...cartModel, updated_at: Date.now() },
+      { upsert: true }
+    );
   }
 
-  remove(customer: string): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-
-  calculateTotal(cartItems: CartItem[]): CartTotal {
-    throw new Error("Method not implemented.");
+  async remove(customer: string): Promise<void> {
+    await CartScheme.deleteOne({ customer: customer });
   }
 }
+
+export default CartMongodb;

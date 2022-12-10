@@ -2,7 +2,7 @@ import CartContract from "../entity/contract/cart_contract";
 import ProductContract from "../entity/contract/product_contract";
 import CartItem from "../entity/model/cart_item";
 import CartModel from "../entity/model/cart_model";
-import CartValidator from "../entity/validator/cart_store_validator";
+import CartValidator from "../entity/validator/cart_validator";
 
 class CartUsecase {
   private cartRepository: CartContract;
@@ -26,30 +26,59 @@ class CartUsecase {
   async store(cartItem: CartItem): Promise<void> {
     this.cartValidator.store(cartItem);
 
-    let cartModel: CartModel = {};
-
     const cart = await this.cartRepository.show(cartItem.customer);
     const product = await this.productRepository.show(cartItem.product);
 
     if (product != null) {
+      let items = [];
+
+      const productItem = {
+        product: product._id!,
+        qty: cartItem.qty,
+        total: product.price?.final! * cartItem.qty,
+      };
+
       if (cart == null) {
-        cartModel = {
-          customer: cartItem.customer,
-          items: [
-            {
-              product: product._id!,
-              qty: product.price?.final!,
-              total: product.price?.final! * cartItem.qty,
-            },
-          ],
-        };
+        items = [productItem];
+      } else {
+        const updatedItems = [
+          ...cart.items!.filter(
+            (e) => (e.product as any)._id.toString() != product._id
+          ),
+          productItem,
+        ];
+
+        items = updatedItems;
+      }
+
+      items = items.filter((e) => e.qty > 0);
+
+      let qty = 0;
+      let total = 0;
+
+      items.forEach((e) => {
+        qty += e.qty;
+        total += e.total;
+      });
+
+      const cartModel: CartModel = {
+        customer: cartItem.customer,
+        qty: qty,
+        total: total,
+        items: items,
+      };
+
+      if (items.length == 0) {
+        await this.cartRepository.remove(cartItem.customer);
+      } else {
+        await this.cartRepository.store(cartModel);
       }
     }
-
-    this.cartRepository.store(cartModel);
   }
 
-  async remove(customer: string): Promise<void> {}
+  async remove(customer: string): Promise<void> {
+    await this.cartRepository.remove(customer);
+  }
 }
 
 export default CartUsecase;

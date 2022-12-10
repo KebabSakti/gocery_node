@@ -1,20 +1,7 @@
 import { model, Schema } from "mongoose";
+import CartModel from "../../entity/model/cart_model";
 
-export interface CartModel {
-  _id?: string;
-  customer: string;
-  total: number;
-  qty: number;
-  items?: {
-    product: string;
-    qty: number;
-    total: number;
-  }[];
-  created_at?: string;
-  updated_at?: string;
-}
-
-export const CartScheme = model<CartModel>(
+const CartScheme = model<CartModel>(
   "carts",
   new Schema<CartModel>({
     customer: { type: String, required: true },
@@ -31,3 +18,5 @@ export const CartScheme = model<CartModel>(
     updated_at: { type: String, default: Date.now() },
   })
 );
+
+export default CartScheme;

@@ -1,19 +1,24 @@
-import { BadRequest } from "./../../../config/errors";
 import express, { Request, Response } from "express";
-import CartMongo from "../../../../feature/customer/cart/datasource/cart_mongo";
-import CartRepository from "../../../../feature/customer/cart/repository/cart_repository";
-import ProductMongo from "../../../../feature/customer/product/datasource/product_mongo";
-import ProductRepository from "../../../../feature/customer/product/repository/product_repository";
+import CartItem from "../../../../feature/customer/ecommerce/entity/model/cart_item";
+import CartValidatorJoi from "../../../../feature/customer/ecommerce/framework/joi/cart_validator_joi";
+import CartMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/cart_mongodb";
+import ProductMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_mongodb";
+import CartUsecase from "../../../../feature/customer/ecommerce/usecase/cart_usecase";
 import ErrorHandler from "../../../service/error_handler";
-import { CartModel } from "./../../../../feature/customer/cart/model/cart_model";
 
 const router = express.Router();
-const cartRepository: CartRepository = new CartMongo();
-const productRepository: ProductRepository = new ProductMongo();
+
+const usecase: CartUsecase = new CartUsecase(
+  new CartMongodb(),
+  new ProductMongodb(),
+  new CartValidatorJoi()
+);
 
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const results = await cartRepository.show(req.app.locals.user);
+    const customer = req.app.locals.user;
+
+    const results = await usecase.show(customer);
 
     res.json(results);
   } catch (error) {
@@ -23,59 +28,17 @@ router.get("/", async (req: Request, res: Response) => {
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    if (isNaN(req.body.qty)) {
-      throw new BadRequest();
-    }
+    const { product_id, qty } = req.body;
 
-    const product = await productRepository.show(req.body.product_id);
-    const cart = await cartRepository.show(req.app.locals.user);
+    const user = req.app.locals.user;
 
-    if (product != null) {
-      const totalQty: number = req.body.qty;
-      const totalPrice: number = product.price!.final * totalQty;
+    const cartItem: CartItem = {
+      customer: user,
+      product: product_id,
+      qty: qty,
+    };
 
-      let items = [];
-
-      const item = {
-        product: product._id as string,
-        qty: totalQty,
-        total: totalPrice,
-      };
-
-      if (cart != null) {
-        items = [
-          ...cart.items!.filter(
-            (e) => (e.product as any)._id.toString() != product._id
-          ),
-          item,
-        ];
-      } else {
-        items = [item];
-      }
-
-      items = items.filter((e) => e.qty > 0);
-
-      let grandTotalQty = 0;
-      let grandTotalPrice = 0;
-
-      items.forEach((e) => {
-        grandTotalQty += e.qty;
-        grandTotalPrice += e.total;
-      });
-
-      const cartModel: CartModel = {
-        customer: req.app.locals.user,
-        qty: grandTotalQty,
-        total: grandTotalPrice,
-        items: items,
-      };
-
-      if (items.length == 0) {
-        await cartRepository.remove(req.app.locals.user);
-      } else {
-        await cartRepository.upsert(cartModel);
-      }
-    }
+    await usecase.store(cartItem);
 
     res.status(200).end();
   } catch (error) {
@@ -85,7 +48,9 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.delete("/", async (req: Request, res: Response) => {
   try {
-    await cartRepository.remove(req.app.locals.user);
+    const user = req.app.locals.user;
+
+    await usecase.remove(user);
 
     res.status(200).end();
   } catch (error) {

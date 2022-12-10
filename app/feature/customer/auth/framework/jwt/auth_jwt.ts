@@ -1,6 +1,6 @@
 import { Unauthorized } from "./../../../../../core/config/errors";
 import jwt from "jsonwebtoken";
-import AuthContract from "../../usecase/contract/auth_contract";
+import AuthContract from "../../entity/contract/auth_contract";
 
 class AuthJwt implements AuthContract {
   async verify(token: string): Promise<string | null> {

@@ -1,14 +1,21 @@
-import CustomerModel from "../entity/customer_model";
-import AuthContract from "./contract/auth_contract";
-import CustomerContract from "./contract/customer_contract";
+import CustomerModel from "../entity/model/customer_model";
+import AuthContract from "../entity/contract/auth_contract";
+import CustomerContract from "../entity/contract/customer_contract";
+import AuthValidator from "../entity/validator/auth_validator";
 
 class AuthUsecase {
   private repository: CustomerContract;
   private auth: AuthContract;
+  private validator: AuthValidator;
 
-  constructor(repository: CustomerContract, auth: AuthContract) {
+  constructor(
+    repository: CustomerContract,
+    auth: AuthContract,
+    validator: AuthValidator
+  ) {
     this.repository = repository;
     this.auth = auth;
+    this.validator = validator;
   }
 
   async verify(token: string): Promise<string | null> {
@@ -16,6 +23,8 @@ class AuthUsecase {
   }
 
   async access(customerModel: CustomerModel): Promise<string | null> {
+    this.validator.access(customerModel);
+
     let customer = await this.repository.show(customerModel._id!);
 
     if (customer == null) {
