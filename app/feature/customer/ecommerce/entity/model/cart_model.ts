@@ -1,8 +1,8 @@
 interface CartModel {
   _id?: string;
-  customer: string;
-  total: number;
-  qty: number;
+  customer?: string;
+  total?: number;
+  qty?: number;
   items?: {
     product: string;
     qty: number;
