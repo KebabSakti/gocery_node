@@ -1,18 +1,18 @@
 import express, { Request, Response } from "express";
 import CustomerModel from "../../../../feature/customer/auth/entity/model/customer_model";
-import AuthValidatorJoi from "../../../../feature/customer/auth/framework/joi/auth_validator_joi";
+import CustomerValidatorJoi from "../../../../feature/customer/auth/framework/joi/customer_validator_joi";
 import AuthJwt from "../../../../feature/customer/auth/framework/jwt/auth_jwt";
 import CustomerMongodb from "../../../../feature/customer/auth/framework/mongodb/customer_mongodb";
-import AuthUsecase from "../../../../feature/customer/auth/usecase/auth_usecase";
+import CustomerUsecase from "../../../../feature/customer/auth/usecase/customer_usecase";
+import { Unauthorized } from "../../../config/errors";
 import ErrorHandler from "../../../service/error_handler";
-import { Unauthorized } from "./../../../config/errors";
 
 const router = express.Router();
 
-const usecase = new AuthUsecase(
-  new CustomerMongodb(),
+const usecase = new CustomerUsecase(
   new AuthJwt(),
-  new AuthValidatorJoi()
+  new CustomerMongodb(),
+  new CustomerValidatorJoi()
 );
 
 router.post("/", async (req: Request, res: Response) => {
@@ -26,7 +26,7 @@ router.post("/", async (req: Request, res: Response) => {
       fcm: req.body.fcm,
     };
 
-    const results = await usecase.access(model);
+    const results = await usecase.store(model);
 
     if (results == null) {
       throw new Unauthorized();

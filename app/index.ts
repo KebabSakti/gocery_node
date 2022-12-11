@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 import express from "express";
 import http from "http";
 import callbackController from "./core/http/controller/callback_controller";
-import customerAuthController from "./core/http/controller/customer/auth_controller_new";
+import customerAuthController from "./core/http/controller/customer/auth_controller";
 import bannerController from "./core/http/controller/customer/banner_controller";
 import bundleController from "./core/http/controller/customer/bundle_controller";
 import cartController from "./core/http/controller/customer/cart_controller";

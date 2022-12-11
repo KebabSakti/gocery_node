@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import AuthJwt from "../../../../feature/customer/auth-new/framework/jwt/auth_jwt";
-import AuthUsecase from "../../../../feature/customer/auth-new/usecase/auth_usecase";
+import AuthJwt from "../../../../feature/customer/auth/framework/jwt/auth_jwt";
+import AuthUsecase from "../../../../feature/customer/auth/usecase/auth_usecase";
 import { Unauthorized } from "../../../config/errors";
 import ErrorHandler from "../../../service/error_handler";
 

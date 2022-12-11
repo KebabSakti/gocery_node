@@ -1,14 +1,8 @@
-import AuthValidatorJoi from "../../../feature/customer/auth/framework/joi/auth_validator_joi";
 import AuthJwt from "../../../feature/customer/auth/framework/jwt/auth_jwt";
-import CustomerMongodb from "../../../feature/customer/auth/framework/mongodb/customer_mongodb";
 import AuthUsecase from "../../../feature/customer/auth/usecase/auth_usecase";
-import { Unauthorized } from "./../../config/errors";
+import { Unauthorized } from "../../config/errors";
 
-const usecase: AuthUsecase = new AuthUsecase(
-  new CustomerMongodb(),
-  new AuthJwt(),
-  new AuthValidatorJoi()
-);
+const usecase = new AuthUsecase(new AuthJwt());
 
 const socketAuth = async (socket: any, next: any) => {
   try {

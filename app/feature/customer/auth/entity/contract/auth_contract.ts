@@ -1,7 +1,7 @@
-abstract class AuthContract {
-  abstract verify(token: string): Promise<string | null>;
+abstract class AuthContract<T, S> {
+  abstract verify(param: any): T;
 
-  abstract access(_id: string): Promise<string | null>;
+  abstract access(param: any): S;
 }
 
 export default AuthContract;

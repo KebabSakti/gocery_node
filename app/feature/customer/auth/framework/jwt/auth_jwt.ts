@@ -1,10 +1,10 @@
-import { Unauthorized } from "./../../../../../core/config/errors";
 import jwt from "jsonwebtoken";
 import AuthContract from "../../entity/contract/auth_contract";
+import { Unauthorized } from "./../../../../../core/config/errors";
 
-class AuthJwt implements AuthContract {
-  async verify(token: string): Promise<string | null> {
-    return await new Promise<string | null>((resolve, reject) => {
+class AuthJwt implements AuthContract<Promise<string>, string> {
+  async verify(token: string): Promise<string> {
+    return await new Promise<string>((resolve, reject) => {
       jwt.verify(
         token,
         process.env.JWT_TOKEN as string,
@@ -19,14 +19,12 @@ class AuthJwt implements AuthContract {
     });
   }
 
-  async access(_id: string): Promise<string | null> {
-    return await new Promise<string | null>((resolve) => {
-      const token = jwt.sign({ _id: _id }, process.env.JWT_TOKEN as string, {
-        expiresIn: "100 years",
-      });
-
-      resolve(token);
+  access(_id: string): string {
+    const token = jwt.sign({ _id: _id }, process.env.JWT_TOKEN as string, {
+      expiresIn: "100 years",
     });
+
+    return token;
   }
 }
 
