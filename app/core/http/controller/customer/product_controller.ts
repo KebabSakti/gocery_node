@@ -1,11 +1,11 @@
 import express, { Request, Response } from "express";
-import ProductOption from "../../../../feature/customer/ecommerce/entity/model/product_option";
-import ProductViewOption from "../../../../feature/customer/ecommerce/entity/model/product_view_option";
-import ProductViewValidatorJoi from "../../../../feature/customer/ecommerce/framework/joi/product_view_validator_joi";
-import ProductMetaMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_meta_mongodb";
-import ProductMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_mongodb";
-import ProductViewMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_view_mongodb";
-import ProductUsecase from "../../../../feature/customer/ecommerce/usecase/product_usecase";
+import ProductOption from "../../../../feature/customer/product/entity/model/product_option";
+import ProductViewOption from "../../../../feature/customer/product/entity/model/product_view_option";
+import ProductViewValidatorJoi from "../../../../feature/customer/product/framework/joi/product_view_validator_joi";
+import ProductMetaMongodb from "../../../../feature/customer/product/framework/mongodb/product_meta_mongodb";
+import ProductMongodb from "../../../../feature/customer/product/framework/mongodb/product_mongodb";
+import ProductViewMongodb from "../../../../feature/customer/product/framework/mongodb/product_view_mongodb";
+import ProductUsecase from "../../../../feature/customer/product/usecase/product_usecase";
 import { BadRequest } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";

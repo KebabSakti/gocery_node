@@ -7,6 +7,7 @@ import bannerController from "./core/http/controller/customer/banner_controller"
 import bundleController from "./core/http/controller/customer/bundle_controller";
 import cartController from "./core/http/controller/customer/cart_controller";
 import categoryController from "./core/http/controller/customer/category_controller";
+import orderController from "./core/http/controller/customer/order_controller_new";
 import productController from "./core/http/controller/customer/product_controller";
 import searchController from "./core/http/controller/customer/search_controller";
 import helperController from "./core/http/controller/helper_controller";
@@ -27,11 +28,11 @@ const port = 1001;
 const io = new SocketIO(server);
 
 // socket middleware
-io.I.use(socketAuth);
-//socket events
-io.I.on("connection", (socket) => {
-  socketController(socket, io);
-});
+// io.I.use(socketAuth);
+// //socket events
+// io.I.on("connection", (socket) => {
+//   socketController(socket, io);
+// });
 
 //express middleware
 app.use(express.json());
@@ -45,11 +46,11 @@ app.use("/api/customer/products", customerMiddleware, productController);
 app.use("/api/customer/bundles", customerMiddleware, bundleController);
 app.use("/api/customer/searches", customerMiddleware, searchController);
 app.use("/api/customer/carts", customerMiddleware, cartController);
-// app.use("/api/customer/orders", authMiddleware, orderController);
+app.use("/api/customer/orders", customerMiddleware, orderController);
 
 //global
 app.use("/api/callback", callbackController);
-app.use("/api/helper", helperController);
+// app.use("/api/helper", helperController);
 
 //route not found 404
 app.use("*", (_, res) => res.status(404).json("Resource Not Found"));

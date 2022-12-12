@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-import CartItem from "../../../../feature/customer/ecommerce/entity/model/cart_item";
-import CartValidatorJoi from "../../../../feature/customer/ecommerce/framework/joi/cart_validator_joi";
-import CartMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/cart_mongodb";
-import ProductMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/product_mongodb";
-import CartUsecase from "../../../../feature/customer/ecommerce/usecase/cart_usecase";
+import CartItem from "../../../../feature/customer/cart/entity/model/cart_item";
+import CartValidatorJoi from "../../../../feature/customer/cart/framework/joi/cart_validator_joi";
+import CartMongodb from "../../../../feature/customer/cart/framework/mongodb/cart_mongodb";
+import CartUsecase from "../../../../feature/customer/cart/usecase/cart_usecase";
+import ProductMongodb from "../../../../feature/customer/product/framework/mongodb/product_mongodb";
 import ErrorHandler from "../../../service/error_handler";
 
 const router = express.Router();

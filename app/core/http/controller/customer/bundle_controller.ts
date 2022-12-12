@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
-import BundleOption from "../../../../feature/customer/ecommerce/entity/model/bundle/bundle_option";
-import BundleMongodb from "../../../../feature/customer/ecommerce/framework/mongodb/bundle_mongodb";
-import BundleUsecase from "../../../../feature/customer/ecommerce/usecase/bundle_usecase";
+import BundleOption from "../../../../feature/customer/bundle/entity/model/bundle_option";
+import BundleMongodb from "../../../../feature/customer/bundle/framework/mongodb/bundle_mongodb";
+import BundleUsecase from "../../../../feature/customer/bundle/usecase/bundle_usecase";
 import { BadRequest } from "../../../config/errors";
 import PagingOption from "../../../model/paging_option";
 import ErrorHandler from "../../../service/error_handler";
