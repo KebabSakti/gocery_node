@@ -1,6 +1,6 @@
-import OrderContract from "../entity/contract/order_contract";
-import ProductContract from "../../product/entity/contract/product_contract";
 import NotificationContract from "../../notification/entity/contract/notification_contract";
+import ProductContract from "../../product/entity/contract/product_contract";
+import OrderContract from "../entity/contract/order_contract";
 import OrderModel from "../entity/model/order_model";
 import OrderValidator from "../entity/validator/order_validator";
 
