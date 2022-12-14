@@ -6,14 +6,15 @@ import OrderUsecase from "../../../../feature/customer/order-new/usecase/order_u
 import ProductMongodb from "../../../../feature/customer/product/framework/mongodb/product_mongodb";
 import OrderValidatorJoi from "../../../../feature/customer/order-new/framework/joi/order_validator_joi";
 import ErrorHandler from "../../../service/error_handler";
+import AppConfigMongodb from "../../../../feature/customer/app_conf/framework/mongodb/app_config_mongodb";
 
 const router = express.Router();
 
 const usecase = new OrderUsecase(
   new OrderMongodb(),
   new ProductMongodb(),
-  new NotificationFcm(),
-  new OrderValidatorJoi()
+  new AppConfigMongodb(),
+  new NotificationFcm()
 );
 
 router.post("/", async (req: Request, res: Response) => {

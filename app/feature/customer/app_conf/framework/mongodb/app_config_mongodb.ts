@@ -11,7 +11,7 @@ class AppConfigMongodb implements AppConfigContract {
       return results;
     }
 
-    throw new InternalServerError("Configuration template not found");
+    throw new InternalServerError("Configuration not found");
   }
 }
 

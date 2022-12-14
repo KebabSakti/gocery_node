@@ -29,7 +29,8 @@ const io = new SocketIO(server);
 
 // socket middleware
 // io.I.use(socketAuth);
-// //socket events
+
+//socket events
 // io.I.on("connection", (socket) => {
 //   socketController(socket, io);
 // });
@@ -50,7 +51,7 @@ app.use("/api/customer/orders", customerMiddleware, orderController);
 
 //global
 app.use("/api/callback", callbackController);
-// app.use("/api/helper", helperController);
+app.use("/api/helper", helperController);
 
 //route not found 404
 app.use("*", (_, res) => res.status(404).json("Resource Not Found"));
