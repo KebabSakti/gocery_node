@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
-import CustomerModel from "../../../../feature/customer/auth/entity/model/customer_model";
-import CustomerValidatorJoi from "../../../../feature/customer/auth/framework/joi/customer_validator_joi";
 import AuthJwt from "../../../../feature/customer/auth/framework/jwt/auth_jwt";
-import CustomerMongodb from "../../../../feature/customer/auth/framework/mongodb/customer_mongodb";
-import CustomerUsecase from "../../../../feature/customer/auth/usecase/customer_usecase";
+import CustomerModel from "../../../../feature/customer/user/entity/model/customer_model";
+import CustomerValidatorJoi from "../../../../feature/customer/user/framework/joi/customer_validator_joi";
+import CustomerMongodb from "../../../../feature/customer/user/framework/mongodb/customer_mongodb";
+import CustomerUsecase from "../../../../feature/customer/user/usecase/customer_usecase";
 import { Unauthorized } from "../../../config/errors";
 import ErrorHandler from "../../../service/error_handler";
 

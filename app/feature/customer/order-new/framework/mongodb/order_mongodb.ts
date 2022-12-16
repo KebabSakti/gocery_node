@@ -46,7 +46,7 @@ class OrderMongodb implements OrderContract {
   async upsert(customer: string, orderModel: OrderModel): Promise<void> {
     await OrderScheme.findOneAndUpdate(
       { "customer._id": customer, status: null },
-      { orderModel },
+      orderModel,
       { upsert: true }
     );
   }

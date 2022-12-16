@@ -7,30 +7,35 @@ import ProductMongodb from "../../../../feature/customer/product/framework/mongo
 import OrderValidatorJoi from "../../../../feature/customer/order-new/framework/joi/order_validator_joi";
 import ErrorHandler from "../../../service/error_handler";
 import AppConfigMongodb from "../../../../feature/customer/app_conf/framework/mongodb/app_config_mongodb";
+import CustomerMongodb from "../../../../feature/customer/user/framework/mongodb/customer_mongodb";
+import OrderPayload from "../../../../feature/customer/order-new/usecase/model/order_payload";
 
 const router = express.Router();
 
 const usecase = new OrderUsecase(
   new OrderMongodb(),
   new ProductMongodb(),
+  new CustomerMongodb(),
   new AppConfigMongodb(),
   new NotificationFcm()
 );
 
 router.post("/", async (req: Request, res: Response) => {
   try {
-    const { shipping, delivery, payment, items } = req.body;
+    const { point, shipping, delivery, payment, items } = req.body;
 
     const customer = req.app.locals.user;
 
-    const orderModel: OrderModel = {
+    const orderPayload: OrderPayload = {
+      customer: customer,
+      point: point,
       shipping: shipping,
       delivery: delivery,
       payment: payment,
       items: items,
     };
 
-    await usecase.upsert(customer, orderModel);
+    await usecase.updateOrderSummary(orderPayload);
 
     res.status(200).end();
   } catch (error) {

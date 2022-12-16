@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import CustomerModel from "../../entity/model/customer_model";
+import CustomerModel from "../../../user/entity/model/customer_model";
 
 const CustomerScheme = model<CustomerModel>(
   "customers",

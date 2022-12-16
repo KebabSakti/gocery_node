@@ -1,4 +1,4 @@
-import AuthContract from "../entity/contract/auth_contract";
+import AuthContract from "../../auth/entity/contract/auth_contract";
 import CustomerContract from "../entity/contract/customer_contract";
 import CustomerModel from "../entity/model/customer_model";
 import CustomerValidator from "../entity/validator/customer_validator";

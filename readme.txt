@@ -29,35 +29,21 @@ order submit -> cash    -> update status order (AKTIF)
 
 
 domain
-    courier
-    admin
-    customer
-        auth
-            auth_entity.ts
-            auth_contract.ts
+    model
+    repository
 application
-    courier
-    admin
-    customer
-        auth
-            auth_usecase.ts
+    model
+    usecase
 adapter
-    courier
-    admin
-    customer
-        auth
-            auth_controller.ts
+    controller
+        auth_controller.ts
 infrastructure
-    mongodb
-        courier
-        admin
-        customer
-            auth
-                auth_mongodb.ts
-                auth_scheme.ts
-    jwt
-        courier
-        admin
-        customer
-            auth
-                auth_jwt.ts
+    repository
+    validation
+    core
+        config
+        util
+        service
+    route
+        controller
+        middleware
