@@ -1,22 +1,19 @@
 import * as dotenv from "dotenv";
 import express from "express";
 import http from "http";
-import callbackController from "./core/http/controller/callback_controller";
-import customerAuthController from "./core/http/controller/customer/auth_controller";
-import bannerController from "./core/http/controller/customer/banner_controller";
-import bundleController from "./core/http/controller/customer/bundle_controller";
-import cartController from "./core/http/controller/customer/cart_controller";
-import categoryController from "./core/http/controller/customer/category_controller";
-import orderController from "./core/http/controller/customer/order_controller_new";
-import productController from "./core/http/controller/customer/product_controller";
-import searchController from "./core/http/controller/customer/search_controller";
-import helperController from "./core/http/controller/helper_controller";
-import socketController from "./core/http/controller/socket_controller";
-import customerMiddleware from "./core/http/middleware/customer/customer_middleware";
-import socketAuth from "./core/http/middleware/socket_auth";
-import FirebaseAdmin from "./core/service/firebase_admin";
-import MongoDB from "./core/service/mongose_database";
-import SocketIO from "./core/service/socketio";
+import callbackController from "./adapter/service/express/controller/callback_controller";
+import customerAuthController from "./adapter/service/express/controller/customer/auth_controller";
+import bannerController from "./adapter/service/express/controller/customer/banner_controller";
+import bundleController from "./adapter/service/express/controller/customer/bundle_controller";
+import cartController from "./adapter/service/express/controller/customer/cart_controller";
+import categoryController from "./adapter/service/express/controller/customer/category_controller";
+import productController from "./adapter/service/express/controller/customer/product_controller";
+import searchController from "./adapter/service/express/controller/customer/search_controller";
+import helperController from "./adapter/service/express/controller/helper_controller";
+import customerMiddleware from "./adapter/service/express/middleware/customer/customer_middleware";
+import FirebaseAdmin from "./common/service/firebase_admin";
+import MongoDB from "./common/service/mongose_database";
+import SocketIO from "./common/service/socketio";
 
 dotenv.config();
 FirebaseAdmin.init();
@@ -31,9 +28,10 @@ const io = new SocketIO(server);
 // io.I.use(socketAuth);
 
 //socket events
-// io.I.on("connection", (socket) => {
-//   socketController(socket, io);
-// });
+io.I.on("connection", (socket) => {
+  //socketController(socket, io);
+  console.log(socket.id);
+});
 
 //express middleware
 app.use(express.json());
@@ -47,7 +45,7 @@ app.use("/api/customer/products", customerMiddleware, productController);
 app.use("/api/customer/bundles", customerMiddleware, bundleController);
 app.use("/api/customer/searches", customerMiddleware, searchController);
 app.use("/api/customer/carts", customerMiddleware, cartController);
-app.use("/api/customer/orders", customerMiddleware, orderController);
+// app.use("/api/customer/orders", customerMiddleware, orderController);
 
 //global
 app.use("/api/callback", callbackController);

@@ -27,23 +27,19 @@ order submit -> cash    -> update status order (AKTIF)
                         -> update status order (COMPLETED)
 ============================================================
 
-
-domain
-    model
+hexagonal
+=======================
+core
+    interactor
     repository
-application
     model
-    usecase
 adapter
     controller
-        auth_controller.ts
-infrastructure
     repository
-    validation
-    core
-        config
-        util
-        service
-    route
-        controller
-        middleware
+common
+    config
+    util
+    service
+route
+    handler
+    middleware

@@ -18,7 +18,7 @@ const usecase = new CustomerUsecase(
 router.post("/", async (req: Request, res: Response) => {
   try {
     const model: CustomerModel = {
-      _id: req.body._id,
+      _id: req.body._id,  
       name: req.body.name,
       email: req.body.email,
       phone: req.body.phone,
