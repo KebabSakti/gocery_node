@@ -1,39 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import AuthJwt from "../../../adapter/service/jwt/customer/auth_jwt";
-import ErrorHandler from "../../../common/error/error_handler";
-import { Unauthorized } from "../../../common/error/exception";
-import AuthUsecase from "../../../port/interactor/customer/auth_usecase";
+import AuthHandler from "../../../adapter/service/express/customer/auth_handler";
 
-const usecase = new AuthUsecase(new AuthJwt());
+const handler = new AuthHandler();
 
-async function customerMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const bearerHeader: string | undefined = req.get("authorization");
-
-    if (bearerHeader == undefined) {
-      throw new Unauthorized();
-    }
-
-    const token = bearerHeader.split(" ")[1];
-
-    const userId = await usecase.verify(token);
-
-    if (userId != null) {
-      req.app.locals.user = userId;
-
-      next();
-
-      return;
-    }
-
-    throw new Unauthorized();
-  } catch (error) {
-    new ErrorHandler(res, error);
-  }
+function customerMiddleware(req: Request, res: Response, next: NextFunction) {
+  handler.verify(req, res, next);
 }
 
 export default customerMiddleware;

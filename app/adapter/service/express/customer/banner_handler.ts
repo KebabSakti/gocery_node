@@ -7,9 +7,9 @@ import BannerUsecase from "../../../../port/interactor/customer/banner_usecase";
 import BannerMongodb from "../../../data/mongodb/customer/banner_mongodb";
 import PagingValidator from "../../joi/customer/paging_validator";
 
-class BannerHandler {
-  private usecase = new BannerUsecase(new BannerMongodb());
+const usecase = new BannerUsecase(new BannerMongodb());
 
+class BannerHandler {
   async getAllBanners(req: Request, res: Response) {
     try {
       const { page, limit } = req.query;
@@ -32,7 +32,7 @@ class BannerHandler {
         };
       }
 
-      const results = await this.usecase.index(option);
+      const results = await usecase.index(option);
 
       res.json(results);
     } catch (error) {

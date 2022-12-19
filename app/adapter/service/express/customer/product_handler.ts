@@ -13,13 +13,13 @@ import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
 import ProductViewMongodb from "../../../data/mongodb/customer/product_view_mongodb";
 import PagingValidator from "../../joi/customer/paging_validator";
 
-class ProductHandler {
-  private usecase = new ProductUsecase(
-    new ProductMongodb(),
-    new ProductViewMongodb(),
-    new ProductMetaMongodb()
-  );
+const usecase = new ProductUsecase(
+  new ProductMongodb(),
+  new ProductViewMongodb(),
+  new ProductMetaMongodb()
+);
 
+class ProductHandler {
   async getAllProduct(req: Request, res: Response) {
     try {
       const {
@@ -64,7 +64,7 @@ class ProductHandler {
         };
       }
 
-      const results = await this.usecase.getAllProduct(option);
+      const results = await usecase.getAllProduct(option);
 
       res.json(results);
     } catch (error) {
@@ -74,7 +74,7 @@ class ProductHandler {
 
   async getProductDetail(req: Request, res: Response) {
     try {
-      const results = await this.usecase.getProductByIdWithIncrement({
+      const results = await usecase.getProductByIdWithIncrement({
         customer: req.app.locals.user,
         product: req.params.id,
       });
@@ -113,7 +113,7 @@ class ProductHandler {
         };
       }
 
-      const results = await this.usecase.getAllProductView(userId, option);
+      const results = await usecase.getAllProductView(userId, option);
 
       if (results == null) {
         throw new ResourceNotFound();

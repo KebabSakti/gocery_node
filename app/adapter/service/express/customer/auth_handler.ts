@@ -1,32 +1,33 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import ErrorHandler from "../../../../common/error/error_handler";
 import { Unauthorized } from "../../../../common/error/exception";
-import CustomerModel from "../../../../entity/customer/customer_model";
-import CustomerUsecase from "../../../../port/interactor/customer/customer_usecase";
-import CustomerMongodb from "../../../data/mongodb/customer/customer_mongodb";
+import AuthUsecase from "../../../../port/interactor/customer/auth_usecase";
 import AuthJwt from "../../jwt/customer/auth_jwt";
 
+const usecase = new AuthUsecase(new AuthJwt());
+
 class AuthHandler {
-  private usecase = new CustomerUsecase(new AuthJwt(), new CustomerMongodb());
-
-  async createUser(req: Request, res: Response) {
+  async verify(req: Request, res: Response, next: NextFunction) {
     try {
-      const model: CustomerModel = {
-        _id: req.body._id,
-        name: req.body.name,
-        email: req.body.email,
-        phone: req.body.phone,
-        image: req.body.image,
-        fcm: req.body.fcm,
-      };
+      const bearerHeader: string | undefined = req.get("authorization");
 
-      const results = await this.usecase.store(model);
-
-      if (results == null) {
+      if (bearerHeader == undefined) {
         throw new Unauthorized();
       }
 
-      res.json(results);
+      const token = bearerHeader.split(" ")[1];
+
+      const userId = await usecase.verify(token);
+
+      if (userId != null) {
+        req.app.locals.user = userId;
+
+        next();
+
+        return;
+      }
+
+      throw new Unauthorized();
     } catch (error) {
       new ErrorHandler(res, error);
     }

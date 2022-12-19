@@ -7,9 +7,9 @@ import CategoryUsecase from "../../../../port/interactor/customer/category_useca
 import CategoryMongodb from "../../../data/mongodb/customer/category_mongodb";
 import PagingValidator from "../../joi/customer/paging_validator";
 
-class CategoryHandler {
-  private usecase = new CategoryUsecase(new CategoryMongodb());
+const usecase = new CategoryUsecase(new CategoryMongodb());
 
+class CategoryHandler {
   async getAllCategories(req: Request, res: Response) {
     try {
       const { name, page, limit } = req.query;
@@ -34,7 +34,7 @@ class CategoryHandler {
         };
       }
 
-      const results = await this.usecase.index(option);
+      const results = await usecase.index(option);
 
       res.json(results);
     } catch (error) {

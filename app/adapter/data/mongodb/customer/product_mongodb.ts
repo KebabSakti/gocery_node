@@ -9,9 +9,9 @@ class ProductMongodb implements ProductContract {
   async getAllProduct(
     option?: ProductOption | undefined
   ): Promise<ProductModel[]> {
-    const query = ProductScheme.find({ active: true }).select(
-      "-active -created_at -updated_at -__v"
-    );
+    const query = ProductScheme.find({ active: true })
+      .lean()
+      .select("-active -created_at -updated_at -__v");
 
     if (option != undefined) {
       if (option.bundle != undefined) {
@@ -73,14 +73,16 @@ class ProductMongodb implements ProductContract {
     return results;
   }
 
-  async getProductById(_id: string): Promise<ProductModel | null> {
+  async getProductById(productId: string): Promise<ProductModel | null> {
     let results: ProductModel | null = null;
 
-    if (mongoose.isValidObjectId(_id)) {
+    if (mongoose.isValidObjectId(productId)) {
       results = await ProductScheme.findOne({
-        _id: _id,
+        _id: productId,
         active: true,
-      }).select("-active -created_at -updated_at -__v");
+      })
+        .lean()
+        .select("-active -created_at -updated_at -__v");
     }
 
     return results;

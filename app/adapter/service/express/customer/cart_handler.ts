@@ -5,14 +5,14 @@ import CartUsecase from "../../../../port/interactor/customer/cart_usecase";
 import CartMongodb from "../../../data/mongodb/customer/cart_mongodb";
 import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
 
-class CartHandler {
-  private usecase = new CartUsecase(new CartMongodb(), new ProductMongodb());
+const usecase = new CartUsecase(new CartMongodb(), new ProductMongodb());
 
+class CartHandler {
   async getCartDetail(req: Request, res: Response) {
     try {
       const customer = req.app.locals.user;
 
-      const results = await this.usecase.getCartByCustomerId(customer);
+      const results = await usecase.getCartByCustomerId(customer);
 
       res.json(results);
     } catch (error) {
@@ -32,7 +32,7 @@ class CartHandler {
         qty: qty,
       };
 
-      await this.usecase.updateCart(cartItem);
+      await usecase.updateCart(cartItem);
 
       res.status(200).end();
     } catch (error) {
@@ -44,7 +44,7 @@ class CartHandler {
     try {
       const user = req.app.locals.user;
 
-      await this.usecase.clearCart(user);
+      await usecase.clearCart(user);
 
       res.status(200).end();
     } catch (error) {

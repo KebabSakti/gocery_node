@@ -26,7 +26,7 @@ class ErrorHandler {
       if (message.length == 0) message = "Internal server error";
     }
 
-    console.log(message);
+    console.log(error);
 
     res.status(status).json(message);
   }

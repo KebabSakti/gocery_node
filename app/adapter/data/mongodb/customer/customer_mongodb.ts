@@ -1,5 +1,5 @@
-import CustomerModel from "../../entity/model/customer_model";
-import CustomerContract from "../../entity/contract/customer_contract";
+import CustomerModel from "../../../../entity/customer/customer_model";
+import CustomerContract from "../../../../port/repository/customer/customer_contract";
 import CustomerScheme from "./customer_scheme";
 
 class CustomerMongodb implements CustomerContract {

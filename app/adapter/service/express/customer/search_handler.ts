@@ -8,9 +8,9 @@ import SearchUsecase from "../../../../port/interactor/customer/search_usecase";
 import SearchMongodb from "../../../data/mongodb/customer/search_mongodb";
 import PagingValidator from "../../joi/customer/paging_validator";
 
-class SearchHandler {
-  private usecase = new SearchUsecase(new SearchMongodb());
+const usecase = new SearchUsecase(new SearchMongodb());
 
+class SearchHandler {
   async getSearchKeywords(req: Request, res: Response) {
     try {
       const { error } = PagingValidator.validate(req.query);
@@ -30,7 +30,7 @@ class SearchHandler {
         ),
       };
 
-      const results = await this.usecase.index(option);
+      const results = await usecase.index(option);
 
       res.json(results);
     } catch (error) {
@@ -47,7 +47,7 @@ class SearchHandler {
         keyword: keyword,
       };
 
-      await this.usecase.store(searchModel);
+      await usecase.store(searchModel);
 
       res.status(200).end();
     } catch (error) {
@@ -59,7 +59,7 @@ class SearchHandler {
     try {
       const { id } = req.params;
 
-      await this.usecase.remove(id);
+      await usecase.remove(id);
 
       res.status(200).end();
     } catch (error) {

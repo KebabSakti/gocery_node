@@ -7,9 +7,9 @@ import BundleUsecase from "../../../../port/interactor/customer/bundle_usecase";
 import BundelMongodb from "../../../data/mongodb/customer/bundle_mongodb";
 import PagingValidator from "../../joi/customer/paging_validator";
 
-class BundleHandler {
-  private usecase = new BundleUsecase(new BundelMongodb());
+const usecase = new BundleUsecase(new BundelMongodb());
 
+class BundleHandler {
   async getAllBundles(req: Request, res: Response) {
     try {
       const { name, page, limit } = req.query;
@@ -34,7 +34,7 @@ class BundleHandler {
         };
       }
 
-      const results = await this.usecase.getAllBundle(option);
+      const results = await usecase.getAllBundle(option);
 
       res.json(results);
     } catch (error) {

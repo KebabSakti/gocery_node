@@ -1,8 +1,8 @@
 import express from "express";
-import AuthHandler from "../../../adapter/service/express/customer/auth_handler";
+import CustomerHandler from "../../../adapter/service/express/customer/customer_handler";
 
 const router = express.Router();
-const handler = new AuthHandler();
+const handler = new CustomerHandler();
 
 router.post("/", handler.createUser);
 
