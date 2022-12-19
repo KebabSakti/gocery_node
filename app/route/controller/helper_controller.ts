@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import ErrorHandler from "../../../../common/error/error_handler";
+import ErrorHandler from "../../common/error/error_handler";
 
 const router = express.Router();
 

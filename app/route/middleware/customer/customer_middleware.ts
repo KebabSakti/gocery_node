@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { Unauthorized } from "../../../../../core/config/errors";
-import ErrorHandler from "../../../../../core/service/error_handler";
-import AuthUsecase from "../../../../../port/interactor/customer/auth_usecase";
-import AuthJwt from "../../../jwt/customer/auth_jwt";
+import AuthJwt from "../../../adapter/service/jwt/customer/auth_jwt";
+import ErrorHandler from "../../../common/error/error_handler";
+import { Unauthorized } from "../../../common/error/exception";
+import AuthUsecase from "../../../port/interactor/customer/auth_usecase";
 
 const usecase = new AuthUsecase(new AuthJwt());
 
