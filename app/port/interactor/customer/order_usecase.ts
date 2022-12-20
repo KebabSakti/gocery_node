@@ -3,6 +3,7 @@ import OrderPayload from "../../../entity/customer/order_payload";
 import AppConfigContract from "../../repository/customer/app_config_contract";
 import CustomerContract from "../../repository/customer/customer_contract";
 import OrderContract from "../../repository/customer/order_contract";
+import PaymentContract from "../../repository/customer/payment_contract";
 import ProductContract from "../../repository/customer/product_contract";
 import NotificationContract from "../../service/customer/notification_contract";
 
@@ -10,6 +11,7 @@ class OrderUsecase<T> {
   private orderRepository: OrderContract;
   private productRepository: ProductContract;
   private customerRepository: CustomerContract;
+  private paymentRepository: PaymentContract;
   private appConfigRepository: AppConfigContract;
   private notificationService: NotificationContract<T>;
 
@@ -17,12 +19,14 @@ class OrderUsecase<T> {
     orderRepository: OrderContract,
     productRepository: ProductContract,
     customerRepository: CustomerContract,
+    paymentRepository: PaymentContract,
     appConfigRepository: AppConfigContract,
     notificationService: NotificationContract<T>
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
     this.customerRepository = customerRepository;
+    this.paymentRepository = paymentRepository;
     this.appConfigRepository = appConfigRepository;
     this.notificationService = notificationService;
   }
@@ -36,6 +40,7 @@ class OrderUsecase<T> {
     let point = 0;
     let shipping: any = orderPayload.shipping;
     let delivery: any = orderPayload.delivery;
+    let payment: any = orderPayload.payment;
     let items: any = [];
 
     if (user != null && orderPayload.point == true) {
@@ -51,6 +56,12 @@ class OrderUsecase<T> {
       const fee = app.fee.delivery;
 
       delivery = { ...delivery, fee: fee };
+    }
+
+    if (payment._id != undefined) {
+      const paymentMethod = await this.paymentRepository.show(payment._id);
+
+      payment = paymentMethod;
     }
 
     for (const item of orderPayload.items) {
@@ -72,6 +83,7 @@ class OrderUsecase<T> {
       point: point,
       shipping: shipping,
       delivery: delivery,
+      payment: payment,
       items: items,
     };
 

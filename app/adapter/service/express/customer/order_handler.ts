@@ -5,6 +5,7 @@ import OrderUsecase from "../../../../port/interactor/customer/order_usecase";
 import AppConfigMongodb from "../../../data/mongodb/customer/app_config_mongodb";
 import CustomerMongodb from "../../../data/mongodb/customer/customer_mongodb";
 import OrderMongodb from "../../../data/mongodb/customer/order_mongodb";
+import PaymentMongodb from "../../../data/mongodb/customer/payment_mongodb";
 import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
 import NotificationFcm from "../../fcm/customer/notification_fcm";
 
@@ -12,6 +13,7 @@ const usecase = new OrderUsecase(
   new OrderMongodb(),
   new ProductMongodb(),
   new CustomerMongodb(),
+  new PaymentMongodb(),
   new AppConfigMongodb(),
   new NotificationFcm()
 );
