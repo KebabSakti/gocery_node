@@ -3,7 +3,9 @@ import ErrorHandler from "../../../../common/error/error_handler";
 import OrderPayload from "../../../../entity/customer/order_payload";
 import OrderUsecase from "../../../../port/interactor/customer/order_usecase";
 import AppConfigMongodb from "../../../data/mongodb/customer/app_config_mongodb";
+import BillMongodb from "../../../data/mongodb/customer/bill_mongodb";
 import CustomerMongodb from "../../../data/mongodb/customer/customer_mongodb";
+import DeductorMongodb from "../../../data/mongodb/customer/deductor_mongodb";
 import OrderMongodb from "../../../data/mongodb/customer/order_mongodb";
 import PaymentMongodb from "../../../data/mongodb/customer/payment_mongodb";
 import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
@@ -14,14 +16,29 @@ const usecase = new OrderUsecase(
   new ProductMongodb(),
   new CustomerMongodb(),
   new PaymentMongodb(),
+  new BillMongodb(),
+  new DeductorMongodb(),
   new AppConfigMongodb(),
   new NotificationFcm()
 );
 
 class OrderHandler {
+  async getOrderDetail(req: Request, res: Response) {
+    try {
+      const orderId = req.params.orderId;
+
+      const results = await usecase.getOrderDetail(orderId);
+
+      res.json(results);
+    } catch (error) {
+      new ErrorHandler(res, error);
+    }
+  }
+
   async updateOrderSummary(req: Request, res: Response) {
     try {
-      const { point, shipping, delivery, payment, items } = req.body;
+      const { point, shipping, delivery, payment, items, bills, deductors } =
+        req.body;
 
       const customer = req.app.locals.user;
 
@@ -32,6 +49,8 @@ class OrderHandler {
         delivery: delivery,
         payment: payment,
         items: items,
+        bills: bills,
+        deductors: deductors,
       };
 
       await usecase.updateOrderSummary(orderPayload);

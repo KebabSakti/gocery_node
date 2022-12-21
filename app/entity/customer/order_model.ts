@@ -1,3 +1,4 @@
+import BillModel from "./bill_model";
 import { OrderStatus, PaymentStatus } from "./order_enum";
 import OrderItemModel from "./order_item_model";
 
@@ -51,8 +52,8 @@ interface OrderModel {
     status?: PaymentStatus;
   };
   items?: OrderItemModel[];
-  bills?: { name: string; value: number }[];
-  deductors?: { name: string; value: number }[];
+  bills?: BillModel[];
+  deductors?: BillModel[];
   created_at?: string;
   updated_at?: string;
 }

@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import OrderModel from "../../../../entity/customer/order_model";
+import BillSchema from "./bill_schema";
 
 const OrderScheme = model<OrderModel>(
   "orders",
@@ -74,21 +75,11 @@ const OrderScheme = model<OrderModel>(
     },
     bills: {
       default: [],
-      type: [
-        {
-          name: { type: String, required: true },
-          value: { type: String, required: true },
-        },
-      ],
+      type: [BillSchema],
     },
     deductors: {
       default: [],
-      type: [
-        {
-          name: { type: String, required: true },
-          value: { type: String, required: true },
-        },
-      ],
+      type: [BillSchema],
     },
     created_at: { type: String, default: Date.now() },
     updated_at: { type: String, default: Date.now() },

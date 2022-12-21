@@ -30,9 +30,10 @@ class OrderMongodb implements OrderContract {
 
   async show(_id: string): Promise<OrderModel | null> {
     if (mongoose.isValidObjectId(_id)) {
-      const results = await OrderScheme.findById(_id)
-        .select("-created_at -updated_at -__v")
-        .populate("items");
+      const results = await OrderScheme.findOne({ _id: _id })
+        .select("-created_at -updated_at -__v -customer")
+        .populate("items")
+        .lean();
 
       return results;
     }

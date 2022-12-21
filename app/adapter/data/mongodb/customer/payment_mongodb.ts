@@ -25,7 +25,7 @@ class PaymentMongodb implements PaymentContract {
     let results = null;
 
     if (mongoose.isValidObjectId(id)) {
-      results = await PaymentScheme.findById(id, { active: true }).select(
+      results = await PaymentScheme.findOne({ _id: id, active: true }).select(
         "-active -created_at -updated_at -__v"
       );
     }

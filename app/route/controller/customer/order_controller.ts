@@ -5,5 +5,6 @@ const router = express.Router();
 const handler = new OrderHandler();
 
 router.post("/", handler.updateOrderSummary);
+router.get("/:orderId", handler.getOrderDetail);
 
 export default router;

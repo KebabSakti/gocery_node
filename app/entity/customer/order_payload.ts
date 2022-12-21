@@ -16,8 +16,16 @@ interface OrderPayload {
     fee: number;
   };
   items: {
-    product: string;
+    _id: string;
     qty: number;
+  }[];
+  bills: {
+    _id: string;
+    selected: boolean;
+  }[];
+  deductors: {
+    _id: string;
+    selected: boolean;
   }[];
 }
 
