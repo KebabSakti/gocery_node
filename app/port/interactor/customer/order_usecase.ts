@@ -164,12 +164,24 @@ class OrderUsecase<T> {
     const billTotal =
       bills.length == 0
         ? 0
-        : bills.reduce((partialSum, e) => partialSum + e.value, 0);
+        : bills.reduce((partialSum, e) => {
+            if (e.selected == true || e.selected == null) {
+              return partialSum + e.value;
+            }
+
+            return 0;
+          }, 0);
 
     const deductorTotal =
       deductors.length == 0
         ? 0
-        : deductors.reduce((partialSum, e) => partialSum + e.value, 0);
+        : deductors.reduce((partialSum, e) => {
+            if (e.selected == true || e.selected == null) {
+              return partialSum + e.value;
+            }
+
+            return 0;
+          }, 0);
 
     payTotal = billTotal - deductorTotal < 0 ? 0 : billTotal - deductorTotal;
 
@@ -184,6 +196,8 @@ class OrderUsecase<T> {
       qty: qtyTotal,
       total: payTotal,
     };
+
+    console.log(model);
 
     await this.orderRepository.upsert(orderPayload.customer, model);
   }
