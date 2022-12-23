@@ -15,7 +15,7 @@ order submit -> cash    -> update status order (AKTIF)
              -> noncash -> update status order (PENDING)
                         -> update status bayar (PENDING) 
                         -> customer bayar
-                        -> update status bayar (PAID) 
+                        -> update status bayar (PAID)
                         -> update status order (AKTIF) 
                         -> notif ke kurir/kantor  
                         -> kurir pilih orderan  

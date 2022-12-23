@@ -10,7 +10,7 @@ import PaymentContract from "../../repository/customer/payment_contract";
 import ProductContract from "../../repository/customer/product_contract";
 import NotificationContract from "../../service/customer/notification_contract";
 
-class OrderUsecase<T> {
+class OrderUsecase {
   private orderRepository: OrderContract;
   private productRepository: ProductContract;
   private customerRepository: CustomerContract;
@@ -18,7 +18,7 @@ class OrderUsecase<T> {
   private billRepository: BillContract;
   private deductorRepository: DeductorContract;
   private appConfigRepository: AppConfigContract;
-  private notificationService: NotificationContract<T>;
+  private notificationService: NotificationContract;
 
   constructor(
     orderRepository: OrderContract,
@@ -28,7 +28,7 @@ class OrderUsecase<T> {
     billRepository: BillContract,
     deductorRepository: DeductorContract,
     appConfigRepository: AppConfigContract,
-    notificationService: NotificationContract<T>
+    notificationService: NotificationContract
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
@@ -40,13 +40,16 @@ class OrderUsecase<T> {
     this.notificationService = notificationService;
   }
 
-  async getOrderDetail(orderId: string): Promise<OrderModel | null> {
-    return await this.orderRepository.show(orderId);
+  async getOrderDetail(
+    orderId: string,
+    customerId: string
+  ): Promise<OrderModel | null> {
+    return await this.orderRepository.getOrderDetail(orderId, customerId);
   }
 
   async updateOrderSummary(orderPayload: OrderPayload): Promise<void> {
     const user = await this.customerRepository.show(orderPayload.customer);
-    const lastOrder = await this.orderRepository.showLastOrder(
+    const lastOrder = await this.orderRepository.getLatestOrder(
       orderPayload.customer
     );
 
@@ -67,8 +70,12 @@ class OrderUsecase<T> {
       point = user.point!;
     }
 
-    if (shipping == undefined && lastOrder != null) {
-      shipping = lastOrder.shipping;
+    if (shipping == undefined) {
+      if (lastOrder != null) {
+        shipping = lastOrder.shipping;
+      } else {
+        shipping = null;
+      }
     }
 
     for (const item of orderPayload.items) {
@@ -94,6 +101,8 @@ class OrderUsecase<T> {
       deliveryFeeTotal = fee;
 
       delivery = { ...delivery, fee: fee };
+    } else {
+      delivery = null;
     }
 
     if (payment._id != undefined) {
@@ -107,12 +116,16 @@ class OrderUsecase<T> {
     bills.push({
       title: "Total Belanja",
       value: shopTotal,
+      selected: null,
+      active: null,
     });
 
     //ongkir
     bills.push({
       title: "Total Ongkir",
       value: deliveryFeeTotal,
+      selected: null,
+      active: null,
     });
 
     //payment fee
@@ -120,6 +133,8 @@ class OrderUsecase<T> {
       bills.push({
         title: `Biaya ${payment.name}`,
         value: paymentFeeTotal,
+        selected: null,
+        active: null,
       });
     }
 
@@ -142,6 +157,8 @@ class OrderUsecase<T> {
     deductors.push({
       title: "Potongan Point",
       value: point,
+      selected: null,
+      active: null,
     });
 
     //dynamic deductor
@@ -169,7 +186,7 @@ class OrderUsecase<T> {
               return partialSum + e.value;
             }
 
-            return 0;
+            return partialSum;
           }, 0);
 
     const deductorTotal =
@@ -180,7 +197,7 @@ class OrderUsecase<T> {
               return partialSum + e.value;
             }
 
-            return 0;
+            return partialSum;
           }, 0);
 
     payTotal = billTotal - deductorTotal < 0 ? 0 : billTotal - deductorTotal;
@@ -197,17 +214,7 @@ class OrderUsecase<T> {
       total: payTotal,
     };
 
-    console.log(model);
-
-    await this.orderRepository.upsert(orderPayload.customer, model);
-  }
-
-  async updateOrderStatus(
-    _id: string,
-    orderModel: OrderModel,
-    notificationPayload: any
-  ): Promise<void> {
-    await this.notificationService.send(notificationPayload);
+    await this.orderRepository.upsertOrder(orderPayload.customer, model);
   }
 }
 

@@ -4,7 +4,6 @@ import OrderItemModel from "../../../../entity/customer/order_item_model";
 const OrderItemScheme = model<OrderItemModel>(
   "order_items",
   new Schema<OrderItemModel>({
-    // _id: { type: Schema.Types.ObjectId, required: true },
     order: { type: String, required: true },
     product: { type: String, required: true },
     name: { type: String, required: true, index: true },

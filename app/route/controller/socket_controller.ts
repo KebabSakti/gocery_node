@@ -1,107 +1,74 @@
-import { DefaultEventsMap } from "@socket.io/component-emitter";
-import { Socket } from "socket.io";
-import ChatMongo from "../../../feature/customer/chat/datasource/chat_mongo";
-import ChatRepository from "../../../feature/customer/chat/repository/chat_repository";
-import { OrderStatus } from "../../../feature/customer/order/config/order_enum";
-import OrderMongo from "../../../feature/customer/order/datasource/order_mongo";
-import OrderRepository from "../../../feature/customer/order/repository/order_repository";
-import SocketIO from "../../service/socketio";
-import { ChatModel } from "./../../../feature/customer/chat/model/chat_model";
+import { Server } from "socket.io";
+import socketMiddelware from "../middleware/socket_middleware";
 
-type SocketType = Socket<
-  DefaultEventsMap,
-  DefaultEventsMap,
-  DefaultEventsMap,
-  any
->;
+const socketController = (io: Server) => {
+  io.use(socketMiddelware);
 
-const orderRepository: OrderRepository = new OrderMongo();
-const chatRepository: ChatRepository = new ChatMongo();
+  io.on("connection", (socket) => {
+    const room = socket.data.id;
 
-const socketController = (socket: SocketType, io: SocketIO) => {
-  if (socket.data.user != undefined) {
-    socket.on("disconnect", () => {
-      socket.leave(`room:${socket.data.user}`);
+    socket.on("joinRoom", () => {
+      socket.join(room);
     });
 
-    socket.on("user:joined", () => {
-      socket.join(`room:${socket.data.user}`);
+    socket.on("leaveRoom", () => {
+      socket.leave(room);
     });
 
-    socket.on("order:updated", async (id) => {
-      const results = await orderRepository.show(id);
+    socket.on("chatSend", (payload, callback) => {
+      socket.to(room).emit("chatSend", payload);
 
-      if (results != null) {
-        // const chat = await chatRepository.show(id);
-
-        // if (chat == null) {
-        //   await chatRepository.update({
-        //     session: id,
-        //   });
-        // }
-
-        const sessionRoom = `room:${id}`;
-
-        if (
-          results.status == OrderStatus.ACTIVE ||
-          results.status == OrderStatus.PROGRESS
-        ) {
-          socket.join(sessionRoom);
-        }
-
-        if (
-          results.status == OrderStatus.COMPLETED ||
-          results.status == OrderStatus.CANCELED
-        ) {
-          io.I.socketsLeave(sessionRoom);
-        }
-      }
+      callback({ error: null, payload: payload });
     });
 
-    socket.on("chat:updated", async (payload, callback) => {
-      const chatSessions = await chatRepository.show(payload.session);
+    socket.on("chatRead", (payload, callback) => {
+      socket.to(room).emit("chatRead", payload);
 
-      const chatModel: ChatModel = {
-        ...chatSessions,
-        updated_at: Date.now().toString(),
-        chats: [
-          ...chatSessions!.chats!,
-          {
-            ...payload,
-            sent: Date.now().toString(),
-          },
-        ],
-      };
-
-      chatRepository.update(chatModel);
-
-      socket.to(`room:${payload.session}`).emit("chat:updated", chatModel);
-
-      callback(chatModel);
+      callback({ error: null, payload: payload });
     });
 
-    socket.on("chat:read", async (session) => {
-      const chatSessions = await chatRepository.show(session);
+    socket.on("orderSubmit", (payload, callback) => {
+      socket.to(room).emit("orderSubmit", payload);
 
-      if (chatSessions != null) {
-        const chats = [];
-
-        for (const item of chatSessions.chats!) {
-          chats.push({ ...item, read: Date.now().toString() });
-        }
-
-        const chatModel: ChatModel = {
-          ...chatSessions,
-          chats: chats,
-          updated_at: Date.now().toString(),
-        };
-
-        chatRepository.update(chatModel);
-
-        socket.to(`room:${session}`).emit("chat:updated", chatModel);
-      }
+      callback({ error: null, payload: payload });
     });
-  }
+
+    socket.on("orderSelect", (payload, callback) => {
+      socket.to(room).emit("orderSelect", payload);
+
+      callback({ error: null, payload: payload });
+    });
+
+    socket.on("orderCancel", (payload, callback) => {
+      socket.to(room).emit("orderCancel", payload);
+
+      callback({ error: null, payload: payload });
+    });
+
+    socket.on("orderComplete", (payload, callback) => {
+      socket.to(room).emit("orderComplete", payload);
+
+      callback({ error: null, payload: payload });
+    });
+
+    socket.on("paymentComplete", (payload, callback) => {
+      socket.to(room).emit("paymentComplete", payload);
+
+      callback({ error: null, payload: payload });
+    });
+
+    socket.on("paymentCancel", (payload, callback) => {
+      socket.to(room).emit("paymentCancel", payload);
+
+      callback({ error: null, payload: payload });
+    });
+
+    socket.on("paymentExpire", (payload, callback) => {
+      socket.to(room).emit("paymentExpire", payload);
+
+      callback({ error: null, payload: payload });
+    });
+  });
 };
 
 export default socketController;

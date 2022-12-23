@@ -6,8 +6,11 @@ import OrderItemScheme from "./order_item_scheme";
 import OrderScheme from "./order_scheme";
 
 class OrderMongodb implements OrderContract {
-  async index(customer: string, option: OrderOption): Promise<OrderModel[]> {
-    const query = OrderScheme.find({ "customer._id": customer })
+  async getAllOrder(
+    customerId: string,
+    option: OrderOption
+  ): Promise<OrderModel[]> {
+    const query = OrderScheme.find({ "customer._id": customerId })
       .select("-created_at -updated_at -__v")
       .populate("items");
 
@@ -28,9 +31,15 @@ class OrderMongodb implements OrderContract {
     return results;
   }
 
-  async show(_id: string): Promise<OrderModel | null> {
-    if (mongoose.isValidObjectId(_id)) {
-      const results = await OrderScheme.findOne({ _id: _id })
+  async getOrderDetail(
+    orderId: string,
+    customerId: string
+  ): Promise<OrderModel | null> {
+    if (mongoose.isValidObjectId(orderId)) {
+      const results = await OrderScheme.findOne({
+        _id: orderId,
+        "customer._id": customerId,
+      })
         .select("-created_at -updated_at -__v -customer")
         .populate("items")
         .lean();
@@ -41,17 +50,27 @@ class OrderMongodb implements OrderContract {
     return null;
   }
 
-  async update(_id: string, orderModel: OrderModel): Promise<void> {
-    await OrderScheme.findByIdAndUpdate(_id, orderModel);
+  async updateOrder(
+    orderId: string,
+    customerId: string,
+    orderModel: OrderModel
+  ): Promise<void> {
+    await OrderScheme.findOneAndUpdate(
+      {
+        _id: orderId,
+        "customer._id": customerId,
+      },
+      orderModel
+    );
   }
 
-  async upsert(customer: string, orderModel: OrderModel): Promise<void> {
+  async upsertOrder(customerId: string, orderModel: OrderModel): Promise<void> {
     const items = orderModel.items!.map((e, _) => {
       return { ...e, _id: new mongoose.Types.ObjectId() };
     });
 
     const order = await OrderScheme.findOneAndUpdate(
-      { "customer._id": customer, status: null },
+      { "customer._id": customerId, status: null },
       { ...orderModel, items: items },
       { upsert: true, returnDocument: "after" }
     );
@@ -68,43 +87,13 @@ class OrderMongodb implements OrderContract {
     }
   }
 
-  async showByCustomer(
-    customer: string,
-    option: OrderOption
-  ): Promise<OrderModel | null> {
-    const query = OrderScheme.findOne({
-      "customer._id": customer,
-      status: option.status,
-    })
-      .select("-created_at -updated_at -__v")
-      .populate("items");
-
-    if (option.payment != undefined) {
-      query.where({ "payment.status": option.payment });
-    }
-
-    const results = query.exec();
-
-    return results;
-  }
-
-  async showLastOrder(customer: string): Promise<OrderModel | null> {
+  async getLatestOrder(customerId: string): Promise<OrderModel | null> {
     const results = await OrderScheme.findOne({
-      "customer._id": customer,
+      "customer._id": customerId,
       status: { $ne: null },
     }).sort({ created_at: "desc" });
 
     return results;
-  }
-
-  async updateByCustomer(
-    customer: string,
-    orderModel: OrderModel
-  ): Promise<void> {
-    await OrderScheme.findOneAndUpdate(
-      { "customer._id": customer },
-      orderModel
-    );
   }
 }
 

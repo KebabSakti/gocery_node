@@ -26,8 +26,9 @@ class OrderHandler {
   async getOrderDetail(req: Request, res: Response) {
     try {
       const orderId = req.params.orderId;
+      const customerId = req.app.locals.user;
 
-      const results = await usecase.getOrderDetail(orderId);
+      const results = await usecase.getOrderDetail(orderId, customerId);
 
       res.json(results);
     } catch (error) {

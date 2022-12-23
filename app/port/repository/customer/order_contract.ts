@@ -2,25 +2,25 @@ import OrderModel from "../../../entity/customer/order_model";
 import OrderOption from "../../../entity/customer/order_option";
 
 abstract class OrderContract {
-  abstract index(customer: string, option: OrderOption): Promise<OrderModel[]>;
-
-  abstract show(_id: string): Promise<OrderModel | null>;
-
-  abstract update(_id: string, orderModel: OrderModel): Promise<void>;
-
-  abstract upsert(customer: string, orderModel: OrderModel): Promise<void>;
-
-  abstract showByCustomer(
-    customer: string,
+  abstract getAllOrder(
+    customerId: string,
     option: OrderOption
+  ): Promise<OrderModel[]>;
+
+  abstract getOrderDetail(
+    orderId: string,
+    customerId: String
   ): Promise<OrderModel | null>;
 
-  abstract showLastOrder(customer: string): Promise<OrderModel | null>;
-
-  abstract updateByCustomer(
-    customer: string,
+  abstract updateOrder(
+    orderId: string,
+    customerId: string,
     orderModel: OrderModel
   ): Promise<void>;
+
+  abstract upsertOrder(customer: string, orderModel: OrderModel): Promise<void>;
+
+  abstract getLatestOrder(customer: string): Promise<OrderModel | null>;
 }
 
 export default OrderContract;

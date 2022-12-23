@@ -1,8 +1,7 @@
-import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { Server } from "socket.io";
 
 class SocketIO {
-  private _i: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>;
+  private _i: Server;
 
   constructor(server: any) {
     this._i = new Server(server, {

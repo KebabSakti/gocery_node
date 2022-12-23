@@ -10,6 +10,7 @@ const OrderScheme = model<OrderModel>(
     total: { type: Number, required: true },
     invoice: { type: String, default: null },
     point: { type: Number, default: 0 },
+    chat: { type: Schema.Types.ObjectId, default: null, ref: "chats" },
     courier: {
       default: null,
       type: {

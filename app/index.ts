@@ -14,6 +14,7 @@ import orderController from "./route/controller/customer/order_controller";
 import productController from "./route/controller/customer/product_controller";
 import searchController from "./route/controller/customer/search_controller";
 import helperController from "./route/controller/helper_controller";
+import socketController from "./route/controller/socket_controller";
 import customerMiddleware from "./route/middleware/customer/customer_middleware";
 
 dotenv.config();
@@ -25,14 +26,8 @@ const server = http.createServer(app);
 const port = 1001;
 const io = new SocketIO(server);
 
-// socket middleware
-// io.I.use(socketAuth);
-
-//socket events
-io.I.on("connection", (socket) => {
-  //socketController(socket, io);
-  console.log(socket.id);
-});
+//socketio
+socketController(io.I);
 
 //express middleware
 app.use(express.json());
@@ -56,5 +51,3 @@ app.use("/api/helper", helperController);
 app.use("*", (_, res) => res.status(404).json("Resource Not Found"));
 
 server.listen(port);
-
-export { io };

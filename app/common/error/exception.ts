@@ -6,4 +6,12 @@ class InternalServerError extends Error {}
 
 class BadRequest extends Error {}
 
-export { ResourceNotFound, Unauthorized, InternalServerError, BadRequest };
+class SocketError extends Error {}
+
+export {
+  ResourceNotFound,
+  Unauthorized,
+  InternalServerError,
+  BadRequest,
+  SocketError,
+};

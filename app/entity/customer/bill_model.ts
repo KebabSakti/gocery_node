@@ -2,8 +2,8 @@ interface BillModel {
   _id?: string;
   title: string;
   value: number;
-  selected?: boolean;
-  active?: boolean;
+  selected?: boolean | null;
+  active?: boolean | null;
   subtitle?: string;
   description?: string;
   note?: string;
