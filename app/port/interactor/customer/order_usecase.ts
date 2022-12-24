@@ -1,6 +1,13 @@
+import ChatModel from "../../../entity/chat_model";
 import BillModel from "../../../entity/customer/bill_model";
+import {
+  OrderStatus,
+  PaymentStatus,
+} from "../../../entity/customer/order_enum";
 import OrderModel from "../../../entity/customer/order_model";
 import OrderPayload from "../../../entity/customer/order_payload";
+import NotificationOption from "../../../entity/notification_option";
+import ChatContract from "../../repository/chat_contract";
 import AppConfigContract from "../../repository/customer/app_config_contract";
 import BillContract from "../../repository/customer/bill_contract";
 import CustomerContract from "../../repository/customer/customer_contract";
@@ -14,6 +21,7 @@ class OrderUsecase {
   private orderRepository: OrderContract;
   private productRepository: ProductContract;
   private customerRepository: CustomerContract;
+  private chatRepository: ChatContract;
   private paymentRepository: PaymentContract;
   private billRepository: BillContract;
   private deductorRepository: DeductorContract;
@@ -24,6 +32,7 @@ class OrderUsecase {
     orderRepository: OrderContract,
     productRepository: ProductContract,
     customerRepository: CustomerContract,
+    chatRepository: ChatContract,
     paymentRepository: PaymentContract,
     billRepository: BillContract,
     deductorRepository: DeductorContract,
@@ -33,6 +42,7 @@ class OrderUsecase {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
     this.customerRepository = customerRepository;
+    this.chatRepository = chatRepository;
     this.paymentRepository = paymentRepository;
     this.billRepository = billRepository;
     this.deductorRepository = deductorRepository;
@@ -40,11 +50,8 @@ class OrderUsecase {
     this.notificationService = notificationService;
   }
 
-  async getOrderDetail(
-    orderId: string,
-    customerId: string
-  ): Promise<OrderModel | null> {
-    return await this.orderRepository.getOrderDetail(orderId, customerId);
+  async getOrderDetail(orderId: string): Promise<OrderModel | null> {
+    return await this.orderRepository.getOrderDetail(orderId);
   }
 
   async updateOrderSummary(orderPayload: OrderPayload): Promise<void> {
@@ -215,6 +222,44 @@ class OrderUsecase {
     };
 
     await this.orderRepository.upsertOrder(orderPayload.customer, model);
+  }
+
+  async submitOrder(orderId: string): Promise<void> {
+    const order = await this.orderRepository.getOrderDetail(orderId);
+
+    if (order != null) {
+      // if (order.status == null && order.payment!.status == null) {
+      let orderModel: OrderModel = {};
+      let chatModel: ChatModel = {
+        session: orderId,
+        user: order.customer?._id,
+      };
+      let orderStatus = OrderStatus.PENDING;
+      let paymentStatus = PaymentStatus.PENDING;
+
+      if (order.payment!.cash) {
+        orderStatus = OrderStatus.ACTIVE;
+      }
+
+      orderModel = {
+        ...order,
+        status: orderStatus,
+        chat: orderId,
+        payment: { ...order.payment!, status: paymentStatus },
+      };
+
+      await this.chatRepository.upsertChatSession(orderId, chatModel);
+
+      await this.orderRepository.updateOrder(orderId, orderModel);
+
+      const notifPayload: NotificationOption = {
+        title: "Order Baru",
+        body: "Anda mendapatkan orderan baru, sentuh untuk cek detail",
+      };
+
+      await this.notificationService.sendToTopic("new_order", notifPayload);
+      // }
+    }
   }
 }
 

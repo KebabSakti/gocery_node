@@ -7,16 +7,9 @@ abstract class OrderContract {
     option: OrderOption
   ): Promise<OrderModel[]>;
 
-  abstract getOrderDetail(
-    orderId: string,
-    customerId: String
-  ): Promise<OrderModel | null>;
+  abstract getOrderDetail(orderId: string): Promise<OrderModel | null>;
 
-  abstract updateOrder(
-    orderId: string,
-    customerId: string,
-    orderModel: OrderModel
-  ): Promise<void>;
+  abstract updateOrder(orderId: string, orderModel: OrderModel): Promise<void>;
 
   abstract upsertOrder(customer: string, orderModel: OrderModel): Promise<void>;
 

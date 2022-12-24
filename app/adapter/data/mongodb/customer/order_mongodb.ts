@@ -31,16 +31,12 @@ class OrderMongodb implements OrderContract {
     return results;
   }
 
-  async getOrderDetail(
-    orderId: string,
-    customerId: string
-  ): Promise<OrderModel | null> {
+  async getOrderDetail(orderId: string): Promise<OrderModel | null> {
     if (mongoose.isValidObjectId(orderId)) {
       const results = await OrderScheme.findOne({
         _id: orderId,
-        "customer._id": customerId,
       })
-        .select("-created_at -updated_at -__v -customer")
+        .select("-created_at -updated_at -__v")
         .populate("items")
         .lean();
 
@@ -50,18 +46,8 @@ class OrderMongodb implements OrderContract {
     return null;
   }
 
-  async updateOrder(
-    orderId: string,
-    customerId: string,
-    orderModel: OrderModel
-  ): Promise<void> {
-    await OrderScheme.findOneAndUpdate(
-      {
-        _id: orderId,
-        "customer._id": customerId,
-      },
-      orderModel
-    );
+  async updateOrder(orderId: string, orderModel: OrderModel): Promise<void> {
+    await OrderScheme.findByIdAndUpdate(orderId, orderModel);
   }
 
   async upsertOrder(customerId: string, orderModel: OrderModel): Promise<void> {
