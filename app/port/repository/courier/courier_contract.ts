@@ -1,7 +1,7 @@
 import CourierModel from "../../../entity/courier/courier_model";
 
-abstract class CourierRepository {
+abstract class CourierContract {
   abstract show(id: string): Promise<CourierModel | null>;
 }
 
-export default CourierRepository;
+export default CourierContract;

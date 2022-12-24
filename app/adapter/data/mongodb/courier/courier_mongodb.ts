@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import CourierModel from "../../../../entity/courier/courier_model";
-import CourierRepository from "../../../../port/repository/courier/courier_repository";
+import CourierContract from "../../../../port/repository/courier/courier_contract";
 import CourierScheme from "./courier_scheme";
 
-class CourierMongodb implements CourierRepository {
+class CourierMongodb implements CourierContract {
   async show(id: string): Promise<CourierModel | null> {
     let results: CourierModel | null = null;
 
