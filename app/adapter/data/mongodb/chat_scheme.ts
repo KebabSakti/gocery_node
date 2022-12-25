@@ -3,13 +3,16 @@ import ChatModel from "../../../entity/chat_model";
 
 const scheme = new Schema({
   session: { type: String, required: true },
-  user: { type: Schema.Types.ObjectId, refPath: "userModel" },
+  user: { type: String, refPath: "userModel" },
   userModel: {
     type: String,
     required: true,
     enum: ["couriers", "customers"],
   },
-  chats: [{ type: Schema.Types.ObjectId, ref: "chat_items" }],
+  chats: {
+    default: [],
+    type: [{ type: Schema.Types.ObjectId, ref: "chat_items" }],
+  },
   created_at: { type: String, default: Date.now() },
   updated_at: { type: String, default: Date.now() },
 });

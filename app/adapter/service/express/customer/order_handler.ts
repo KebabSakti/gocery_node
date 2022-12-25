@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import ErrorHandler from "../../../../common/error/error_handler";
 import OrderPayload from "../../../../entity/customer/order_payload";
 import OrderUsecase from "../../../../port/interactor/customer/order_usecase";
+import ChatMongodb from "../../../data/mongodb/chat_mongodb";
 import AppConfigMongodb from "../../../data/mongodb/customer/app_config_mongodb";
 import BillMongodb from "../../../data/mongodb/customer/bill_mongodb";
 import CustomerMongodb from "../../../data/mongodb/customer/customer_mongodb";
@@ -15,6 +16,7 @@ const usecase = new OrderUsecase(
   new OrderMongodb(),
   new ProductMongodb(),
   new CustomerMongodb(),
+  new ChatMongodb(),
   new PaymentMongodb(),
   new BillMongodb(),
   new DeductorMongodb(),
@@ -26,9 +28,8 @@ class OrderHandler {
   async getOrderDetail(req: Request, res: Response) {
     try {
       const orderId = req.params.orderId;
-      const customerId = req.app.locals.user;
 
-      const results = await usecase.getOrderDetail(orderId, customerId);
+      const results = await usecase.getOrderDetail(orderId);
 
       res.json(results);
     } catch (error) {
