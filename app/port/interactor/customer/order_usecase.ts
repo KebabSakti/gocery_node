@@ -228,37 +228,39 @@ class OrderUsecase {
     const order = await this.orderRepository.getOrderDetail(orderId);
 
     if (order != null) {
-      // if (order.status == null && order.payment!.status == null) {
-      let orderModel: OrderModel = {};
-      let chatModel: ChatModel = {
-        session: orderId,
-        user: order.customer?._id,
-      };
-      let orderStatus = OrderStatus.PENDING;
-      let paymentStatus = PaymentStatus.PENDING;
+      if (order.status == null && order.payment!.status == null) {
+        let orderModel: OrderModel = {};
+        let chatModel: ChatModel = {
+          session: orderId,
+          user: order.customer?._id,
+        };
+        let orderStatus = OrderStatus.PENDING;
+        let paymentStatus = PaymentStatus.PENDING;
 
-      if (order.payment!.cash) {
-        orderStatus = OrderStatus.ACTIVE;
+        if (order.payment!.cash) {
+          orderStatus = OrderStatus.ACTIVE;
+        }
+
+        orderModel = {
+          ...order,
+          status: orderStatus,
+          chat: orderId,
+          payment: { ...order.payment!, status: paymentStatus },
+        };
+
+        await this.chatRepository.upsertChatSession(orderId, chatModel);
+
+        await this.orderRepository.updateOrder(orderId, orderModel);
+
+        if (orderStatus == OrderStatus.ACTIVE) {
+          const notifPayload: NotificationOption = {
+            title: "Order Baru",
+            body: `Antar ke ${orderModel.shipping?.address} atas nama ${orderModel.customer?.name}`,
+          };
+
+          await this.notificationService.sendToTopic("new_order", notifPayload);
+        }
       }
-
-      orderModel = {
-        ...order,
-        status: orderStatus,
-        chat: orderId,
-        payment: { ...order.payment!, status: paymentStatus },
-      };
-
-      await this.chatRepository.upsertChatSession(orderId, chatModel);
-
-      await this.orderRepository.updateOrder(orderId, orderModel);
-
-      const notifPayload: NotificationOption = {
-        title: "Order Baru",
-        body: "Anda mendapatkan orderan baru, sentuh untuk cek detail",
-      };
-
-      await this.notificationService.sendToTopic("new_order", notifPayload);
-      // }
     }
   }
 }
