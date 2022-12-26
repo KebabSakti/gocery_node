@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import ChatItemModel from "../../../entity/chat_item_model";
 import ChatModel from "../../../entity/chat_model";
 import ChatContract from "../../../port/repository/chat_contract";
 import ChatItemScheme from "./chat_item_scheme";
@@ -19,20 +19,18 @@ class ChatMongodb implements ChatContract {
   async upsertChatSession(
     session: string,
     chatModel: ChatModel
-  ): Promise<ChatModel> {
-    const chatItems = await ChatItemScheme.find({ session: chatModel.session });
-    const items = [...chatItems, chatModel.chats];
-    const transaction = await mongoose.startSession();
+  ): Promise<ChatModel | null> {
+    const items: ChatItemModel[] = [];
 
-    transaction.startTransaction();
+    if (chatModel.chats != undefined) {
+      await ChatItemScheme.deleteMany({ session: session });
 
-    await ChatItemScheme.deleteMany({ session: session }).session(transaction);
-
-    for (const item of chatModel.chats!) {
-      await ChatItemScheme.create([item], { transaction });
+      for (const item of chatModel.chats) {
+        await ChatItemScheme.create(item);
+      }
     }
 
-    const results = await ChatScheme.findOneAndUpdate(
+    const chatSession = await ChatScheme.findOneAndUpdate(
       {
         session: session,
       },
@@ -40,13 +38,9 @@ class ChatMongodb implements ChatContract {
       { upsert: true, returnDocument: "after" }
     )
       .lean()
-      .populate("chats")
-      .select("-active -created_at -updated_at -__v")
-      .session(transaction);
+      .select("-active -created_at -updated_at -__v");
 
-    await transaction.commitTransaction();
-
-    return results;
+    return chatSession;
   }
 }
 

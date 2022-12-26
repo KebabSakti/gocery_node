@@ -16,12 +16,12 @@ const usecase = new OrderUsecase(
   new OrderMongodb(),
   new ProductMongodb(),
   new CustomerMongodb(),
-  new ChatMongodb(),
   new PaymentMongodb(),
   new BillMongodb(),
   new DeductorMongodb(),
   new AppConfigMongodb(),
-  new NotificationFcm()
+  new NotificationFcm(),
+  new ChatMongodb()
 );
 
 class OrderHandler {

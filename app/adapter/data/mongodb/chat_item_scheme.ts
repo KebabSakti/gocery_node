@@ -3,7 +3,7 @@ import ChatItemModel from "../../../entity/chat_item_model";
 
 const scheme = new Schema({
   session: { type: String, required: true },
-  sender: { type: Schema.Types.ObjectId, ref: "userModel" },
+  sender: { type: String, ref: "userModel" },
   userModel: {
     type: String,
     required: true,

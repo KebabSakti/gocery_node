@@ -6,7 +6,7 @@ abstract class ChatContract {
   abstract upsertChatSession(
     session: string,
     chatModel: ChatModel
-  ): Promise<ChatModel>;
+  ): Promise<ChatModel | null>;
 }
 
 export default ChatContract;

@@ -17,19 +17,23 @@ const usecase = new OrderUsecase(
   new OrderMongodb(),
   new ProductMongodb(),
   new CustomerMongodb(),
-  new ChatMongodb(),
   new PaymentMongodb(),
   new BillMongodb(),
   new DeductorMongodb(),
   new AppConfigMongodb(),
-  new NotificationFcm()
+  new NotificationFcm(),
+  new ChatMongodb()
 );
 
 router.get("*", async (req: Request, res: Response) => {
   try {
     // const iterates: number[] = [...Array(20).keys()];
 
-    await usecase.submitOrder("63a5c31d9396a401ba3875c0");
+    const { param } = req.query;
+
+    if (param != undefined) {
+      await usecase.submitOrder(param.toString());
+    }
 
     res.status(200).end();
   } catch (error) {

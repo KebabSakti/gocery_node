@@ -1,3 +1,4 @@
+import ChatItemModel from "../../../entity/chat_item_model";
 import ChatModel from "../../../entity/chat_model";
 import BillModel from "../../../entity/customer/bill_model";
 import {
@@ -21,33 +22,33 @@ class OrderUsecase {
   private orderRepository: OrderContract;
   private productRepository: ProductContract;
   private customerRepository: CustomerContract;
-  private chatRepository: ChatContract;
   private paymentRepository: PaymentContract;
   private billRepository: BillContract;
   private deductorRepository: DeductorContract;
   private appConfigRepository: AppConfigContract;
   private notificationService: NotificationContract;
+  private chatRepository: ChatContract;
 
   constructor(
     orderRepository: OrderContract,
     productRepository: ProductContract,
     customerRepository: CustomerContract,
-    chatRepository: ChatContract,
     paymentRepository: PaymentContract,
     billRepository: BillContract,
     deductorRepository: DeductorContract,
     appConfigRepository: AppConfigContract,
-    notificationService: NotificationContract
+    notificationService: NotificationContract,
+    chatRepository: ChatContract
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
     this.customerRepository = customerRepository;
-    this.chatRepository = chatRepository;
     this.paymentRepository = paymentRepository;
     this.billRepository = billRepository;
     this.deductorRepository = deductorRepository;
     this.appConfigRepository = appConfigRepository;
     this.notificationService = notificationService;
+    this.chatRepository = chatRepository;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderModel | null> {
@@ -55,7 +56,7 @@ class OrderUsecase {
   }
 
   async updateOrderSummary(orderPayload: OrderPayload): Promise<void> {
-    const user = await this.customerRepository.show(orderPayload.customer);
+    const customer = await this.customerRepository.show(orderPayload.customer);
     const lastOrder = await this.orderRepository.getLatestOrder(
       orderPayload.customer
     );
@@ -73,8 +74,8 @@ class OrderUsecase {
     let paymentFeeTotal = 0;
     let payTotal = 0;
 
-    if (user != null && orderPayload.point == true) {
-      point = user.point!;
+    if (customer != null && orderPayload.point == true) {
+      point = customer.point!;
     }
 
     if (shipping == undefined) {
@@ -210,6 +211,14 @@ class OrderUsecase {
     payTotal = billTotal - deductorTotal < 0 ? 0 : billTotal - deductorTotal;
 
     const model: OrderModel = {
+      customer: {
+        _id: customer!._id!,
+        name: customer!.name!,
+        email: customer!.email,
+        image: customer!.image,
+        phone: customer!.phone,
+        point: customer!.point,
+      },
       point: point,
       shipping: shipping,
       delivery: delivery,
@@ -228,39 +237,43 @@ class OrderUsecase {
     const order = await this.orderRepository.getOrderDetail(orderId);
 
     if (order != null) {
-      if (order.status == null && order.payment!.status == null) {
-        let orderModel: OrderModel = {};
-        let chatModel: ChatModel = {
-          session: orderId,
+      // if (order.status == null && order.payment!.status == null) {
+      let orderStatus = OrderStatus.PENDING;
+      let paymentStatus = PaymentStatus.PENDING;
+
+      if (order.payment!.cash) {
+        orderStatus = OrderStatus.ACTIVE;
+      }
+
+      const orderModel: OrderModel = {
+        ...order,
+        status: orderStatus,
+        payment: { ...order.payment!, status: paymentStatus },
+      };
+
+      await this.orderRepository.updateOrder(orderId, orderModel);
+
+      if (orderStatus == OrderStatus.ACTIVE) {
+        const chatModel: ChatModel = {
+          session: order._id,
           user: order.customer?._id,
         };
-        let orderStatus = OrderStatus.PENDING;
-        let paymentStatus = PaymentStatus.PENDING;
 
-        if (order.payment!.cash) {
-          orderStatus = OrderStatus.ACTIVE;
-        }
+        await this.chatRepository.upsertChatSession(
+          order._id!.toString(),
+          chatModel
+        );
 
-        orderModel = {
-          ...order,
-          status: orderStatus,
-          chat: orderId,
-          payment: { ...order.payment!, status: paymentStatus },
+        const notifPayload: NotificationOption = {
+          title: "Orderan Baru",
+          body: `Antar ke ${orderModel.shipping?.address} atas nama ${
+            orderModel.shipping!.name
+          }`,
         };
 
-        await this.chatRepository.upsertChatSession(orderId, chatModel);
-
-        await this.orderRepository.updateOrder(orderId, orderModel);
-
-        if (orderStatus == OrderStatus.ACTIVE) {
-          const notifPayload: NotificationOption = {
-            title: "Order Baru",
-            body: `Antar ke ${orderModel.shipping?.address} atas nama ${orderModel.customer?.name}`,
-          };
-
-          await this.notificationService.sendToTopic("new_order", notifPayload);
-        }
+        await this.notificationService.sendToTopic("new_order", notifPayload);
       }
+      // }
     }
   }
 }

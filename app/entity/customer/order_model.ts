@@ -8,7 +8,6 @@ interface OrderModel {
   total?: number;
   qty?: number;
   point?: number;
-  chat?: string;
   status?: OrderStatus;
   courier?: {
     _id: string;
