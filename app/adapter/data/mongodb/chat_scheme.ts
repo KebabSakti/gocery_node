@@ -1,14 +1,9 @@
-import { model, Schema } from "mongoose";
+import mongoose, { model, Schema } from "mongoose";
 import ChatModel from "../../../entity/chat_model";
 
 const scheme = new Schema({
   session: { type: String, required: true },
-  user: { type: String, refPath: "userModel" },
-  userModel: {
-    type: String,
-    required: true,
-    enum: ["couriers", "customers"],
-  },
+  user: { type: Schema.Types.Mixed },
   chats: {
     default: [],
     type: [{ type: Schema.Types.ObjectId, ref: "chat_items" }],

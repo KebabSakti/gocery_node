@@ -34,20 +34,18 @@ class ChatUsecase {
     const order = await this.orderRepository.getOrderDetail(option.session);
 
     if (chat == null || order == null) {
-      throw new ResourceNotFound();
+      throw new ResourceNotFound("Chat session not found");
     }
 
-    const courier = await this.courierRepository.show(order.courier!._id);
     const customer = await this.customerRepository.show(order.customer?._id!);
 
     if (customer == null) {
-      throw new ResourceNotFound();
+      throw new ResourceNotFound("Customer not found");
     }
 
     let chatItems = [
       ...chat.chats!,
       {
-        _id: option.chatId,
         session: option.session,
         sender: option.sender,
         message: option.message,
@@ -61,7 +59,13 @@ class ChatUsecase {
       chatModel
     );
 
-    if (courier != null) {
+    if (order.courier != null) {
+      const courier = await this.courierRepository.show(order.courier._id);
+
+      if (courier == null) {
+        throw new ResourceNotFound("Courier not found");
+      }
+
       if (order.customer?._id == option.sender) {
         const tokens = [courier.fcm!];
 

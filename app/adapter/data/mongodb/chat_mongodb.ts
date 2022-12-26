@@ -1,7 +1,9 @@
+// import ChatItemModel from "../../../entity/chat_item_model";
 import ChatItemModel from "../../../entity/chat_item_model";
 import ChatModel from "../../../entity/chat_model";
 import ChatContract from "../../../port/repository/chat_contract";
 import ChatItemScheme from "./chat_item_scheme";
+// import ChatItemScheme from "./chat_item_scheme";
 import ChatScheme from "./chat_scheme";
 
 class ChatMongodb implements ChatContract {
@@ -10,7 +12,7 @@ class ChatMongodb implements ChatContract {
       session: session,
     })
       .lean()
-      .populate("chats")
+      // .populate("chats")
       .select("-active -created_at -updated_at -__v");
 
     return results;
@@ -20,6 +22,8 @@ class ChatMongodb implements ChatContract {
     session: string,
     chatModel: ChatModel
   ): Promise<ChatModel | null> {
+    console.log(chatModel);
+
     const items: ChatItemModel[] = [];
 
     if (chatModel.chats != undefined) {

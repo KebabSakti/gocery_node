@@ -1,5 +1,5 @@
 interface ChatSendOption {
-  chatId: string;
+  chatId?: string;
   session: string;
   sender: string;
   message: string;

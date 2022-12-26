@@ -3,13 +3,8 @@ import ChatItemModel from "../../../entity/chat_item_model";
 
 const scheme = new Schema({
   session: { type: String, required: true },
-  sender: { type: String, ref: "userModel" },
-  userModel: {
-    type: String,
-    required: true,
-    enum: ["couriers", "customers"],
-  },
-  messsage: { type: String, required: true },
+  sender: { type: Schema.Types.Mixed },
+  message: { type: String, required: true },
   image: { type: Boolean, default: false },
   sent: { type: String, default: Date.now() },
   read: { type: String, default: null },
