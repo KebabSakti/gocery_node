@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import ErrorHandler from "../../../../common/error/error_handler";
+import { BadRequest } from "../../../../common/error/exception";
 import OrderPayload from "../../../../entity/customer/order_payload";
 import OrderUsecase from "../../../../port/interactor/customer/order_usecase";
 import ChatMongodb from "../../../data/mongodb/chat_mongodb";
@@ -63,7 +64,21 @@ class OrderHandler {
     }
   }
 
-  async updateOrderStatus(req: Request, res: Response) {}
+  async submitOrder(req: Request, res: Response) {
+    try {
+      const { order_id } = req.body;
+
+      if (order_id == undefined) {
+        throw new BadRequest();
+      }
+
+      await usecase.submitOrder(order_id);
+
+      res.status(200).end();
+    } catch (error) {
+      new ErrorHandler(res, error);
+    }
+  }
 }
 
 export default OrderHandler;

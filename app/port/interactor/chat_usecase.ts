@@ -3,30 +3,28 @@ import ChatModel from "../../entity/chat_model";
 import ChatSendOption from "../../entity/chat_send_option";
 import NotificationOption from "../../entity/notification_option";
 import ChatContract from "../repository/chat_contract";
-import CourierContract from "../repository/courier/courier_contract";
-import CustomerContract from "../repository/customer/customer_contract";
 import OrderContract from "../repository/customer/order_contract";
 import NotificationContract from "../service/customer/notification_contract";
 
 class ChatUsecase {
   private chatRepository: ChatContract;
   private orderRepository: OrderContract;
-  private customerRepository: CustomerContract;
-  private courierRepository: CourierContract;
   private notificationService: NotificationContract;
 
   constructor(
     chatRepository: ChatContract,
     orderRepository: OrderContract,
-    customerRepository: CustomerContract,
-    courierRepository: CourierContract,
     notificationService: NotificationContract
   ) {
     this.chatRepository = chatRepository;
     this.orderRepository = orderRepository;
-    this.customerRepository = customerRepository;
-    this.courierRepository = courierRepository;
     this.notificationService = notificationService;
+  }
+
+  async getChatSession(session: string): Promise<ChatModel | null> {
+    const results = await this.chatRepository.getChatSession(session);
+
+    return results;
   }
 
   async chatSend(option: ChatSendOption): Promise<ChatModel | null> {
@@ -35,12 +33,6 @@ class ChatUsecase {
 
     if (chat == null || order == null) {
       throw new ResourceNotFound("Chat session not found");
-    }
-
-    const customer = await this.customerRepository.show(order.customer?._id!);
-
-    if (customer == null) {
-      throw new ResourceNotFound("Customer not found");
     }
 
     let chatItems = [
@@ -59,29 +51,23 @@ class ChatUsecase {
       chatModel
     );
 
-    if (order.courier != null) {
-      const courier = await this.courierRepository.show(order.courier._id);
-
-      if (courier == null) {
-        throw new ResourceNotFound("Courier not found");
-      }
-
-      if (order.customer?._id == option.sender) {
-        const tokens = [courier.fcm!];
+    if (order.courier != null && order.customer != null) {
+      if (order.customer._id == option.sender) {
+        const tokens = [order.courier.fcm];
 
         const notifPayload: NotificationOption = {
-          title: `Kustomer . ${customer.name}`,
+          title: `Kustomer . ${order.customer.name}`,
           body: option.message,
         };
 
         await this.notificationService.sendToTokens(tokens, notifPayload);
       }
 
-      if (order.courier?._id == option.sender) {
-        const tokens = [customer.fcm!];
+      if (order.courier._id == option.sender) {
+        const tokens = [order.customer.fcm];
 
         const notifPayload: NotificationOption = {
-          title: `Kurir . ${courier.name}`,
+          title: `Kurir . ${order.courier.name}`,
           body: option.message,
         };
 

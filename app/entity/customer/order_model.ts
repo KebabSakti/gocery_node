@@ -12,6 +12,7 @@ interface OrderModel {
   courier?: {
     _id: string;
     name: string;
+    fcm: string;
     email?: string;
     phone?: string;
     image?: string;
@@ -19,6 +20,7 @@ interface OrderModel {
   customer?: {
     _id: string;
     name: string;
+    fcm: string;
     email?: string;
     phone?: string;
     image?: string;

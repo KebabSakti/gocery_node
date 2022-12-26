@@ -21,12 +21,6 @@ const socketController = (io: Server) => {
       callback({ error: null, payload: payload });
     });
 
-    socket.on("chatRead", (payload, callback) => {
-      socket.to(room).emit("chatRead", payload);
-
-      callback({ error: null, payload: payload });
-    });
-
     socket.on("orderSubmit", (payload, callback) => {
       socket.to(room).emit("orderSubmit", payload);
 

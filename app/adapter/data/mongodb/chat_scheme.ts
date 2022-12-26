@@ -8,6 +8,7 @@ const scheme = new Schema({
     default: [],
     type: [{ type: Schema.Types.ObjectId, ref: "chat_items" }],
   },
+  ended: { type: Boolean, default: false },
   created_at: { type: String, default: Date.now() },
   updated_at: { type: String, default: Date.now() },
 });

@@ -5,6 +5,7 @@ interface ChatModel {
   session?: string;
   user?: string;
   chats?: ChatItemModel[];
+  ended?: boolean;
   created_at?: string;
   updated_at?: string;
 }

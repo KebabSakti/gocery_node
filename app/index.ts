@@ -10,6 +10,7 @@ import bannerController from "./route/controller/customer/banner_controller";
 import bundleController from "./route/controller/customer/bundle_controller";
 import cartController from "./route/controller/customer/cart_controller";
 import categoryController from "./route/controller/customer/category_controller";
+import chatController from "./route/controller/customer/chat_controller";
 import orderController from "./route/controller/customer/order_controller";
 import productController from "./route/controller/customer/product_controller";
 import searchController from "./route/controller/customer/search_controller";
@@ -42,6 +43,7 @@ app.use("/api/customer/bundles", customerMiddleware, bundleController);
 app.use("/api/customer/searches", customerMiddleware, searchController);
 app.use("/api/customer/carts", customerMiddleware, cartController);
 app.use("/api/customer/orders", customerMiddleware, orderController);
+app.use("/api/customer/chats", customerMiddleware, chatController);
 
 //global
 app.use("/api/callback", callbackController);

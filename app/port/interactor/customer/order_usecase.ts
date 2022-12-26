@@ -161,13 +161,15 @@ class OrderUsecase {
       }
     }
 
-    //point deduction
-    deductors.push({
-      title: "Potongan Point",
-      value: point,
-      selected: null,
-      active: null,
-    });
+    if (point > 0) {
+      //point deduction
+      deductors.push({
+        title: "Potongan Point",
+        value: point,
+        selected: null,
+        active: null,
+      });
+    }
 
     //dynamic deductor
     for (const deductorItem of orderPayload.deductors) {
@@ -214,6 +216,7 @@ class OrderUsecase {
       customer: {
         _id: customer!._id!,
         name: customer!.name!,
+        fcm: customer!.fcm!,
         email: customer!.email,
         image: customer!.image,
         phone: customer!.phone,
