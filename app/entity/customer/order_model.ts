@@ -8,6 +8,7 @@ interface OrderModel {
   total?: number;
   qty?: number;
   point?: number;
+  clearCart?: boolean;
   status?: OrderStatus;
   courier?: {
     _id: string;

@@ -1,7 +1,11 @@
 interface ChatItemModel {
   _id?: string;
   session?: string;
-  sender?: string;
+  sender?: {
+    _id: string;
+    name: string;
+    role: string;
+  };
   message?: string;
   image?: boolean;
   sent?: string;

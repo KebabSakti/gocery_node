@@ -259,7 +259,6 @@ class OrderUsecase {
       if (orderStatus == OrderStatus.ACTIVE) {
         const chatModel: ChatModel = {
           session: order._id,
-          user: order.customer?._id,
         };
 
         await this.chatRepository.upsertChatSession(
@@ -277,6 +276,10 @@ class OrderUsecase {
         await this.notificationService.sendToTopic("new_order", notifPayload);
       }
       // }
+
+      if (order.clearCart) {
+        //clear cart after checkout
+      }
     }
   }
 }

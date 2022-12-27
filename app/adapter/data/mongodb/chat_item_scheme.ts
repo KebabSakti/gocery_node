@@ -3,7 +3,11 @@ import ChatItemModel from "../../../entity/chat_item_model";
 
 const scheme = new Schema({
   session: { type: String, required: true },
-  sender: { type: Schema.Types.Mixed },
+  sender: {
+    _id: { type: String, required: true },
+    name: { type: String, required: true },
+    role: { type: String, required: true },
+  },
   message: { type: String, required: true },
   image: { type: Boolean, default: false },
   sent: { type: String, default: Date.now() },

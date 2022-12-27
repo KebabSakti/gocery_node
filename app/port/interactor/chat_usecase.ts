@@ -52,7 +52,7 @@ class ChatUsecase {
     );
 
     if (order.courier != null && order.customer != null) {
-      if (order.customer._id == option.sender) {
+      if (order.customer._id == option.sender._id) {
         const tokens = [order.courier.fcm];
 
         const notifPayload: NotificationOption = {
@@ -63,7 +63,7 @@ class ChatUsecase {
         await this.notificationService.sendToTokens(tokens, notifPayload);
       }
 
-      if (order.courier._id == option.sender) {
+      if (order.courier._id == option.sender._id) {
         const tokens = [order.customer.fcm];
 
         const notifPayload: NotificationOption = {

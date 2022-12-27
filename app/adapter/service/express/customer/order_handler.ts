@@ -40,8 +40,16 @@ class OrderHandler {
 
   async updateOrderSummary(req: Request, res: Response) {
     try {
-      const { point, shipping, delivery, payment, items, bills, deductors } =
-        req.body;
+      const {
+        point,
+        shipping,
+        delivery,
+        payment,
+        items,
+        bills,
+        deductors,
+        clearCart,
+      } = req.body;
 
       const customer = req.app.locals.user;
 
@@ -54,6 +62,7 @@ class OrderHandler {
         items: items,
         bills: bills,
         deductors: deductors,
+        clearCart: clearCart,
       };
 
       await usecase.updateOrderSummary(orderPayload);

@@ -44,21 +44,25 @@ router.get("*", async (req: Request, res: Response) => {
     if (param != undefined) {
       // await orderUsecase.submitOrder(param.toString());
 
-      // const chatPayload: ChatSendOption = {
-      //   session: param.toString(),
-      //   sender: "sMQ6HEvkfZadQfbbae2Qlgj11IJ2",
-      //   message: "Hallo",
-      // };
+      const chatPayload: ChatSendOption = {
+        session: param.toString(),
+        sender: {
+          _id: "sMQ6HEvkfZadQfbbae2Qlgj11IJ2",
+          name: "Aryo",
+          role: "customers",
+        },
+        message: "Hallo",
+      };
 
-      // await chatUsecase.chatSend(chatPayload);
+      await chatUsecase.chatSend(chatPayload);
 
-      const results = await chatUsecase.getChatSession(param.toString());
+      // const results = await chatUsecase.getChatSession(param.toString());
 
-      if (results == null) {
-        throw new ResourceNotFound("Chat session not found");
-      }
+      // if (results == null) {
+      //   throw new ResourceNotFound("Chat session not found");
+      // }
 
-      res.json(results);
+      // res.json(results);
     }
 
     res.status(200).end();

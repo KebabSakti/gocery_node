@@ -1,7 +1,11 @@
 interface ChatSendOption {
   chatId?: string;
   session: string;
-  sender: string;
+  sender: {
+    _id: string;
+    name: string;
+    role: string;
+  };
   message: string;
 }
 

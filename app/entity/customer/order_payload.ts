@@ -2,6 +2,7 @@ interface OrderPayload {
   customer: string;
   point: boolean;
   payment: string;
+  clearCart?: boolean;
   shipping?: {
     place_id?: string;
     address: string;

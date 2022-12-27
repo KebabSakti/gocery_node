@@ -10,6 +10,7 @@ const OrderScheme = model<OrderModel>(
     total: { type: Number, required: true },
     invoice: { type: String, default: null },
     point: { type: Number, default: 0 },
+    clearCart: { type: Boolean, default: false },
     courier: {
       default: null,
       type: {
