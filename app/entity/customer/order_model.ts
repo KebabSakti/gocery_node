@@ -35,10 +35,14 @@ interface OrderModel {
     note?: string;
   };
   delivery?: {
-    distance: number;
-    unit: string;
+    distanceText: string;
+    distanceValue: number;
+    durationText: string;
+    durationValue: number;
     time: string;
     fee: number;
+    lat: string;
+    lng: string;
   };
   payment?: {
     _id: string;

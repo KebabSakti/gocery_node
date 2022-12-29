@@ -6,9 +6,9 @@ import PaymentContract from "../../../../port/repository/customer/payment_contra
 
 class PaymentMongodb implements PaymentContract {
   async index(option?: PaymentOption | undefined): Promise<PaymentModel[]> {
-    const query = PaymentScheme.find({ active: true }).select(
-      "-active -created_at -updated_at -__v"
-    );
+    const query = PaymentScheme.find({ active: true })
+      .select("-active -created_at -updated_at -__v")
+      .lean();
 
     if (option != undefined) {
       if (option.pagination != undefined) {
@@ -25,9 +25,9 @@ class PaymentMongodb implements PaymentContract {
     let results = null;
 
     if (mongoose.isValidObjectId(id)) {
-      results = await PaymentScheme.findOne({ _id: id, active: true }).select(
-        "-active -created_at -updated_at -__v"
-      );
+      results = await PaymentScheme.findOne({ _id: id, active: true })
+        .select("-active -created_at -updated_at -__v")
+        .lean();
     }
 
     return results;

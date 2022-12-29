@@ -8,6 +8,10 @@ const AppConfigScheme = model<AppConfigModel>(
     fee: {
       delivery: { type: Number, default: 0 },
     },
+    origin: {
+      placeId: { type: String, required: true },
+      latLng: { type: String, required: true },
+    },
     bills: {
       default: [],
       type: [BillSchema],

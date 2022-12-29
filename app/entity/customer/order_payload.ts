@@ -1,8 +1,11 @@
 interface OrderPayload {
   customer: string;
   point: boolean;
-  payment: string;
   clearCart?: boolean;
+  payment: {
+    _id: string;
+    note?: string;
+  };
   shipping?: {
     place_id?: string;
     address: string;
@@ -11,10 +14,8 @@ interface OrderPayload {
     note?: string;
   };
   delivery?: {
-    distance: number;
-    unit: string;
     time: string;
-    fee: number;
+    destination: string;
   };
   items: {
     _id: string;

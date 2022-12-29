@@ -1,6 +1,7 @@
 import ChatItemModel from "../../../entity/chat_item_model";
 import ChatModel from "../../../entity/chat_model";
 import BillModel from "../../../entity/customer/bill_model";
+import DistanceRequest from "../../../entity/customer/distance_request";
 import {
   OrderStatus,
   PaymentStatus,
@@ -11,12 +12,15 @@ import NotificationOption from "../../../entity/notification_option";
 import ChatContract from "../../repository/chat_contract";
 import AppConfigContract from "../../repository/customer/app_config_contract";
 import BillContract from "../../repository/customer/bill_contract";
+import CartContract from "../../repository/customer/cart_contract";
 import CustomerContract from "../../repository/customer/customer_contract";
 import DeductorContract from "../../repository/customer/deductor_contract";
 import OrderContract from "../../repository/customer/order_contract";
 import PaymentContract from "../../repository/customer/payment_contract";
 import ProductContract from "../../repository/customer/product_contract";
+import DistanceContract from "../../service/customer/distance_contract";
 import NotificationContract from "../../service/customer/notification_contract";
+import DistanceUsecase from "./distance_usecase";
 
 class OrderUsecase {
   private orderRepository: OrderContract;
@@ -28,6 +32,8 @@ class OrderUsecase {
   private appConfigRepository: AppConfigContract;
   private notificationService: NotificationContract;
   private chatRepository: ChatContract;
+  private cartRepository: CartContract;
+  private distanceService: DistanceUsecase;
 
   constructor(
     orderRepository: OrderContract,
@@ -38,7 +44,9 @@ class OrderUsecase {
     deductorRepository: DeductorContract,
     appConfigRepository: AppConfigContract,
     notificationService: NotificationContract,
-    chatRepository: ChatContract
+    chatRepository: ChatContract,
+    cartRepository: CartContract,
+    distanceService: DistanceUsecase
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
@@ -49,6 +57,8 @@ class OrderUsecase {
     this.appConfigRepository = appConfigRepository;
     this.notificationService = notificationService;
     this.chatRepository = chatRepository;
+    this.cartRepository = cartRepository;
+    this.distanceService = distanceService;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderModel | null> {
@@ -105,10 +115,15 @@ class OrderUsecase {
 
     if (delivery != undefined) {
       const app = await this.appConfigRepository.show();
-      const fee = app.fee.delivery;
-      deliveryFeeTotal = fee;
+      const distanceResponse = await this.distanceService.getDistance(
+        delivery.destination
+      );
 
-      delivery = { ...delivery, fee: fee };
+      delivery = {
+        time: delivery.time,
+        fee: app.fee.delivery,
+        distanceText: distanceResponse.distance.text,
+      };
     } else {
       delivery = null;
     }
@@ -117,7 +132,7 @@ class OrderUsecase {
       const paymentMethod = await this.paymentRepository.show(payment._id);
       paymentFeeTotal = paymentMethod?.fee!;
 
-      payment = paymentMethod;
+      payment = { ...paymentMethod, note: orderPayload.payment.note };
     }
 
     //total belanja
@@ -252,6 +267,7 @@ class OrderUsecase {
         ...order,
         status: orderStatus,
         payment: { ...order.payment!, status: paymentStatus },
+        updated_at: Date.now().toString(),
       };
 
       await this.orderRepository.updateOrder(orderId, orderModel);
@@ -278,7 +294,7 @@ class OrderUsecase {
       // }
 
       if (order.clearCart) {
-        //clear cart after checkout
+        await this.cartRepository.clearCart(order.customer!._id);
       }
     }
   }

@@ -2,27 +2,49 @@ import { Request, Response } from "express";
 import ErrorHandler from "../../../../common/error/error_handler";
 import { BadRequest } from "../../../../common/error/exception";
 import OrderPayload from "../../../../entity/customer/order_payload";
+import DistanceUsecase from "../../../../port/interactor/customer/distance_usecase";
 import OrderUsecase from "../../../../port/interactor/customer/order_usecase";
 import ChatMongodb from "../../../data/mongodb/chat_mongodb";
 import AppConfigMongodb from "../../../data/mongodb/customer/app_config_mongodb";
 import BillMongodb from "../../../data/mongodb/customer/bill_mongodb";
+import CartMongodb from "../../../data/mongodb/customer/cart_mongodb";
 import CustomerMongodb from "../../../data/mongodb/customer/customer_mongodb";
 import DeductorMongodb from "../../../data/mongodb/customer/deductor_mongodb";
 import OrderMongodb from "../../../data/mongodb/customer/order_mongodb";
 import PaymentMongodb from "../../../data/mongodb/customer/payment_mongodb";
 import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
 import NotificationFcm from "../../fcm/customer/notification_fcm";
+import DistanceMatrix from "../../google/distance/distance_matrix";
+
+const orderRepository = new OrderMongodb();
+const productRepository = new ProductMongodb();
+const customerRepository = new CustomerMongodb();
+const paymentRepository = new PaymentMongodb();
+const billRepository = new BillMongodb();
+const deductorRepository = new DeductorMongodb();
+const appConfigRepository = new AppConfigMongodb();
+const notificationService = new NotificationFcm();
+const chatRepository = new ChatMongodb();
+const cartRepository = new CartMongodb();
+const distanceService = new DistanceMatrix();
+
+const distanceUsecase = new DistanceUsecase(
+  distanceService,
+  appConfigRepository
+);
 
 const usecase = new OrderUsecase(
-  new OrderMongodb(),
-  new ProductMongodb(),
-  new CustomerMongodb(),
-  new PaymentMongodb(),
-  new BillMongodb(),
-  new DeductorMongodb(),
-  new AppConfigMongodb(),
-  new NotificationFcm(),
-  new ChatMongodb()
+  orderRepository,
+  productRepository,
+  customerRepository,
+  paymentRepository,
+  billRepository,
+  deductorRepository,
+  appConfigRepository,
+  notificationService,
+  chatRepository,
+  cartRepository,
+  distanceUsecase
 );
 
 class OrderHandler {
@@ -48,7 +70,7 @@ class OrderHandler {
         items,
         bills,
         deductors,
-        clearCart,
+        clear_cart,
       } = req.body;
 
       const customer = req.app.locals.user;
@@ -62,7 +84,7 @@ class OrderHandler {
         items: items,
         bills: bills,
         deductors: deductors,
-        clearCart: clearCart,
+        clearCart: clear_cart,
       };
 
       await usecase.updateOrderSummary(orderPayload);

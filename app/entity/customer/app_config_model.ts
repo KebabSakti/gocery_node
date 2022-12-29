@@ -4,6 +4,10 @@ interface AppConfigModel {
   fee: {
     delivery: number;
   };
+  origin: {
+    placeId: string;
+    latLng: string;
+  };
   bills: BillModel[];
   deductors: BillModel[];
 }

@@ -47,10 +47,14 @@ const OrderScheme = model<OrderModel>(
     delivery: {
       default: null,
       type: {
-        distance: { type: Number, required: true },
-        unit: { type: String, required: true },
+        distanceText: { type: String, required: true },
+        distanceValue: { type: Number, required: true },
+        durationText: { type: String, required: true },
+        durationValue: { type: Number, required: true },
         time: { type: String, required: true },
         fee: { type: Number, required: true },
+        lat: { type: String, required: true },
+        lng: { type: String, required: true },
       },
     },
     payment: {
@@ -61,6 +65,7 @@ const OrderScheme = model<OrderModel>(
         code: { type: String, required: true },
         name: { type: String, required: true },
         picture: { type: String, required: true },
+        note: { type: String, default: null },
         fee: { type: Number, required: true },
         percentage: { type: Number, required: true },
         min: { type: Number, required: true },

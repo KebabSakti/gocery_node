@@ -1,32 +1,51 @@
 import express, { Request, Response } from "express";
 import ChatMongodb from "../../adapter/data/mongodb/chat_mongodb";
-import CourierMongodb from "../../adapter/data/mongodb/courier/courier_mongodb";
 import AppConfigMongodb from "../../adapter/data/mongodb/customer/app_config_mongodb";
 import BillMongodb from "../../adapter/data/mongodb/customer/bill_mongodb";
+import CartMongodb from "../../adapter/data/mongodb/customer/cart_mongodb";
 import CustomerMongodb from "../../adapter/data/mongodb/customer/customer_mongodb";
 import DeductorMongodb from "../../adapter/data/mongodb/customer/deductor_mongodb";
 import OrderMongodb from "../../adapter/data/mongodb/customer/order_mongodb";
 import PaymentMongodb from "../../adapter/data/mongodb/customer/payment_mongodb";
 import ProductMongodb from "../../adapter/data/mongodb/customer/product_mongodb";
 import NotificationFcm from "../../adapter/service/fcm/customer/notification_fcm";
+import DistanceMatrix from "../../adapter/service/google/distance/distance_matrix";
 import ErrorHandler from "../../common/error/error_handler";
-import { ResourceNotFound } from "../../common/error/exception";
-import ChatSendOption from "../../entity/chat_send_option";
 import ChatUsecase from "../../port/interactor/chat_usecase";
+import DistanceUsecase from "../../port/interactor/customer/distance_usecase";
 import OrderUsecase from "../../port/interactor/customer/order_usecase";
 
 const router = express.Router();
 
+const orderRepository = new OrderMongodb();
+const productRepository = new ProductMongodb();
+const customerRepository = new CustomerMongodb();
+const paymentRepository = new PaymentMongodb();
+const billRepository = new BillMongodb();
+const deductorRepository = new DeductorMongodb();
+const appConfigRepository = new AppConfigMongodb();
+const notificationService = new NotificationFcm();
+const chatRepository = new ChatMongodb();
+const cartRepository = new CartMongodb();
+const distanceService = new DistanceMatrix();
+
+const distanceUsecase = new DistanceUsecase(
+  distanceService,
+  appConfigRepository
+);
+
 const orderUsecase = new OrderUsecase(
-  new OrderMongodb(),
-  new ProductMongodb(),
-  new CustomerMongodb(),
-  new PaymentMongodb(),
-  new BillMongodb(),
-  new DeductorMongodb(),
-  new AppConfigMongodb(),
-  new NotificationFcm(),
-  new ChatMongodb()
+  orderRepository,
+  productRepository,
+  customerRepository,
+  paymentRepository,
+  billRepository,
+  deductorRepository,
+  appConfigRepository,
+  notificationService,
+  chatRepository,
+  cartRepository,
+  distanceUsecase
 );
 
 const chatUsecase = new ChatUsecase(
@@ -34,6 +53,8 @@ const chatUsecase = new ChatUsecase(
   new OrderMongodb(),
   new NotificationFcm()
 );
+
+const distance = new DistanceMatrix();
 
 router.get("*", async (req: Request, res: Response) => {
   try {
@@ -43,26 +64,35 @@ router.get("*", async (req: Request, res: Response) => {
 
     if (param != undefined) {
       // await orderUsecase.submitOrder(param.toString());
-
-      const chatPayload: ChatSendOption = {
-        session: param.toString(),
-        sender: {
-          _id: "sMQ6HEvkfZadQfbbae2Qlgj11IJ2",
-          name: "Aryo",
-          role: "customers",
-        },
-        message: "Hallo",
-      };
-
-      await chatUsecase.chatSend(chatPayload);
-
+      // const chatPayload: ChatSendOption = {
+      //   session: param.toString(),
+      //   sender: {
+      //     _id: "sMQ6HEvkfZadQfbbae2Qlgj11IJ2",
+      //     name: "Aryo",
+      //     role: "customers",
+      //   },
+      //   message: "Hallo",
+      // };
+      // await chatUsecase.chatSend(chatPayload);
       // const results = await chatUsecase.getChatSession(param.toString());
-
       // if (results == null) {
       //   throw new ResourceNotFound("Chat session not found");
       // }
-
       // res.json(results);
+
+      const distanceFromLatlng = await distance.getDistance({
+        origin: "-0.45112820110515417,117.16787601134645",
+        destination: "-0.4946222024853206,117.12710191134651",
+      });
+
+      const distanceFromPlaceId = await distance.getDistance({
+        origin: "place_id:ChIJ4Wxyxb959i0RezVkTs8gY_Q",
+        destination: "place_id:ChIJRwfTC29_9i0R92CLWYaaTms",
+      });
+
+      console.log(distanceFromLatlng);
+
+      console.log(distanceFromPlaceId);
     }
 
     res.status(200).end();

@@ -4,6 +4,7 @@ interface PaymentModel {
   code?: string;
   name?: string;
   picture?: string;
+  note?: string;
   fee?: number;
   percentage?: number;
   min?: number;
