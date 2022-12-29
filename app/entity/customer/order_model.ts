@@ -41,8 +41,8 @@ interface OrderModel {
     durationValue: number;
     time: string;
     fee: number;
-    lat: string;
-    lng: string;
+    lat: number;
+    lng: number;
   };
   payment?: {
     _id: string;
