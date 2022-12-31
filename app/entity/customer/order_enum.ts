@@ -14,4 +14,12 @@ enum PaymentStatus {
   EXPIRED = "expired",
 }
 
-export { PaymentStatus, OrderStatus };
+enum PaymentCategory {
+  VA = "Virtual Account",
+  EWALLET = "E-Wallet",
+  QR = "QR Code",
+  RETAIL = "Retail Outlet",
+  DIRECT = "Direct Bank Transfer",
+}
+
+export { PaymentStatus, OrderStatus, PaymentCategory };

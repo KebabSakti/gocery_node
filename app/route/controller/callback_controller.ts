@@ -14,6 +14,7 @@ router.post("/xendit", async (req: Request, res: Response) => {
 
     switch (type) {
       case "va":
+        //req.query.status value will be 'paid'
         console.log("VA TRIGGERED");
         break;
 
@@ -26,6 +27,7 @@ router.post("/xendit", async (req: Request, res: Response) => {
         break;
 
       case "ewallet":
+        //SUCCEDED FAILED
         console.log("EWALLET TRIGGERED");
         break;
     }

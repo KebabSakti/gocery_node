@@ -1,7 +1,6 @@
-import ChatItemModel from "../../../entity/chat_item_model";
+import { BadRequest, ResourceNotFound } from "../../../common/error/exception";
 import ChatModel from "../../../entity/chat_model";
 import BillModel from "../../../entity/customer/bill_model";
-import DistanceRequest from "../../../entity/customer/distance_request";
 import {
   OrderStatus,
   PaymentStatus,
@@ -15,10 +14,11 @@ import BillContract from "../../repository/customer/bill_contract";
 import CartContract from "../../repository/customer/cart_contract";
 import CustomerContract from "../../repository/customer/customer_contract";
 import DeductorContract from "../../repository/customer/deductor_contract";
+import DeliveryTimeContract from "../../repository/customer/delivery_time_contract";
 import OrderContract from "../../repository/customer/order_contract";
 import PaymentContract from "../../repository/customer/payment_contract";
 import ProductContract from "../../repository/customer/product_contract";
-import DistanceContract from "../../service/customer/distance_contract";
+import DateTimeContract from "../../service/customer/date_time_contract";
 import NotificationContract from "../../service/customer/notification_contract";
 import DistanceUsecase from "./distance_usecase";
 
@@ -34,6 +34,8 @@ class OrderUsecase {
   private chatRepository: ChatContract;
   private cartRepository: CartContract;
   private distanceService: DistanceUsecase;
+  private dateTimeService: DateTimeContract;
+  private deliveryTimeRepository: DeliveryTimeContract;
 
   constructor(
     orderRepository: OrderContract,
@@ -46,7 +48,9 @@ class OrderUsecase {
     notificationService: NotificationContract,
     chatRepository: ChatContract,
     cartRepository: CartContract,
-    distanceService: DistanceUsecase
+    distanceService: DistanceUsecase,
+    dateTimeService: DateTimeContract,
+    deliveryTimeRepository: DeliveryTimeContract
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
@@ -59,6 +63,8 @@ class OrderUsecase {
     this.chatRepository = chatRepository;
     this.cartRepository = cartRepository;
     this.distanceService = distanceService;
+    this.dateTimeService = dateTimeService;
+    this.deliveryTimeRepository = deliveryTimeRepository;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderModel | null> {
@@ -66,34 +72,80 @@ class OrderUsecase {
   }
 
   async updateOrderSummary(orderPayload: OrderPayload): Promise<void> {
+    const app = await this.appConfigRepository.show();
     const customer = await this.customerRepository.show(orderPayload.customer);
-    const lastOrder = await this.orderRepository.getLatestOrder(
-      orderPayload.customer
-    );
 
     let point = 0;
-    let shipping: any = orderPayload.shipping;
-    let delivery: any = orderPayload.delivery;
+    let shipping: any = null;
     let payment: any = orderPayload.payment;
+    let user: any = {};
     let items: any = [];
     let bills: BillModel[] = [];
     let deductors: BillModel[] = [];
     let qtyTotal = 0;
     let shopTotal = 0;
-    let deliveryFeeTotal = 0;
+    let deliveryFeeTotal = app.fee.delivery;
     let paymentFeeTotal = 0;
     let payTotal = 0;
 
     if (customer != null && orderPayload.point == true) {
       point = customer.point!;
+
+      user = {
+        _id: customer!._id!,
+        name: customer!.name!,
+        fcm: customer!.fcm!,
+        email: customer!.email,
+        image: customer!.image,
+        phone: customer!.phone,
+        point: customer!.point,
+      };
     }
 
-    if (shipping == undefined) {
-      if (lastOrder != null) {
-        shipping = lastOrder.shipping;
-      } else {
-        shipping = null;
+    if (orderPayload.shipping != undefined) {
+      const distanceResponse = await this.distanceService.getDistance(
+        orderPayload.shipping!.destination
+      );
+
+      const deliveryTime = await this.deliveryTimeRepository.getById(
+        orderPayload.shipping!.time
+      );
+
+      if (deliveryTime == null) {
+        throw new ResourceNotFound("Delivery time is not available");
       }
+
+      const timeIsAvailable = this.dateTimeService.startIsBeforeEnd(
+        deliveryTime.time,
+        this.dateTimeService.timeNow()
+      );
+
+      if (!timeIsAvailable) {
+        throw new BadRequest("Selected delivery time is in the past");
+      }
+
+      shipping = {
+        ...shipping,
+        fee: app.fee.delivery,
+        origin: {
+          placeId: app.origin.placeId,
+          latLng: app.origin.latLng,
+        },
+        destination: {
+          ...orderPayload.shipping,
+          place: orderPayload.shipping.destination,
+          distance: distanceResponse.distance.text,
+          duration: distanceResponse.duration.text,
+        },
+        schedule: {
+          timeId: deliveryTime._id,
+          time: deliveryTime.time,
+        },
+        meta: {
+          distance: distanceResponse.distance.value,
+          duration: distanceResponse.duration.value,
+        },
+      };
     }
 
     for (const item of orderPayload.items) {
@@ -111,21 +163,6 @@ class OrderUsecase {
           total: total,
         },
       ];
-    }
-
-    if (delivery != undefined) {
-      const app = await this.appConfigRepository.show();
-      const distanceResponse = await this.distanceService.getDistance(
-        delivery.destination
-      );
-
-      delivery = {
-        time: delivery.time,
-        fee: app.fee.delivery,
-        distanceText: distanceResponse.distance.text,
-      };
-    } else {
-      delivery = null;
     }
 
     if (payment._id != undefined) {
@@ -228,18 +265,9 @@ class OrderUsecase {
     payTotal = billTotal - deductorTotal < 0 ? 0 : billTotal - deductorTotal;
 
     const model: OrderModel = {
-      customer: {
-        _id: customer!._id!,
-        name: customer!.name!,
-        fcm: customer!.fcm!,
-        email: customer!.email,
-        image: customer!.image,
-        phone: customer!.phone,
-        point: customer!.point,
-      },
+      customer: user,
       point: point,
       shipping: shipping,
-      delivery: delivery,
       payment: payment,
       items: items,
       bills: bills,
@@ -284,9 +312,9 @@ class OrderUsecase {
 
         const notifPayload: NotificationOption = {
           title: "Orderan Baru",
-          body: `Antar ke ${orderModel.shipping?.address} atas nama ${
-            orderModel.shipping!.name
-          }`,
+          body: `Antar ke ${
+            orderModel.shipping?.destination.address
+          } atas nama ${orderModel.shipping!.destination.name}`,
         };
 
         await this.notificationService.sendToTopic("new_order", notifPayload);

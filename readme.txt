@@ -26,3 +26,25 @@ order submit -> cash    -> update status order (AKTIF)
                         -> kurir terima pembayaran
                         -> update status order (COMPLETED)
 ============================================================
+
+payment field required
+- phone number
+- qr string
+- checkout url
+- note
+
+ewallet
+- ovo
+- shope
+- dana
+- link aja
+va
+- bsi
+- bni
+- mandiri
+- bca
+retail
+- indomaret
+- alfamidi
+qr
+- qris

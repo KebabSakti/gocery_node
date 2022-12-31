@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import SearchModel from "../../entity/model/search_model";
-import SearchOption from "../../entity/model/search_option";
-import SearchContract from "../../entity/contract/search_contract";
+import SearchModel from "../../../../entity/customer/search_model";
+import SearchOption from "../../../../entity/customer/search_option";
+import SearchContract from "../../../../port/repository/customer/search_contract";
 import SearchScheme from "./search_scheme";
 
 class SearchMongodb implements SearchContract {

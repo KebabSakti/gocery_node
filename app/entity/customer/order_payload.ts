@@ -7,15 +7,12 @@ interface OrderPayload {
     note?: string;
   };
   shipping?: {
-    place_id?: string;
     address: string;
     name: string;
     phone: string;
-    note?: string;
-  };
-  delivery?: {
     time: string;
     destination: string;
+    note?: string;
   };
   items: {
     _id: string;

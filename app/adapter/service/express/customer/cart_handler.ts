@@ -5,7 +5,10 @@ import CartUsecase from "../../../../port/interactor/customer/cart_usecase";
 import CartMongodb from "../../../data/mongodb/customer/cart_mongodb";
 import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
 
-const usecase = new CartUsecase(new CartMongodb(), new ProductMongodb());
+const cartRepository = new CartMongodb();
+const productRepository = new ProductMongodb();
+
+const usecase = new CartUsecase(cartRepository, productRepository);
 
 class CartHandler {
   async getCartDetail(req: Request, res: Response) {

@@ -10,7 +10,8 @@ interface PaymentModel {
   min?: number;
   max?: number;
   cash?: boolean;
-  expire?: string;
+  expire?: number;
+  help?: string;
   active?: boolean;
   created_at?: string;
   updated_at?: string;

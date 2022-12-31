@@ -28,21 +28,28 @@ interface OrderModel {
     point?: number;
   };
   shipping?: {
-    place_id?: string;
-    address: string;
-    name: string;
-    phone: string;
-    note?: string;
-  };
-  delivery?: {
-    distanceText: string;
-    distanceValue: number;
-    durationText: string;
-    durationValue: number;
-    time: string;
     fee: number;
-    lat: number;
-    lng: number;
+    origin: {
+      placeId: string;
+      latLng: string;
+    };
+    destination: {
+      place: string;
+      address: string;
+      name: string;
+      phone: string;
+      distance: string;
+      duration: string;
+      note?: string;
+    };
+    schedule: {
+      timeId: string;
+      time: string;
+    };
+    meta: {
+      distance: number;
+      duration: number;
+    };
   };
   payment?: {
     _id: string;
@@ -54,9 +61,12 @@ interface OrderModel {
     percentage: number;
     min: number;
     max: number;
-    cash?: boolean;
-    expire: string;
+    info: string;
+    cash: boolean;
+    expire?: string;
+    note?: string;
     status?: PaymentStatus;
+    help?: string;
   };
   items?: OrderItemModel[];
   bills?: BillModel[];

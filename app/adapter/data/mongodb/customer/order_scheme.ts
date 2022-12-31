@@ -37,24 +37,28 @@ const OrderScheme = model<OrderModel>(
     shipping: {
       default: null,
       type: {
-        place_id: { type: String, default: null },
-        address: { type: String, required: true },
-        name: { type: String, required: true },
-        phone: { type: String, required: true },
-        note: { type: String, default: null },
-      },
-    },
-    delivery: {
-      default: null,
-      type: {
-        distanceText: { type: String, required: true },
-        distanceValue: { type: Number, required: true },
-        durationText: { type: String, required: true },
-        durationValue: { type: Number, required: true },
-        time: { type: String, required: true },
         fee: { type: Number, required: true },
-        lat: { type: Number, required: true },
-        lng: { type: Number, required: true },
+        origin: {
+          placeId: { type: String, required: true },
+          latLng: { type: String, required: true },
+        },
+        destination: {
+          place: { type: String, required: true },
+          address: { type: String, required: true },
+          name: { type: String, required: true },
+          phone: { type: String, required: true },
+          distance: { type: String, required: true },
+          duration: { type: String, required: true },
+          note: { type: String, default: null },
+        },
+        schedule: {
+          timeId: { type: String, required: true },
+          time: { type: String, required: true },
+        },
+        meta: {
+          distance: { type: Number, required: true },
+          duration: { type: Number, required: true },
+        },
       },
     },
     payment: {
@@ -66,13 +70,15 @@ const OrderScheme = model<OrderModel>(
         name: { type: String, required: true },
         picture: { type: String, required: true },
         note: { type: String, default: null },
+        info: { type: String, required: true },
         fee: { type: Number, required: true },
         percentage: { type: Number, required: true },
         min: { type: Number, required: true },
         max: { type: Number, required: true },
         cash: { type: Boolean, default: true },
-        expire: { type: String, required: true },
+        expire: { type: String, default: null },
         status: { type: String, default: null },
+        help: { type: String, default: null },
       },
     },
     items: {
