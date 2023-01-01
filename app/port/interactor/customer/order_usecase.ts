@@ -5,6 +5,7 @@ import {
   OrderStatus,
   PaymentStatus,
 } from "../../../entity/customer/order_enum";
+import OrderItemModel from "../../../entity/customer/order_item_model";
 import OrderModel from "../../../entity/customer/order_model";
 import OrderPayload from "../../../entity/customer/order_payload";
 import NotificationOption from "../../../entity/notification_option";
@@ -16,6 +17,7 @@ import CustomerContract from "../../repository/customer/customer_contract";
 import DeductorContract from "../../repository/customer/deductor_contract";
 import DeliveryTimeContract from "../../repository/customer/delivery_time_contract";
 import OrderContract from "../../repository/customer/order_contract";
+import OrderItemContract from "../../repository/customer/order_item_contract";
 import PaymentContract from "../../repository/customer/payment_contract";
 import ProductContract from "../../repository/customer/product_contract";
 import DateTimeContract from "../../service/customer/date_time_contract";
@@ -36,6 +38,7 @@ class OrderUsecase {
   private distanceService: DistanceUsecase;
   private dateTimeService: DateTimeContract;
   private deliveryTimeRepository: DeliveryTimeContract;
+  private orderItemRepository: OrderItemContract;
 
   constructor(
     orderRepository: OrderContract,
@@ -50,7 +53,8 @@ class OrderUsecase {
     cartRepository: CartContract,
     distanceService: DistanceUsecase,
     dateTimeService: DateTimeContract,
-    deliveryTimeRepository: DeliveryTimeContract
+    deliveryTimeRepository: DeliveryTimeContract,
+    orderItemRepository: OrderItemContract
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
@@ -65,6 +69,7 @@ class OrderUsecase {
     this.distanceService = distanceService;
     this.dateTimeService = dateTimeService;
     this.deliveryTimeRepository = deliveryTimeRepository;
+    this.orderItemRepository = orderItemRepository;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderModel | null> {
@@ -72,13 +77,27 @@ class OrderUsecase {
   }
 
   async updateOrderSummary(orderPayload: OrderPayload): Promise<void> {
+    // const order = await this.getOrderDetail(orderPayload.orderId);
+
     const app = await this.appConfigRepository.show();
     const customer = await this.customerRepository.show(orderPayload.customer);
 
+    if (customer == null) {
+      throw new ResourceNotFound("Customer not found");
+    }
+
+    let user: any = {
+      _id: customer._id!,
+      name: customer.name!,
+      fcm: customer.fcm!,
+      email: customer.email,
+      image: customer.image,
+      phone: customer.phone,
+    };
+
     let point = 0;
     let shipping: any = null;
-    let payment: any = orderPayload.payment;
-    let user: any = {};
+    let payment: any = {};
     let items: any = [];
     let bills: BillModel[] = [];
     let deductors: BillModel[] = [];
@@ -88,18 +107,10 @@ class OrderUsecase {
     let paymentFeeTotal = 0;
     let payTotal = 0;
 
-    if (customer != null && orderPayload.point == true) {
+    if (orderPayload.point == true) {
       point = customer.point!;
 
-      user = {
-        _id: customer!._id!,
-        name: customer!.name!,
-        fcm: customer!.fcm!,
-        email: customer!.email,
-        image: customer!.image,
-        phone: customer!.phone,
-        point: customer!.point,
-      };
+      user = { ...user, point: point };
     }
 
     if (orderPayload.shipping != undefined) {
@@ -157,19 +168,54 @@ class OrderUsecase {
       items = [
         ...items,
         {
-          ...product,
+          // ...product,
+          _id: product?._id?.toString(),
           product: product?._id?.toString(),
+          name: product?.name,
+          description: product?.description,
+          image: product?.image,
+          point: product?.point,
+          category: product?.category?.toString(),
+          currency: {
+            code: product?.currency?.code,
+            name: product?.currency?.name,
+            symbol: product?.currency?.symbol,
+          },
+          price: {
+            base: product?.price?.base,
+            discount: product?.price?.discount,
+            final: product?.price?.final,
+          },
+          unit: {
+            name: product?.unit?.name,
+            symbol: product?.unit?.symbol,
+            count: product?.unit?.count,
+          },
+          meta: {
+            sold: product?.meta?.sold,
+            view: product?.meta?.view,
+            favs: product?.meta?.favs,
+          },
           qty: item.qty,
           total: total,
         },
       ];
+
+      // console.log(items);
     }
 
-    if (payment._id != undefined) {
-      const paymentMethod = await this.paymentRepository.show(payment._id);
+    if (orderPayload.payment._id != undefined) {
+      const paymentMethod = await this.paymentRepository.show(
+        orderPayload.payment._id
+      );
+
       paymentFeeTotal = paymentMethod?.fee!;
 
-      payment = { ...paymentMethod, note: orderPayload.payment.note };
+      payment = {
+        ...orderPayload.payment,
+        ...paymentMethod,
+        note: orderPayload.payment.note,
+      };
     }
 
     //total belanja
@@ -276,7 +322,27 @@ class OrderUsecase {
       total: payTotal,
     };
 
-    await this.orderRepository.upsertOrder(orderPayload.customer, model);
+    console.log(model);
+
+    const newOrderItem: OrderItemModel[] = [];
+
+    for (const asd of model.items!) {
+      newOrderItem.push({ _id: asd.product });
+    }
+
+    const order = await this.orderRepository.addOrder({
+      ...model,
+      items: newOrderItem,
+    });
+
+    for (const orderItem of model.items!) {
+      await this.orderItemRepository.addOrderItem({
+        ...orderItem,
+        order: order._id?.toString(),
+      });
+    }
+
+    // await this.orderRepository.upsertOrder(orderPayload.customer, model);
   }
 
   async submitOrder(orderId: string): Promise<void> {

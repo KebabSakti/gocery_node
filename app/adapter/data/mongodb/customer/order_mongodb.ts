@@ -81,6 +81,12 @@ class OrderMongodb implements OrderContract {
 
     return results;
   }
+
+  async addOrder(orderModel: OrderModel): Promise<OrderModel> {
+    const order = await new OrderScheme(orderModel).save();
+
+    return order;
+  }
 }
 
 export default OrderMongodb;
