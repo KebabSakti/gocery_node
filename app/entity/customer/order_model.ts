@@ -9,7 +9,7 @@ interface OrderModel {
   qty?: number;
   point?: number;
   clearCart?: boolean;
-  status?: OrderStatus;
+  status?: { detail: OrderStatus; created_at?: string; updated_at?: string }[];
   courier?: {
     _id: string;
     name: string;
@@ -65,7 +65,11 @@ interface OrderModel {
     cash: boolean;
     expire?: string;
     note?: string;
-    status?: PaymentStatus;
+    status?: {
+      detail: PaymentStatus;
+      created_at?: string;
+      updated_at?: string;
+    }[];
     help?: string;
   };
   items?: OrderItemModel[];

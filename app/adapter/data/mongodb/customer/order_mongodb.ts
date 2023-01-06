@@ -56,7 +56,7 @@ class OrderMongodb implements OrderContract {
     });
 
     const order = await OrderScheme.findOneAndUpdate(
-      { "customer._id": customerId, status: null },
+      { "customer._id": customerId, status: [] },
       { ...orderModel, items: items },
       { upsert: true, returnDocument: "after" }
     );

@@ -5,12 +5,21 @@ import BillSchema from "./bill_schema";
 const OrderScheme = model<OrderModel>(
   "orders",
   new Schema<OrderModel>({
-    status: { type: String, default: null },
     qty: { type: Number, required: true },
     total: { type: Number, required: true },
     invoice: { type: String, default: null },
     point: { type: Number, default: 0 },
     clearCart: { type: Boolean, default: false },
+    status: {
+      default: [],
+      type: [
+        {
+          detail: { type: String, required: true },
+          created_at: { type: String, default: Date.now() },
+          updated_at: { type: String, default: Date.now() },
+        },
+      ],
+    },
     courier: {
       default: null,
       type: {
@@ -70,15 +79,40 @@ const OrderScheme = model<OrderModel>(
         name: { type: String, required: true },
         picture: { type: String, required: true },
         note: { type: String, default: null },
-        // info: { type: String, required: true },
         fee: { type: Number, required: true },
         percentage: { type: Number, required: true },
         min: { type: Number, default: null },
         max: { type: Number, default: null },
         cash: { type: Boolean, default: true },
         expire: { type: String, default: null },
-        status: { type: String, default: null },
         help: { type: String, default: null },
+        status: {
+          default: [],
+          type: [
+            {
+              detail: { type: String, required: true },
+              created_at: { type: String, default: Date.now() },
+              updated_at: { type: String, default: Date.now() },
+            },
+          ],
+        },
+        data: {
+          default: null,
+          type: {
+            category: {
+              type: String,
+              required: true,
+            },
+            info: {
+              type: String,
+              required: true,
+            },
+            note: {
+              type: String,
+              default: null,
+            },
+          },
+        },
       },
     },
     items: {

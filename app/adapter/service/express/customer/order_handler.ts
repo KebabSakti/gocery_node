@@ -11,7 +11,6 @@ import CartMongodb from "../../../data/mongodb/customer/cart_mongodb";
 import CustomerMongodb from "../../../data/mongodb/customer/customer_mongodb";
 import DeductorMongodb from "../../../data/mongodb/customer/deductor_mongodb";
 import DeliveryTimeMongodb from "../../../data/mongodb/customer/delivery_time_mongodb";
-import OrderItemMongodb from "../../../data/mongodb/customer/order_item_mongodb";
 import OrderMongodb from "../../../data/mongodb/customer/order_mongodb";
 import PaymentMongodb from "../../../data/mongodb/customer/payment_mongodb";
 import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
@@ -32,7 +31,6 @@ const cartRepository = new CartMongodb();
 const distanceService = new DistanceMatrix();
 const deliveryTimeRepository = new DeliveryTimeMongodb();
 const dateTimeService = new DateTimeLuxon();
-const orderItemRepository = new OrderItemMongodb();
 
 const distanceUsecase = new DistanceUsecase(
   distanceService,
@@ -52,8 +50,7 @@ const usecase = new OrderUsecase(
   cartRepository,
   distanceUsecase,
   dateTimeService,
-  deliveryTimeRepository,
-  orderItemRepository
+  deliveryTimeRepository
 );
 
 class OrderHandler {

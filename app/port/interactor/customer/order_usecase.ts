@@ -5,7 +5,6 @@ import {
   OrderStatus,
   PaymentStatus,
 } from "../../../entity/customer/order_enum";
-import OrderItemModel from "../../../entity/customer/order_item_model";
 import OrderModel from "../../../entity/customer/order_model";
 import OrderPayload from "../../../entity/customer/order_payload";
 import NotificationOption from "../../../entity/notification_option";
@@ -17,7 +16,6 @@ import CustomerContract from "../../repository/customer/customer_contract";
 import DeductorContract from "../../repository/customer/deductor_contract";
 import DeliveryTimeContract from "../../repository/customer/delivery_time_contract";
 import OrderContract from "../../repository/customer/order_contract";
-import OrderItemContract from "../../repository/customer/order_item_contract";
 import PaymentContract from "../../repository/customer/payment_contract";
 import ProductContract from "../../repository/customer/product_contract";
 import DateTimeContract from "../../service/customer/date_time_contract";
@@ -38,7 +36,6 @@ class OrderUsecase {
   private distanceService: DistanceUsecase;
   private dateTimeService: DateTimeContract;
   private deliveryTimeRepository: DeliveryTimeContract;
-  private orderItemRepository: OrderItemContract;
 
   constructor(
     orderRepository: OrderContract,
@@ -53,8 +50,7 @@ class OrderUsecase {
     cartRepository: CartContract,
     distanceService: DistanceUsecase,
     dateTimeService: DateTimeContract,
-    deliveryTimeRepository: DeliveryTimeContract,
-    orderItemRepository: OrderItemContract
+    deliveryTimeRepository: DeliveryTimeContract
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
@@ -69,7 +65,6 @@ class OrderUsecase {
     this.distanceService = distanceService;
     this.dateTimeService = dateTimeService;
     this.deliveryTimeRepository = deliveryTimeRepository;
-    this.orderItemRepository = orderItemRepository;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderModel | null> {
@@ -77,8 +72,6 @@ class OrderUsecase {
   }
 
   async updateOrderSummary(orderPayload: OrderPayload): Promise<void> {
-    // const order = await this.getOrderDetail(orderPayload.orderId);
-
     const app = await this.appConfigRepository.show();
     const customer = await this.customerRepository.show(orderPayload.customer);
 
@@ -131,9 +124,9 @@ class OrderUsecase {
         this.dateTimeService.timeNow()
       );
 
-      if (!timeIsAvailable) {
-        throw new BadRequest("Selected delivery time is in the past");
-      }
+      // if (!timeIsAvailable) {
+      //   throw new BadRequest("Selected delivery time is in the past");
+      // }
 
       shipping = {
         ...shipping,
@@ -168,7 +161,6 @@ class OrderUsecase {
       items = [
         ...items,
         {
-          // ...product,
           _id: product?._id?.toString(),
           product: product?._id?.toString(),
           name: product?.name,
@@ -200,8 +192,6 @@ class OrderUsecase {
           total: total,
         },
       ];
-
-      // console.log(items);
     }
 
     if (orderPayload.payment._id != undefined) {
@@ -322,27 +312,7 @@ class OrderUsecase {
       total: payTotal,
     };
 
-    console.log(model);
-
-    const newOrderItem: OrderItemModel[] = [];
-
-    for (const asd of model.items!) {
-      newOrderItem.push({ _id: asd.product });
-    }
-
-    const order = await this.orderRepository.addOrder({
-      ...model,
-      items: newOrderItem,
-    });
-
-    for (const orderItem of model.items!) {
-      await this.orderItemRepository.addOrderItem({
-        ...orderItem,
-        order: order._id?.toString(),
-      });
-    }
-
-    // await this.orderRepository.upsertOrder(orderPayload.customer, model);
+    await this.orderRepository.upsertOrder(orderPayload.customer, model);
   }
 
   async submitOrder(orderId: string): Promise<void> {
@@ -359,8 +329,11 @@ class OrderUsecase {
 
       const orderModel: OrderModel = {
         ...order,
-        status: orderStatus,
-        payment: { ...order.payment!, status: paymentStatus },
+        status: [...order.status!, { detail: orderStatus }],
+        payment: {
+          ...order.payment!,
+          status: [...order.payment!.status!, { detail: paymentStatus }],
+        },
         updated_at: Date.now().toString(),
       };
 
