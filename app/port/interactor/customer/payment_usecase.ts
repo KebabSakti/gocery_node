@@ -25,9 +25,7 @@ class PaymentUsecase {
     return await this.paymentRepository.show(id);
   }
 
-  async createPayment<T>(category: string, payload: T): Promise<string> {
-    return "";
-  }
+  async createPayment(category: string): Promise<void> {}
 
   async updatePayment(
     orderId: string,
@@ -50,6 +48,7 @@ class PaymentUsecase {
         break;
 
       case "ewallet":
+        //
         break;
 
       default:
