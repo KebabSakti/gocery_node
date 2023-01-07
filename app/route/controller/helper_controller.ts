@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import { DateTime } from "luxon";
 import ChatMongodb from "../../adapter/data/mongodb/chat_mongodb";
 import AppConfigMongodb from "../../adapter/data/mongodb/customer/app_config_mongodb";
 import BillMongodb from "../../adapter/data/mongodb/customer/bill_mongodb";
@@ -7,13 +6,13 @@ import CartMongodb from "../../adapter/data/mongodb/customer/cart_mongodb";
 import CustomerMongodb from "../../adapter/data/mongodb/customer/customer_mongodb";
 import DeductorMongodb from "../../adapter/data/mongodb/customer/deductor_mongodb";
 import DeliveryTimeMongodb from "../../adapter/data/mongodb/customer/delivery_time_mongodb";
-import DeliveryTimeScheme from "../../adapter/data/mongodb/customer/delivery_time_scheme";
 import OrderMongodb from "../../adapter/data/mongodb/customer/order_mongodb";
 import PaymentMongodb from "../../adapter/data/mongodb/customer/payment_mongodb";
 import ProductMongodb from "../../adapter/data/mongodb/customer/product_mongodb";
 import NotificationFcm from "../../adapter/service/fcm/customer/notification_fcm";
 import DistanceMatrix from "../../adapter/service/google/distance/distance_matrix";
 import DateTimeLuxon from "../../adapter/service/luxon/date_time_luxon";
+import PaymentGatewayXendit from "../../adapter/service/xendit/payment_gateway_xendit";
 import ErrorHandler from "../../common/error/error_handler";
 import ChatUsecase from "../../port/interactor/chat_usecase";
 import DeliveryTimeUsecase from "../../port/interactor/customer/delivery_time_usecase";
@@ -69,6 +68,8 @@ const deliveryTimeUsecase = new DeliveryTimeUsecase(
   dateTimeService
 );
 
+const xendit = new PaymentGatewayXendit();
+
 router.get("*", async (req: Request, res: Response) => {
   try {
     // const iterates: number[] = [...Array(20).keys()];
@@ -111,15 +112,22 @@ router.get("*", async (req: Request, res: Response) => {
 
     // console.log(dateTimeService.startIsBeforeEnd(start, end));
 
-    await DeliveryTimeScheme.create([
-      { time: "01:00", active: true },
-      { time: "04:00", active: true },
-      { time: "07:00", active: true },
-    ]);
+    // await DeliveryTimeScheme.create([
+    //   { time: "01:00", active: true },
+    //   { time: "04:00", active: true },
+    //   { time: "07:00", active: true },
+    // ]);
 
-    const times = await deliveryTimeUsecase.getAvailableDeliveryTimes();
+    // const times = await deliveryTimeUsecase.getAvailableDeliveryTimes();
 
-    res.json(times);
+    const result = await xendit.makeRetailPayment({
+      id: `RETAIL_GOCERY_${Date.now()}`,
+      retailName: "ALFAMART",
+      name: "UDIN",
+      amount: 25000,
+    });
+
+    res.json(result);
   } catch (error) {
     new ErrorHandler(res, error);
   }
