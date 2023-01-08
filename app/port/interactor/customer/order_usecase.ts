@@ -1,4 +1,4 @@
-import { BadRequest, ResourceNotFound } from "../../../common/error/exception";
+import { ResourceNotFound } from "../../../common/error/exception";
 import ChatModel from "../../../entity/chat_model";
 import BillModel from "../../../entity/customer/bill_model";
 import {
@@ -318,51 +318,53 @@ class OrderUsecase {
   async submitOrder(orderId: string): Promise<void> {
     const order = await this.orderRepository.getOrderDetail(orderId);
 
-    if (order != null) {
-      // if (order.status == null && order.payment!.status == null) {
-      let orderStatus = OrderStatus.PENDING;
-      let paymentStatus = PaymentStatus.PENDING;
+    if (order == null) {
+      throw new ResourceNotFound("Order not found");
+    }
 
-      if (order.payment!.cash) {
-        orderStatus = OrderStatus.ACTIVE;
-      }
+    // if (order.status == null && order.payment!.status == null) {
+    let orderStatus = OrderStatus.PENDING;
+    let paymentStatus = PaymentStatus.PENDING;
 
-      const orderModel: OrderModel = {
-        ...order,
-        status: [...order.status!, { detail: orderStatus }],
-        payment: {
-          ...order.payment!,
-          status: [...order.payment!.status!, { detail: paymentStatus }],
-        },
-        updated_at: Date.now().toString(),
+    if (order.payment!.cash) {
+      orderStatus = OrderStatus.ACTIVE;
+    }
+
+    const orderModel: OrderModel = {
+      ...order,
+      status: [...order.status!, { detail: orderStatus }],
+      payment: {
+        ...order.payment!,
+        status: [...order.payment!.status!, { detail: paymentStatus }],
+      },
+      updated_at: Date.now().toString(),
+    };
+
+    await this.orderRepository.updateOrder(orderId, orderModel);
+
+    if (orderStatus == OrderStatus.ACTIVE) {
+      const chatModel: ChatModel = {
+        session: order._id,
       };
 
-      await this.orderRepository.updateOrder(orderId, orderModel);
+      await this.chatRepository.upsertChatSession(
+        order._id!.toString(),
+        chatModel
+      );
 
-      if (orderStatus == OrderStatus.ACTIVE) {
-        const chatModel: ChatModel = {
-          session: order._id,
-        };
+      const notifPayload: NotificationOption = {
+        title: "Orderan Baru",
+        body: `Antar ke ${orderModel.shipping?.destination.address} atas nama ${
+          orderModel.shipping!.destination.name
+        }`,
+      };
 
-        await this.chatRepository.upsertChatSession(
-          order._id!.toString(),
-          chatModel
-        );
+      await this.notificationService.sendToTopic("new_order", notifPayload);
+    }
+    // }
 
-        const notifPayload: NotificationOption = {
-          title: "Orderan Baru",
-          body: `Antar ke ${
-            orderModel.shipping?.destination.address
-          } atas nama ${orderModel.shipping!.destination.name}`,
-        };
-
-        await this.notificationService.sendToTopic("new_order", notifPayload);
-      }
-      // }
-
-      if (order.clearCart) {
-        await this.cartRepository.clearCart(order.customer!._id);
-      }
+    if (order.clear_cart) {
+      await this.cartRepository.clearCart(order.customer!._id);
     }
   }
 }

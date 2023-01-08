@@ -4,6 +4,7 @@ import PaymentModel from "./payment_model";
 const PaymentScheme = model<PaymentModel>(
   "payments",
   new Schema<PaymentModel>({
+    vendor: { type: String, required: true },
     category: { type: String, required: true },
     code: { type: String, required: true },
     name: { type: String, required: true },

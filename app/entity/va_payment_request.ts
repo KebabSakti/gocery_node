@@ -1,6 +1,8 @@
+import { VaBankCode } from "./payment_gateway_enum";
+
 interface VaPaymentRequest {
   id: string;
-  bankCode: string;
+  bankCode: VaBankCode;
   name: string;
   amount?: number;
 }

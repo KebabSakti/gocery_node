@@ -1,6 +1,8 @@
+import { RetailCode } from "./payment_gateway_enum";
+
 interface RetailPaymentRequest {
   id: string;
-  retailName: string;
+  retailName: RetailCode;
   name: string;
   amount: number;
 }

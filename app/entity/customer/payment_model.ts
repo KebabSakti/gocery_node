@@ -1,5 +1,6 @@
 interface PaymentModel {
   _id?: string;
+  vendor?: string;
   category?: string;
   code?: string;
   name?: string;

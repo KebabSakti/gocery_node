@@ -1,6 +1,6 @@
 interface QrPaymentRequest {
   id: string;
-  amount: string;
+  amount: number;
 }
 
 export default QrPaymentRequest;

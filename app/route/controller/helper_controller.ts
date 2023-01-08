@@ -120,11 +120,12 @@ router.get("*", async (req: Request, res: Response) => {
 
     // const times = await deliveryTimeUsecase.getAvailableDeliveryTimes();
 
-    const result = await xendit.makeRetailPayment({
-      id: `RETAIL_GOCERY_${Date.now()}`,
-      retailName: "ALFAMART",
-      name: "UDIN",
+    const result = await xendit.makeVaPayment({
+      id: Date.now().toString(),
       amount: 25000,
+      code: "MANDIRI",
+      // name: "UDIN",
+      // phone: "6281254982664",
     });
 
     res.json(result);
