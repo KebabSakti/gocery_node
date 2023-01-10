@@ -17,6 +17,7 @@ import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
 import NotificationFcm from "../../fcm/customer/notification_fcm";
 import DistanceMatrix from "../../google/distance/distance_matrix";
 import DateTimeLuxon from "../../luxon/date_time_luxon";
+import PaymentGatewayXendit from "../../xendit/payment_gateway_xendit";
 
 const orderRepository = new OrderMongodb();
 const productRepository = new ProductMongodb();
@@ -31,6 +32,7 @@ const cartRepository = new CartMongodb();
 const distanceService = new DistanceMatrix();
 const deliveryTimeRepository = new DeliveryTimeMongodb();
 const dateTimeService = new DateTimeLuxon();
+const paymentGatewayService = new PaymentGatewayXendit();
 
 const distanceUsecase = new DistanceUsecase(
   distanceService,
@@ -50,7 +52,8 @@ const usecase = new OrderUsecase(
   cartRepository,
   distanceUsecase,
   dateTimeService,
-  deliveryTimeRepository
+  deliveryTimeRepository,
+  paymentGatewayService
 );
 
 class OrderHandler {

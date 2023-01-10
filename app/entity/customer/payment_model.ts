@@ -7,7 +7,7 @@ interface PaymentModel {
   picture?: string;
   note?: string;
   fee?: number;
-  percentage?: number;
+  percentage?: boolean;
   min?: number;
   max?: number;
   cash?: boolean;

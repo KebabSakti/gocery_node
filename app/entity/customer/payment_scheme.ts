@@ -10,7 +10,7 @@ const PaymentScheme = model<PaymentModel>(
     name: { type: String, required: true },
     picture: { type: String, required: true },
     fee: { type: Number, default: 0 },
-    percentage: { type: Number, default: 0 },
+    percentage: { type: Boolean, default: false },
     min: { type: Number, default: null },
     max: { type: Number, default: null },
     cash: { type: Boolean, default: true },

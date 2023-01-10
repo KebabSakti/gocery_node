@@ -7,6 +7,10 @@ interface VaPaymentResponse {
   accountNumber: string;
   amount: number;
   expirationDate: string;
+  raw: {
+    charge_response: string;
+    paid_response?: string;
+  };
 }
 
 export default VaPaymentResponse;

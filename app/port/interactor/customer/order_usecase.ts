@@ -20,6 +20,7 @@ import PaymentContract from "../../repository/customer/payment_contract";
 import ProductContract from "../../repository/customer/product_contract";
 import DateTimeContract from "../../service/customer/date_time_contract";
 import NotificationContract from "../../service/customer/notification_contract";
+import PaymentGateway from "../../service/customer/payment_gateway";
 import DistanceUsecase from "./distance_usecase";
 
 class OrderUsecase {
@@ -36,6 +37,7 @@ class OrderUsecase {
   private distanceService: DistanceUsecase;
   private dateTimeService: DateTimeContract;
   private deliveryTimeRepository: DeliveryTimeContract;
+  private paymentGatewayService: PaymentGateway;
 
   constructor(
     orderRepository: OrderContract,
@@ -50,7 +52,8 @@ class OrderUsecase {
     cartRepository: CartContract,
     distanceService: DistanceUsecase,
     dateTimeService: DateTimeContract,
-    deliveryTimeRepository: DeliveryTimeContract
+    deliveryTimeRepository: DeliveryTimeContract,
+    paymentGatewayService: PaymentGateway
   ) {
     this.orderRepository = orderRepository;
     this.productRepository = productRepository;
@@ -65,6 +68,7 @@ class OrderUsecase {
     this.distanceService = distanceService;
     this.dateTimeService = dateTimeService;
     this.deliveryTimeRepository = deliveryTimeRepository;
+    this.paymentGatewayService = paymentGatewayService;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderModel | null> {
@@ -199,7 +203,13 @@ class OrderUsecase {
         orderPayload.payment._id
       );
 
-      paymentFeeTotal = paymentMethod?.fee!;
+      if (paymentMethod == null) {
+        throw new ResourceNotFound("Payment method not found");
+      }
+
+      paymentFeeTotal = !paymentMethod.percentage
+        ? paymentMethod.fee!
+        : shopTotal * ((paymentMethod.fee! / shopTotal) * 100);
 
       payment = {
         ...orderPayload.payment,
@@ -325,9 +335,48 @@ class OrderUsecase {
     // if (order.status == null && order.payment!.status == null) {
     let orderStatus = OrderStatus.PENDING;
     let paymentStatus = PaymentStatus.PENDING;
+    let paymentData: any = null;
 
     if (order.payment!.cash) {
       orderStatus = OrderStatus.ACTIVE;
+    } else {
+      switch (order.payment!.category) {
+        case "va":
+          const va = await this.paymentGatewayService.makeVaPayment({
+            id: orderId,
+            amount: order.total!,
+            code: order.payment!.code,
+          });
+
+          paymentData = {
+            category: "va",
+            info: `${va.name}\n${va.accountNumber}`,
+            raw: {
+              charge_response: va.raw.charge_response,
+            },
+          };
+          break;
+
+        case "ewallet":
+          const ewallet = await this.paymentGatewayService.makeEwalletPayment({
+            id: orderId,
+            amount: order.total!,
+            code: order.payment!.code,
+            phone: order.payment?.note,
+          });
+
+          paymentData = {
+            category: "ewallet",
+            info: ewallet.note,
+            raw: {
+              charge_response: ewallet.raw.charge_response,
+            },
+          };
+          break;
+
+        default:
+          break;
+      }
     }
 
     const orderModel: OrderModel = {
@@ -336,36 +385,73 @@ class OrderUsecase {
       payment: {
         ...order.payment!,
         status: [...order.payment!.status!, { detail: paymentStatus }],
+        data: paymentData,
       },
       updated_at: Date.now().toString(),
     };
 
     await this.orderRepository.updateOrder(orderId, orderModel);
 
-    if (orderStatus == OrderStatus.ACTIVE) {
-      const chatModel: ChatModel = {
-        session: order._id,
-      };
-
-      await this.chatRepository.upsertChatSession(
-        order._id!.toString(),
-        chatModel
-      );
-
-      const notifPayload: NotificationOption = {
-        title: "Orderan Baru",
-        body: `Antar ke ${orderModel.shipping?.destination.address} atas nama ${
-          orderModel.shipping!.destination.name
-        }`,
-      };
-
-      await this.notificationService.sendToTopic("new_order", notifPayload);
-    }
-    // }
-
     if (order.clear_cart) {
       await this.cartRepository.clearCart(order.customer!._id);
     }
+
+    if (orderStatus == OrderStatus.ACTIVE) {
+      await this.orderIsActive(orderId);
+    }
+    // }
+  }
+
+  async orderPaid(orderId: string, payload: string): Promise<void> {
+    const order = await this.orderRepository.getOrderDetail(orderId);
+
+    if (order == null) {
+      throw new ResourceNotFound("Order not found");
+    }
+
+    const orderModel: OrderModel = {
+      ...order,
+      status: [...order.status!, { detail: OrderStatus.ACTIVE }],
+      payment: {
+        ...order.payment!,
+        status: [...order.payment!.status!, { detail: PaymentStatus.PAID }],
+        data: {
+          ...order.payment!.data!,
+          raw: { ...order.payment!.data!.raw, paid_response: payload },
+        },
+      },
+      updated_at: Date.now().toString(),
+    };
+
+    await this.orderRepository.updateOrder(orderId, orderModel);
+
+    await this.orderIsActive(orderId);
+  }
+
+  private async orderIsActive(orderId: string): Promise<void> {
+    const order = await this.orderRepository.getOrderDetail(orderId);
+
+    if (order == null) {
+      throw new ResourceNotFound("Order not found");
+    }
+
+    const chatModel: ChatModel = {
+      session: order._id,
+    };
+
+    await this.chatRepository.upsertChatSession(
+      order._id!.toString(),
+      chatModel
+    );
+
+    const notifPayload: NotificationOption = {
+      title: "Orderan Baru",
+      body: `Antar ke ${order.shipping?.destination.address} atas nama ${
+        order.shipping!.destination.name
+      }`,
+    };
+
+    await this.notificationService.sendToTopic("new_order", notifPayload);
   }
 }
 

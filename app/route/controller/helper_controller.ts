@@ -14,6 +14,7 @@ import DistanceMatrix from "../../adapter/service/google/distance/distance_matri
 import DateTimeLuxon from "../../adapter/service/luxon/date_time_luxon";
 import PaymentGatewayXendit from "../../adapter/service/xendit/payment_gateway_xendit";
 import ErrorHandler from "../../common/error/error_handler";
+import PaymentScheme from "../../entity/customer/payment_scheme";
 import ChatUsecase from "../../port/interactor/chat_usecase";
 import DeliveryTimeUsecase from "../../port/interactor/customer/delivery_time_usecase";
 import DistanceUsecase from "../../port/interactor/customer/distance_usecase";
@@ -35,6 +36,7 @@ const distanceService = new DistanceMatrix();
 const deliveryTimeRepository = new DeliveryTimeMongodb();
 const dateTimeService = new DateTimeLuxon();
 const distance = new DistanceMatrix();
+const paymentGatewayService = new PaymentGatewayXendit();
 
 const distanceUsecase = new DistanceUsecase(
   distanceService,
@@ -54,7 +56,8 @@ const orderUsecase = new OrderUsecase(
   cartRepository,
   distanceUsecase,
   dateTimeService,
-  deliveryTimeRepository
+  deliveryTimeRepository,
+  paymentGatewayService
 );
 
 const chatUsecase = new ChatUsecase(
@@ -120,15 +123,67 @@ router.get("*", async (req: Request, res: Response) => {
 
     // const times = await deliveryTimeUsecase.getAvailableDeliveryTimes();
 
-    const result = await xendit.makeVaPayment({
-      id: Date.now().toString(),
-      amount: 25000,
-      code: "MANDIRI",
-      // name: "UDIN",
-      // phone: "6281254982664",
-    });
+    // const result = await xendit.makeVaPayment({
+    //   id: Date.now().toString(),
+    //   amount: 25000,
+    //   code: "MANDIRI",
+    //   // name: "UDIN",
+    //   // phone: "6281254982664",
+    // });
 
-    res.json(result);
+    await new PaymentScheme({
+      vendor: "xendit",
+      category: "ewallet",
+      code: "ID_OVO",
+      name: "OVO",
+      picture:
+        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681088/ayo%20mobile/Logo_ovo_purple.svg.png",
+      percentage: true,
+      fee: 1.5,
+      cash: false,
+      active: true,
+    }).save();
+
+    await new PaymentScheme({
+      vendor: "xendit",
+      category: "ewallet",
+      code: "ID_SHOPEEPAY",
+      name: "SHOPEEPAY",
+      picture:
+        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681207/ayo%20mobile/Logo_ShopeePay.png",
+      percentage: true,
+      fee: 2,
+      cash: false,
+      active: true,
+    }).save();
+
+    await new PaymentScheme({
+      vendor: "xendit",
+      category: "ewallet",
+      code: "ID_DANA",
+      name: "DANA",
+      picture:
+        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681309/ayo%20mobile/1200px-Logo_dana_blue.svg.png",
+      percentage: true,
+      fee: 1.5,
+      cash: false,
+      active: true,
+    }).save();
+
+    await new PaymentScheme({
+      vendor: "xendit",
+      category: "ewallet",
+      code: "ID_LINKAJA",
+      name: "LINK AJA",
+      picture:
+        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681407/ayo%20mobile/Logo_Link_Aja.png",
+      percentage: true,
+      fee: 1.5,
+      cash: false,
+      active: true,
+    }).save();
+
+    res.json("ok");
   } catch (error) {
     new ErrorHandler(res, error);
   }

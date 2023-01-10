@@ -80,7 +80,7 @@ const OrderScheme = model<OrderModel>(
         picture: { type: String, required: true },
         note: { type: String, default: null },
         fee: { type: Number, required: true },
-        percentage: { type: Number, required: true },
+        percentage: { type: Boolean, required: true },
         min: { type: Number, default: null },
         max: { type: Number, default: null },
         cash: { type: Boolean, default: true },
@@ -110,6 +110,10 @@ const OrderScheme = model<OrderModel>(
             note: {
               type: String,
               default: null,
+            },
+            raw: {
+              charge_response: { type: String, required: true },
+              paid_response: { type: String, default: null },
             },
           },
         },

@@ -50,6 +50,9 @@ class PaymentGatewayXendit implements PaymentGateway {
             amount: expected_amount,
             status: status,
             expirationDate: expiration_date,
+            raw: {
+              charge_response: JSON.stringify(response),
+            },
           };
 
           resolve(result);
@@ -200,8 +203,6 @@ class PaymentGatewayXendit implements PaymentGateway {
         channelProperties: channelProps,
       })
         .then((response: any) => {
-          console.log(response);
-
           const {
             id,
             reference_id,
@@ -228,6 +229,9 @@ class PaymentGatewayXendit implements PaymentGateway {
             channel: channel_code,
             created: created,
             updated: updated,
+            raw: {
+              charge_response: JSON.stringify(response),
+            },
           };
 
           resolve(results);

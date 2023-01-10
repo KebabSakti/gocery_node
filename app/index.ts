@@ -14,6 +14,7 @@ import chatController from "./route/controller/customer/chat_controller";
 import orderController from "./route/controller/customer/order_controller";
 import productController from "./route/controller/customer/product_controller";
 import searchController from "./route/controller/customer/search_controller";
+import paymentController from "./route/controller/customer/payment_controller";
 import helperController from "./route/controller/helper_controller";
 import socketController from "./route/controller/socket_controller";
 import customerMiddleware from "./route/middleware/customer/customer_middleware";
@@ -44,6 +45,7 @@ app.use("/api/customer/searches", customerMiddleware, searchController);
 app.use("/api/customer/carts", customerMiddleware, cartController);
 app.use("/api/customer/orders", customerMiddleware, orderController);
 app.use("/api/customer/chats", customerMiddleware, chatController);
+app.use("/api/customer/payments", customerMiddleware, paymentController);
 
 //global
 app.use("/api/callback", callbackController);

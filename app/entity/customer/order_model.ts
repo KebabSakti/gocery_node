@@ -58,7 +58,7 @@ interface OrderModel {
     name: string;
     picture: string;
     fee: number;
-    percentage: number;
+    percentage: boolean;
     min: number;
     max: number;
     info: string;
@@ -70,6 +70,15 @@ interface OrderModel {
       created_at?: string;
       updated_at?: string;
     }[];
+    data?: {
+      category: string;
+      info: string;
+      raw: {
+        charge_response: string;
+        paid_response?: string;
+      };
+      note?: string;
+    };
     help?: string;
   };
   items?: OrderItemModel[];

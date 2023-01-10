@@ -36,7 +36,7 @@ class OrderMongodb implements OrderContract {
       const results = await OrderScheme.findOne({
         _id: orderId,
       })
-        .select("-created_at -updated_at -__v")
+        .select("-created_at -updated_at -__v -payment.data.raw")
         .populate("items")
         .lean();
 
