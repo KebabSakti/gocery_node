@@ -6,6 +6,7 @@ import {
   PaymentStatus,
 } from "../../../entity/customer/order_enum";
 import OrderModel from "../../../entity/customer/order_model";
+import OrderOption from "../../../entity/customer/order_option";
 import OrderPayload from "../../../entity/customer/order_payload";
 import NotificationOption from "../../../entity/notification_option";
 import ChatContract from "../../repository/chat_contract";
@@ -69,6 +70,15 @@ class OrderUsecase {
     this.dateTimeService = dateTimeService;
     this.deliveryTimeRepository = deliveryTimeRepository;
     this.paymentGatewayService = paymentGatewayService;
+  }
+
+  async getAllOorders(
+    customerId: string,
+    option: OrderOption
+  ): Promise<OrderModel[]> {
+    const results = await this.orderRepository.getAllOrder(customerId, option);
+
+    return results;
   }
 
   async getOrderDetail(orderId: string): Promise<OrderModel | null> {
@@ -346,6 +356,7 @@ class OrderUsecase {
             id: orderId,
             amount: order.total!,
             code: order.payment!.code,
+            name: "GOCERY",
           });
 
           paymentData = {
@@ -370,6 +381,38 @@ class OrderUsecase {
             info: ewallet.note,
             raw: {
               charge_response: ewallet.raw.charge_response,
+            },
+          };
+          break;
+
+        case "retail":
+          const retail = await this.paymentGatewayService.makeRetailPayment({
+            id: orderId,
+            amount: order.total!,
+            code: order.payment!.code,
+            name: order.customer?.name ?? "GOCERY",
+          });
+
+          paymentData = {
+            category: "retail",
+            info: retail.paymentCode,
+            raw: {
+              charge_response: retail.raw.charge_response,
+            },
+          };
+          break;
+
+        case "qr":
+          const qr = await this.paymentGatewayService.makeQrPayment({
+            id: orderId,
+            amount: order.total!,
+          });
+
+          paymentData = {
+            category: "qr",
+            info: qr.qr,
+            raw: {
+              charge_response: qr.raw.charge_response,
             },
           };
           break;

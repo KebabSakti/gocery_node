@@ -24,7 +24,7 @@ class PaymentGatewayXendit implements PaymentGateway {
       va.createFixedVA({
         externalID: model.id,
         bankCode: model.code!,
-        name: "Gocery",
+        name: model.name!,
         expectedAmt: model.amount!,
         isSingleUse: true,
         isClosed: true,
@@ -105,6 +105,9 @@ class PaymentGatewayXendit implements PaymentGateway {
             retailName: retail_outlet_name,
             status: status,
             expirationDate: expiration_date,
+            raw: {
+              charge_response: JSON.stringify(response),
+            },
           };
 
           resolve(results);
@@ -149,6 +152,9 @@ class PaymentGatewayXendit implements PaymentGateway {
             status: status,
             created: created,
             updated: updated,
+            raw: {
+              charge_response: JSON.stringify(response),
+            },
           };
 
           resolve(results);

@@ -7,6 +7,10 @@ interface RetailPaymentResponse {
   paymentCode: string;
   amount: number;
   expirationDate: string;
+  raw: {
+    charge_response: string;
+    paid_response?: string;
+  };
 }
 
 export default RetailPaymentResponse;

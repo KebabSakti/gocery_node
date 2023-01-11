@@ -75,23 +75,32 @@ router.post("/xendit", async (req: Request, res: Response) => {
 
       case "retail":
         console.log("RETAIL TRIGGERED");
+
+        await usecase.orderPaid(payload.external_id, JSON.stringify(payload));
         break;
 
       case "qr":
         console.log("QR TRIGGERED");
+
+        if (payload.data != undefined) {
+          if (payload.data.status == "SUCCEEDED") {
+            await usecase.orderPaid(
+              payload.data.reference_id,
+              JSON.stringify(payload)
+            );
+          }
+        }
         break;
 
       case "ewallet":
-        //SUCCEDED FAILED
         console.log("EWALLET TRIGGERED");
 
-        const { data } = payload;
-
-        if (data != undefined) {
-          const { status, reference_id } = data;
-
-          if (status == "SUCCEEDED") {
-            usecase.orderPaid(reference_id, JSON.stringify(payload));
+        if (payload.data != undefined) {
+          if (payload.data.status == "SUCCEEDED") {
+            await usecase.orderPaid(
+              payload.data.reference_id,
+              JSON.stringify(payload)
+            );
           }
         }
         break;

@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import ErrorHandler from "../../../../common/error/error_handler";
 import { BadRequest } from "../../../../common/error/exception";
+import OrderOption from "../../../../entity/customer/order_option";
 import OrderPayload from "../../../../entity/customer/order_payload";
+import PagingOption from "../../../../entity/customer/paging_option";
 import DistanceUsecase from "../../../../port/interactor/customer/distance_usecase";
 import OrderUsecase from "../../../../port/interactor/customer/order_usecase";
 import ChatMongodb from "../../../data/mongodb/chat_mongodb";
@@ -16,6 +18,7 @@ import PaymentMongodb from "../../../data/mongodb/customer/payment_mongodb";
 import ProductMongodb from "../../../data/mongodb/customer/product_mongodb";
 import NotificationFcm from "../../fcm/customer/notification_fcm";
 import DistanceMatrix from "../../google/distance/distance_matrix";
+import PagingValidator from "../../joi/customer/paging_validator";
 import DateTimeLuxon from "../../luxon/date_time_luxon";
 import PaymentGatewayXendit from "../../xendit/payment_gateway_xendit";
 
@@ -57,6 +60,41 @@ const usecase = new OrderUsecase(
 );
 
 class OrderHandler {
+  async getAllOrders(req: Request, res: Response) {
+    try {
+      const { status, payment, page, limit } = req.query;
+
+      const userId = req.app.locals.user;
+
+      let option: OrderOption = {
+        status: status,
+        payment: payment,
+      };
+
+      if (page != undefined && limit != undefined) {
+        const { error } = PagingValidator.validate(req.query);
+
+        if (error != undefined) {
+          throw new BadRequest(error.message);
+        }
+
+        option = {
+          ...option,
+          pagination: new PagingOption(
+            parseInt(page as string),
+            parseInt(limit as string)
+          ),
+        };
+      }
+
+      const results = await usecase.getAllOorders(userId, option);
+
+      res.json(results);
+    } catch (error) {
+      new ErrorHandler(res, error);
+    }
+  }
+
   async getOrderDetail(req: Request, res: Response) {
     try {
       const orderId = req.params.orderId;

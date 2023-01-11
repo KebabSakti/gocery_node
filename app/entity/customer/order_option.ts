@@ -1,8 +1,6 @@
-import { OrderStatus, PaymentStatus } from "./order_enum";
-
 interface OrderOption {
-  status?: OrderStatus;
-  payment?: PaymentStatus;
+  status?: any;
+  payment?: any;
   pagination?: any;
 }
 
