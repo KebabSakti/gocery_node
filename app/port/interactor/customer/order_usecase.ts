@@ -1,4 +1,4 @@
-import { ResourceNotFound } from "../../../common/error/exception";
+import { BadRequest, ResourceNotFound } from "../../../common/error/exception";
 import ChatModel from "../../../entity/chat_model";
 import BillModel from "../../../entity/customer/bill_model";
 import {
@@ -72,7 +72,7 @@ class OrderUsecase {
     this.paymentGatewayService = paymentGatewayService;
   }
 
-  async getAllOorders(
+  async getAllOrders(
     customerId: string,
     option: OrderOption
   ): Promise<OrderModel[]> {
@@ -181,6 +181,7 @@ class OrderUsecase {
           description: product?.description,
           image: product?.image,
           point: product?.point,
+          stock: product?.stock,
           category: product?.category?.toString(),
           currency: {
             code: product?.currency?.code,
@@ -342,6 +343,20 @@ class OrderUsecase {
       throw new ResourceNotFound("Order not found");
     }
 
+    for (const item of order.items!) {
+      const product = await this.productRepository.getProductById(
+        item.product!
+      );
+
+      if (product == null) {
+        throw new ResourceNotFound("Product not found");
+      }
+
+      if (product.stock! <= 0) {
+        throw new BadRequest(`${product?.name} out of stock`);
+      }
+    }
+
     // if (order.status == null && order.payment!.status == null) {
     let orderStatus = OrderStatus.PENDING;
     let paymentStatus = PaymentStatus.PENDING;
@@ -469,6 +484,16 @@ class OrderUsecase {
     await this.orderRepository.updateOrder(orderId, orderModel);
 
     await this.orderIsActive(orderId);
+
+    const notifPayload: NotificationOption = {
+      title: "Pembayaran Berhasil",
+      body: `Pembayaran menggunakan ${order.payment?.name} telah kami terima`,
+    };
+
+    await this.notificationService.sendToTokens(
+      [order.customer?.fcm!],
+      notifPayload
+    );
   }
 
   private async orderIsActive(orderId: string): Promise<void> {
@@ -487,14 +512,27 @@ class OrderUsecase {
       chatModel
     );
 
-    const notifPayload: NotificationOption = {
+    const courierNotifPayload: NotificationOption = {
       title: "Orderan Baru",
       body: `Antar ke ${order.shipping?.destination.address} atas nama ${
         order.shipping!.destination.name
       }`,
     };
 
-    await this.notificationService.sendToTopic("new_order", notifPayload);
+    const customerNotifPayload: NotificationOption = {
+      title: "Orderan Diterima",
+      body: "Orderan anda sudah terkonfirmasi, tunggu kurir kami antarkan orderannya ke tujuan ya",
+    };
+
+    await this.notificationService.sendToTopic(
+      "new_order",
+      courierNotifPayload
+    );
+
+    await this.notificationService.sendToTokens(
+      [order.customer?.fcm!],
+      customerNotifPayload
+    );
   }
 }
 

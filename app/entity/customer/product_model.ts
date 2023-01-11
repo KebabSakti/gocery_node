@@ -5,6 +5,7 @@ interface ProductModel {
   description?: string;
   image?: string;
   point?: number;
+  stock?: number;
   min?: number;
   max?: number;
   link?: string;

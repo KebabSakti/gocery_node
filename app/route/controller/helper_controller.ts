@@ -133,52 +133,13 @@ router.get("*", async (req: Request, res: Response) => {
 
     await new PaymentScheme({
       vendor: "xendit",
-      category: "ewallet",
-      code: "ID_OVO",
-      name: "OVO",
+      category: "qr",
+      code: "QRIS",
+      name: "QRIS",
       picture:
-        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681088/ayo%20mobile/Logo_ovo_purple.svg.png",
+        "https://res.cloudinary.com/vjtechsolution/image/upload/v1656986817/ayo%20mobile/qris.png",
       percentage: true,
-      fee: 1.5,
-      cash: false,
-      active: true,
-    }).save();
-
-    await new PaymentScheme({
-      vendor: "xendit",
-      category: "ewallet",
-      code: "ID_SHOPEEPAY",
-      name: "SHOPEEPAY",
-      picture:
-        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681207/ayo%20mobile/Logo_ShopeePay.png",
-      percentage: true,
-      fee: 2,
-      cash: false,
-      active: true,
-    }).save();
-
-    await new PaymentScheme({
-      vendor: "xendit",
-      category: "ewallet",
-      code: "ID_DANA",
-      name: "DANA",
-      picture:
-        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681309/ayo%20mobile/1200px-Logo_dana_blue.svg.png",
-      percentage: true,
-      fee: 1.5,
-      cash: false,
-      active: true,
-    }).save();
-
-    await new PaymentScheme({
-      vendor: "xendit",
-      category: "ewallet",
-      code: "ID_LINKAJA",
-      name: "LINK AJA",
-      picture:
-        "https://res.cloudinary.com/vjtechsolution/image/upload/v1645681407/ayo%20mobile/Logo_Link_Aja.png",
-      percentage: true,
-      fee: 1.5,
+      fee: 0.7,
       cash: false,
       active: true,
     }).save();

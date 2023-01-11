@@ -15,50 +15,20 @@ const socketController = (io: Server) => {
       socket.leave(room);
     });
 
-    socket.on("chatSend", (payload, callback) => {
-      socket.to(room).emit("chatSend", payload);
+    socket.on("chatUpdate", (payload, callback) => {
+      socket.to(room).emit("chatUpdate", payload);
 
       callback({ error: null, payload: payload });
     });
 
-    socket.on("orderSubmit", (payload, callback) => {
-      socket.to(room).emit("orderSubmit", payload);
+    socket.on("orderStatusUpdate", (payload, callback) => {
+      socket.to(room).emit("orderStatusUpdate", payload);
 
       callback({ error: null, payload: payload });
     });
 
-    socket.on("orderSelect", (payload, callback) => {
-      socket.to(room).emit("orderSelect", payload);
-
-      callback({ error: null, payload: payload });
-    });
-
-    socket.on("orderCancel", (payload, callback) => {
-      socket.to(room).emit("orderCancel", payload);
-
-      callback({ error: null, payload: payload });
-    });
-
-    socket.on("orderComplete", (payload, callback) => {
-      socket.to(room).emit("orderComplete", payload);
-
-      callback({ error: null, payload: payload });
-    });
-
-    socket.on("paymentComplete", (payload, callback) => {
-      socket.to(room).emit("paymentComplete", payload);
-
-      callback({ error: null, payload: payload });
-    });
-
-    socket.on("paymentCancel", (payload, callback) => {
-      socket.to(room).emit("paymentCancel", payload);
-
-      callback({ error: null, payload: payload });
-    });
-
-    socket.on("paymentExpire", (payload, callback) => {
-      socket.to(room).emit("paymentExpire", payload);
+    socket.on("paymentStatusUpdate", (payload, callback) => {
+      socket.to(room).emit("paymentStatusUpdate", payload);
 
       callback({ error: null, payload: payload });
     });

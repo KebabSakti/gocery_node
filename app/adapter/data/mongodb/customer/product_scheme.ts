@@ -13,6 +13,7 @@ const ProductScheme = model<ProductModel>(
     description: { type: String },
     image: { type: String, required: true },
     point: { type: Number, default: 0 },
+    stock: { type: Number, default: 0 },
     min: { type: Number },
     max: { type: Number },
     link: { type: String },

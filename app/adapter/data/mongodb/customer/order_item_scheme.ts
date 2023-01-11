@@ -10,6 +10,7 @@ const OrderItemScheme = model<OrderItemModel>(
     description: { type: String },
     image: { type: String, required: true },
     point: { type: Number, default: 0 },
+    stock: { type: Number, default: 0 },
     min: { type: Number, default: null },
     max: { type: Number, default: null },
     link: { type: String, default: null },
