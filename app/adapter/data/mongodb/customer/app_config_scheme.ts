@@ -20,6 +20,14 @@ const AppConfigScheme = model<AppConfigModel>(
       default: [],
       type: [BillSchema],
     },
+    cities: [
+      {
+        name: { type: String, required: true },
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true },
+        radius: { type: Number, default: 50000 },
+      },
+    ],
   })
 );
 

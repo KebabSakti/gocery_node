@@ -14,6 +14,7 @@ import DistanceMatrix from "../../adapter/service/google/distance/distance_matri
 import DateTimeLuxon from "../../adapter/service/luxon/date_time_luxon";
 import PaymentGatewayXendit from "../../adapter/service/xendit/payment_gateway_xendit";
 import ErrorHandler from "../../common/error/error_handler";
+import RandomStringGenerator from "../../common/utility/random_string_generator";
 import PaymentScheme from "../../entity/customer/payment_scheme";
 import ChatUsecase from "../../port/interactor/chat_usecase";
 import DeliveryTimeUsecase from "../../port/interactor/customer/delivery_time_usecase";
@@ -73,6 +74,8 @@ const deliveryTimeUsecase = new DeliveryTimeUsecase(
 
 const xendit = new PaymentGatewayXendit();
 
+const generator = new RandomStringGenerator();
+
 router.get("*", async (req: Request, res: Response) => {
   try {
     // const iterates: number[] = [...Array(20).keys()];
@@ -131,20 +134,28 @@ router.get("*", async (req: Request, res: Response) => {
     //   // phone: "6281254982664",
     // });
 
-    await new PaymentScheme({
-      vendor: "xendit",
-      category: "qr",
-      code: "QRIS",
-      name: "QRIS",
-      picture:
-        "https://res.cloudinary.com/vjtechsolution/image/upload/v1656986817/ayo%20mobile/qris.png",
-      percentage: true,
-      fee: 0.7,
-      cash: false,
-      active: true,
-    }).save();
+    // await new PaymentScheme({
+    //   vendor: "xendit",
+    //   category: "qr",
+    //   code: "QRIS",
+    //   name: "QRIS",
+    //   picture:
+    //     "https://res.cloudinary.com/vjtechsolution/image/upload/v1656986817/ayo%20mobile/qris.png",
+    //   percentage: true,
+    //   fee: 0.7,
+    //   cash: false,
+    //   active: true,
+    // }).save();
 
-    res.json("ok");
+    const randomString = generator.uuidv4();
+
+    if (generator.udin.length > 0) {
+      generator.udin = generator.udin;
+    } else {
+      generator.udin = randomString;
+    }
+
+    res.json(generator.udin);
   } catch (error) {
     new ErrorHandler(res, error);
   }

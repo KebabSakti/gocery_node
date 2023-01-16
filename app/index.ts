@@ -46,6 +46,7 @@ app.use("/api/customer/carts", customerMiddleware, cartController);
 app.use("/api/customer/orders", customerMiddleware, orderController);
 app.use("/api/customer/chats", customerMiddleware, chatController);
 app.use("/api/customer/payments", customerMiddleware, paymentController);
+app.use("/api/customer/places", customerMiddleware, paymentController);
 
 //global
 app.use("/api/callback", callbackController);

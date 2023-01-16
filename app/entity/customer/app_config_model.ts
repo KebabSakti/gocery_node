@@ -10,6 +10,12 @@ interface AppConfigModel {
   };
   bills: BillModel[];
   deductors: BillModel[];
+  cities: {
+    name: string;
+    lat: number;
+    lng: number;
+    radius: number;
+  }[];
 }
 
 export default AppConfigModel;

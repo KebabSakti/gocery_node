@@ -322,6 +322,7 @@ class OrderUsecase {
     payTotal = billTotal - deductorTotal < 0 ? 0 : billTotal - deductorTotal;
 
     const model: OrderModel = {
+      clear_cart: orderPayload.clearCart,
       customer: user,
       point: point,
       shipping: shipping,
